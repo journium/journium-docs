@@ -1,0 +1,656 @@
+---
+title: "SDK Initialization"
+description: "Initialize and configure the Journium SDK in your application"
+---
+
+## Journium.init()
+
+Initialize the Journium SDK with your project configuration.
+
+### Syntax
+
+```javascript
+Journium.init(config)
+```
+
+### Parameters
+
+<ParamField path="projectId" type="string" required>
+  Your unique project identifier from the Journium dashboard
+</ParamField>
+
+<ParamField path="apiKey" type="string" required>
+  Your public API key for client-side tracking
+</ParamField>
+
+<ParamField path="environment" type="string" required>
+  Environment setting: `'development'` or `'production'`
+</ParamField>
+
+<ParamField path="config" type="object">
+  Optional configuration object with additional settings
+  
+  <Expandable title="Configuration Options">
+    <ParamField path="trackPageViews" type="boolean" default="true">
+      Automatically track page view events
+    </ParamField>
+    
+    <ParamField path="trackClicks" type="boolean" default="true">
+      Automatically track click events on buttons and links
+    </ParamField>
+    
+    <ParamField path="trackScrolling" type="boolean" default="true">
+      Track scroll depth and user engagement
+    </ParamField>
+    
+    <ParamField path="trackFormSubmissions" type="boolean" default="true">
+      Track form submissions and interactions
+    </ParamField>
+    
+    <ParamField path="enableRecommendations" type="boolean" default="true">
+      Enable AI-powered conversion recommendations
+    </ParamField>
+    
+    <ParamField path="trackPerformance" type="boolean" default="false">
+      Track performance metrics and Core Web Vitals
+    </ParamField>
+    
+    <ParamField path="trackErrors" type="boolean" default="false">
+      Automatically track JavaScript errors and exceptions
+    </ParamField>
+    
+    <ParamField path="debugMode" type="boolean" default="false">
+      Enable debug logging and verbose output
+    </ParamField>
+    
+    <ParamField path="batchSize" type="number" default="10">
+      Number of events to batch before sending to server
+    </ParamField>
+    
+    <ParamField path="flushInterval" type="number" default="5000">
+      Time in milliseconds between automatic event flushes
+    </ParamField>
+    
+    <ParamField path="respectDoNotTrack" type="boolean" default="true">
+      Respect the user's Do Not Track browser setting
+    </ParamField>
+    
+    <ParamField path="anonymizeIPs" type="boolean" default="true">
+      Anonymize IP addresses for privacy compliance
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### Examples
+
+#### Basic Initialization
+
+```javascript
+Journium.init({
+  projectId: 'proj_1234567890',
+  apiKey: 'pk_live_abcdef123456',
+  environment: 'production'
+});
+```
+
+#### Advanced Configuration
+
+```javascript
+Journium.init({
+  projectId: 'proj_1234567890',
+  apiKey: 'pk_live_abcdef123456',
+  environment: 'production',
+  
+  config: {
+    // Core tracking
+    trackPageViews: true,
+    trackClicks: true,
+    trackScrolling: true,
+    trackFormSubmissions: true,
+    
+    // Advanced features
+    enableRecommendations: true,
+    trackPerformance: true,
+    trackErrors: true,
+    
+    // Performance optimization
+    batchSize: 20,
+    flushInterval: 3000,
+    
+    // Privacy settings
+    respectDoNotTrack: true,
+    anonymizeIPs: true,
+    
+    // Debug settings
+    debugMode: false
+  }
+});
+```
+
+#### Environment-Specific Configuration
+
+```javascript
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+Journium.init({
+  projectId: isDevelopment ? 'proj_dev_123' : 'proj_prod_456',
+  apiKey: isDevelopment ? 'pk_test_dev123' : 'pk_live_prod456',
+  environment: isDevelopment ? 'development' : 'production',
+  
+  config: {
+    debugMode: isDevelopment,
+    trackClicks: !isDevelopment, // Reduce noise in development
+    batchSize: isDevelopment ? 1 : 10, // Send immediately in dev
+    flushInterval: isDevelopment ? 100 : 5000
+  }
+});
+```
+
+### Return Value
+
+The `init()` method returns a Promise that resolves when initialization is complete:
+
+```javascript
+Journium.init(config)
+  .then(() => {
+    console.log('Journium initialized successfully');
+    // Start tracking events
+    Journium.track('app_initialized');
+  })
+  .catch((error) => {
+    console.error('Failed to initialize Journium:', error);
+  });
+```
+
+### Error Handling
+
+The initialization can fail for several reasons:
+
+```javascript
+try {
+  await Journium.init({
+    projectId: 'proj_1234567890',
+    apiKey: 'pk_live_abcdef123456',
+    environment: 'production'
+  });
+} catch (error) {
+  if (error.code === 'INVALID_API_KEY') {
+    console.error('Invalid API key provided');
+  } else if (error.code === 'NETWORK_ERROR') {
+    console.error('Network connection failed');
+  } else {
+    console.error('Initialization failed:', error.message);
+  }
+}
+```
+
+Common error codes:
+- `INVALID_API_KEY` - API key is invalid or expired
+- `INVALID_PROJECT_ID` - Project ID not found
+- `NETWORK_ERROR` - Cannot connect to Journium servers
+- `INVALID_CONFIG` - Configuration object is malformed
+- `ALREADY_INITIALIZED` - SDK has already been initialized
+
+---
+
+## Journium.ready()
+
+Wait for the SDK to be fully initialized and ready to track events.
+
+### Syntax
+
+```javascript
+Journium.ready(callback)
+// or
+Journium.ready().then(callback)
+```
+
+### Parameters
+
+<ParamField path="callback" type="function" optional>
+  Function to execute when the SDK is ready
+</ParamField>
+
+### Examples
+
+#### Callback Style
+
+```javascript
+Journium.ready(() => {
+  console.log('Journium is ready!');
+  Journium.track('sdk_ready');
+});
+```
+
+#### Promise Style
+
+```javascript
+Journium.ready().then(() => {
+  console.log('Journium is ready!');
+  Journium.track('sdk_ready');
+});
+
+// Or with async/await
+async function initApp() {
+  await Journium.ready();
+  console.log('Journium is ready!');
+  Journium.track('sdk_ready');
+}
+```
+
+#### With Timeout
+
+```javascript
+Promise.race([
+  Journium.ready(),
+  new Promise((_, reject) => 
+    setTimeout(() => reject(new Error('Timeout')), 5000)
+  )
+]).then(() => {
+  console.log('Journium is ready!');
+}).catch((error) => {
+  console.warn('Journium initialization timeout:', error);
+  // Continue without analytics
+});
+```
+
+---
+
+## Journium.isReady()
+
+Check if the SDK is currently ready to track events.
+
+### Syntax
+
+```javascript
+const ready = Journium.isReady()
+```
+
+### Return Value
+
+Returns a boolean indicating whether the SDK is ready:
+- `true` - SDK is initialized and ready
+- `false` - SDK is not ready (still initializing or failed)
+
+### Examples
+
+```javascript
+if (Journium.isReady()) {
+  Journium.track('button_clicked', { button_id: 'signup' });
+} else {
+  console.log('Journium not ready yet');
+}
+```
+
+#### Conditional Tracking
+
+```javascript
+function trackEvent(eventName, properties) {
+  if (Journium.isReady()) {
+    Journium.track(eventName, properties);
+  } else {
+    console.warn('Journium not ready, event queued:', eventName);
+    // Optionally queue events for later
+    queueEvent(eventName, properties);
+  }
+}
+```
+
+---
+
+## Journium.getConfig()
+
+Get the current SDK configuration.
+
+### Syntax
+
+```javascript
+const config = Journium.getConfig()
+```
+
+### Return Value
+
+Returns the current configuration object:
+
+```javascript
+{
+  projectId: 'proj_1234567890',
+  apiKey: 'pk_live_abcdef123456',
+  environment: 'production',
+  config: {
+    trackPageViews: true,
+    trackClicks: true,
+    // ... other configuration options
+  },
+  version: '1.2.0',
+  initialized: true
+}
+```
+
+### Examples
+
+```javascript
+const config = Journium.getConfig();
+console.log('Current environment:', config.environment);
+console.log('Tracking page views:', config.config.trackPageViews);
+console.log('SDK version:', config.version);
+```
+
+#### Debug Configuration
+
+```javascript
+function debugConfiguration() {
+  const config = Journium.getConfig();
+  
+  console.group('Journium Configuration');
+  console.log('Project ID:', config.projectId);
+  console.log('Environment:', config.environment);
+  console.log('Version:', config.version);
+  console.log('Initialized:', config.initialized);
+  console.table(config.config);
+  console.groupEnd();
+}
+
+// Call when debugging
+if (config.config.debugMode) {
+  debugConfiguration();
+}
+```
+
+---
+
+## Journium.updateConfig()
+
+Update configuration settings after initialization.
+
+### Syntax
+
+```javascript
+Journium.updateConfig(newConfig)
+```
+
+### Parameters
+
+<ParamField path="newConfig" type="object" required>
+  Object containing configuration updates. Only includes changed settings.
+</ParamField>
+
+### Examples
+
+```javascript
+// Enable additional tracking after user consent
+Journium.updateConfig({
+  trackClicks: true,
+  trackScrolling: true,
+  trackPerformance: true
+});
+
+// Update batch settings for better performance
+Journium.updateConfig({
+  batchSize: 50,
+  flushInterval: 10000
+});
+```
+
+#### Conditional Updates
+
+```javascript
+function updateTrackingBasedOnConsent(consentGiven) {
+  if (consentGiven) {
+    Journium.updateConfig({
+      trackClicks: true,
+      trackScrolling: true,
+      trackFormSubmissions: true,
+      trackPerformance: true
+    });
+  } else {
+    Journium.updateConfig({
+      trackClicks: false,
+      trackScrolling: false,
+      trackFormSubmissions: false,
+      trackPerformance: false
+    });
+  }
+}
+```
+
+---
+
+## Journium.getStatus()
+
+Get detailed status information about the SDK.
+
+### Syntax
+
+```javascript
+const status = Journium.getStatus()
+```
+
+### Return Value
+
+Returns a status object with detailed information:
+
+```javascript
+{
+  initialized: true,
+  ready: true,
+  connected: true,
+  lastFlush: 1640995200000,
+  queueSize: 5,
+  totalEvents: 1247,
+  errors: 0,
+  version: '1.2.0',
+  uptime: 3600000
+}
+```
+
+### Examples
+
+```javascript
+const status = Journium.getStatus();
+
+console.log('SDK Status:', {
+  ready: status.ready,
+  queue: status.queueSize,
+  total_events: status.totalEvents
+});
+
+// Health check
+if (!status.connected) {
+  console.warn('Journium connection lost');
+}
+```
+
+#### Status Monitoring
+
+```javascript
+function monitorSDKHealth() {
+  setInterval(() => {
+    const status = Journium.getStatus();
+    
+    // Alert if queue is getting too large
+    if (status.queueSize > 100) {
+      console.warn('Event queue is getting large:', status.queueSize);
+    }
+    
+    // Alert if there are errors
+    if (status.errors > 0) {
+      console.error('SDK has encountered errors:', status.errors);
+    }
+    
+    // Alert if not connected
+    if (!status.connected) {
+      console.error('SDK is not connected to servers');
+    }
+  }, 30000); // Check every 30 seconds
+}
+
+// Start monitoring in production
+if (Journium.getConfig().environment === 'production') {
+  monitorSDKHealth();
+}
+```
+
+## Best Practices
+
+### 1. Initialize Early
+
+```javascript
+// ✅ Initialize as early as possible in your app
+document.addEventListener('DOMContentLoaded', () => {
+  Journium.init({
+    projectId: 'your-project-id',
+    apiKey: 'your-api-key',
+    environment: 'production'
+  });
+});
+
+// ❌ Don't wait for user interactions
+document.getElementById('button').addEventListener('click', () => {
+  // Too late - you'll miss early page views and interactions
+  Journium.init(config);
+});
+```
+
+### 2. Handle Initialization Failures Gracefully
+
+```javascript
+// ✅ Your app should work even if analytics fails
+async function initializeApp() {
+  try {
+    await Journium.init(config);
+    console.log('Analytics initialized');
+  } catch (error) {
+    console.warn('Analytics failed to initialize:', error);
+    // App continues to work normally
+  }
+  
+  // Continue with app initialization
+  startApp();
+}
+```
+
+### 3. Environment-Specific Configuration
+
+```javascript
+// ✅ Use different settings for different environments
+const getConfig = () => {
+  const base = {
+    projectId: process.env.JOURNIUM_PROJECT_ID,
+    apiKey: process.env.JOURNIUM_API_KEY
+  };
+  
+  if (process.env.NODE_ENV === 'development') {
+    return {
+      ...base,
+      environment: 'development',
+      config: {
+        debugMode: true,
+        trackClicks: false,
+        batchSize: 1
+      }
+    };
+  }
+  
+  return {
+    ...base,
+    environment: 'production',
+    config: {
+      debugMode: false,
+      trackClicks: true,
+      batchSize: 20
+    }
+  };
+};
+
+Journium.init(getConfig());
+```
+
+### 4. Progressive Enhancement
+
+```javascript
+// ✅ Start with basic tracking, add features progressively
+Journium.init({
+  projectId: 'your-project-id',
+  apiKey: 'your-api-key',
+  environment: 'production',
+  config: {
+    trackPageViews: true, // Start with essentials
+    trackClicks: false,
+    trackScrolling: false
+  }
+});
+
+// After user grants consent or interacts with the app
+function enableAdvancedTracking() {
+  Journium.updateConfig({
+    trackClicks: true,
+    trackScrolling: true,
+    trackPerformance: true
+  });
+}
+```
+
+### 5. Error Monitoring
+
+```javascript
+// ✅ Monitor SDK health and performance
+function setupSDKMonitoring() {
+  // Log initialization success/failure
+  Journium.init(config)
+    .then(() => {
+      console.log('✅ Journium initialized successfully');
+      
+      // Send success event to your error tracking
+      yourErrorTracker.log('journium_init_success');
+    })
+    .catch((error) => {
+      console.error('❌ Journium initialization failed:', error);
+      
+      // Send failure event to your error tracking
+      yourErrorTracker.error('journium_init_failed', error);
+    });
+  
+  // Periodic health checks
+  setInterval(() => {
+    const status = Journium.getStatus();
+    
+    if (!status.connected || status.errors > 0) {
+      yourErrorTracker.warn('journium_health_issue', status);
+    }
+  }, 300000); // Every 5 minutes
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**"Journium is not defined" error**
+- Ensure the SDK script is loaded before calling `init()`
+- Check that the CDN URL is correct and accessible
+
+**Initialization hangs or times out**
+- Check your network connection
+- Verify your API key and project ID are correct
+- Check the browser console for error messages
+
+**Events not appearing in dashboard**
+- Verify you're using the correct environment (development/production)
+- Check that your project ID and API key match
+- Ensure events are being tracked after `Journium.ready()` resolves
+
+**"Already initialized" error**
+- `init()` can only be called once per page load
+- Use `updateConfig()` to change settings after initialization
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Event Tracking" icon="cursor-click" href="/api-reference/tracking">
+    Learn how to track custom events and user actions
+  </Card>
+  <Card title="User Identification" icon="user" href="/api-reference/identification">
+    Identify and manage user data
+  </Card>
+</CardGroup>

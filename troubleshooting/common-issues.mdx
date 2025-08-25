@@ -1,0 +1,857 @@
+---
+title: "Common Issues & Solutions"
+description: "Troubleshoot common problems with Journium SDK integration and tracking"
+---
+
+## Installation Issues
+
+### SDK Not Loading
+
+**Problem**: "Journium is not defined" error in browser console.
+
+<AccordionGroup>
+  <Accordion title="CDN Script Not Loading" icon="link">
+    **Symptoms:**
+    - Console error: `Uncaught ReferenceError: Journium is not defined`
+    - No network request to CDN visible in DevTools
+    
+    **Solutions:**
+    ```html
+    <!-- ✅ Correct CDN URL -->
+    <script src="https://cdn.journium.com/sdk/v1/journium.min.js"></script>
+    
+    <!-- ❌ Common mistakes -->
+    <script src="https://cdn.journium.com/journium.js"></script> <!-- Wrong path -->
+    <script src="https://journium.com/sdk/journium.js"></script> <!-- Wrong domain -->
+    ```
+    
+    **Debugging steps:**
+    1. Check Network tab in DevTools for failed requests
+    2. Verify the CDN URL is accessible in a new browser tab
+    3. Check for Content Security Policy blocking external scripts
+    4. Try loading the script directly: `curl -I https://cdn.journium.com/sdk/v1/journium.min.js`
+  </Accordion>
+  
+  <Accordion title="Script Loading Order" icon="sort">
+    **Problem:** Trying to use Journium before the script has loaded.
+    
+    ```javascript
+    // ❌ Wrong: Script hasn't loaded yet
+    <script src="https://cdn.journium.com/sdk/v1/journium.min.js"></script>
+    <script>
+      Journium.init({ ... }); // Error: Journium is not defined
+    </script>
+    
+    // ✅ Correct: Wait for script to load
+    <script src="https://cdn.journium.com/sdk/v1/journium.min.js" onload="initJournium()"></script>
+    <script>
+      function initJournium() {
+        Journium.init({ ... });
+      }
+    </script>
+    
+    // ✅ Alternative: Check if loaded
+    <script>
+      function waitForJournium() {
+        if (typeof Journium !== 'undefined') {
+          Journium.init({ ... });
+        } else {
+          setTimeout(waitForJournium, 100);
+        }
+      }
+      waitForJournium();
+    </script>
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### NPM Installation Issues
+
+**Problem**: Module not found after `npm install @journium/sdk`.
+
+<AccordionGroup>
+  <Accordion title="Import Path Issues" icon="import">
+    ```javascript
+    // ❌ Common import mistakes
+    import Journium from 'journium'; // Wrong package name
+    import { Journium } from '@journium/sdk'; // Wrong import syntax
+    import Journium from '@journium/sdk/dist/journium'; // Wrong path
+    
+    // ✅ Correct imports
+    import Journium from '@journium/sdk';
+    
+    // Or CommonJS
+    const Journium = require('@journium/sdk');
+    ```
+  </Accordion>
+  
+  <Accordion title="Build Tool Configuration" icon="cog">
+    **Webpack Configuration:**
+    ```javascript
+    // webpack.config.js
+    module.exports = {
+      resolve: {
+        alias: {
+          '@journium/sdk': path.resolve(__dirname, 'node_modules/@journium/sdk')
+        }
+      }
+    };
+    ```
+    
+    **Vite Configuration:**
+    ```javascript
+    // vite.config.js
+    export default {
+      optimizeDeps: {
+        include: ['@journium/sdk']
+      }
+    };
+    ```
+    
+    **Next.js Configuration:**
+    ```javascript
+    // next.config.js
+    module.exports = {
+      transpilePackages: ['@journium/sdk']
+    };
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Authentication & Configuration Issues
+
+### Invalid API Key
+
+**Problem**: Authentication fails with invalid API key error.
+
+<AccordionGroup>
+  <Accordion title="API Key Format Issues" icon="key">
+    **Symptoms:**
+    - Console error: `Invalid API key format`
+    - 401 Unauthorized responses
+    - Events not appearing in dashboard
+    
+    **Check your API key format:**
+    ```javascript
+    // ✅ Correct API key formats
+    const publicKey = 'pk_live_abcd1234567890efgh';     // Live public key
+    const testKey = 'pk_test_abcd1234567890efgh';       // Test public key
+    
+    // ❌ Common mistakes
+    const wrongKey1 = 'sk_live_abcd1234567890efgh';     // Secret key (server-only)
+    const wrongKey2 = 'abcd1234567890efgh';             // Missing prefix
+    const wrongKey3 = 'pk-live-abcd1234567890efgh';     // Wrong separators
+    ```
+    
+    **Verification steps:**
+    1. Check the [Journium dashboard](https://app.journium.com) for correct keys
+    2. Ensure you're using the public key (starts with `pk_`) for client-side
+    3. Verify the environment (live/test) matches your configuration
+  </Accordion>
+  
+  <Accordion title="Environment Mismatch" icon="environment">
+    ```javascript
+    // ❌ Common environment issues
+    Journium.init({
+      projectId: 'proj_live_12345',
+      apiKey: 'pk_test_abcd1234',  // Test key with live project
+      environment: 'production'    // Environment doesn't match key
+    });
+    
+    // ✅ Correct configuration
+    Journium.init({
+      projectId: process.env.NODE_ENV === 'production' 
+        ? 'proj_live_12345' 
+        : 'proj_test_12345',
+      apiKey: process.env.NODE_ENV === 'production'
+        ? 'pk_live_abcd1234'
+        : 'pk_test_abcd1234',
+      environment: process.env.NODE_ENV === 'production' 
+        ? 'production' 
+        : 'development'
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Project Not Found
+
+**Problem**: Project ID not found error.
+
+<AccordionGroup>
+  <Accordion title="Project ID Issues" icon="folder">
+    **Common causes:**
+    - Typo in project ID
+    - Using wrong project (development vs production)
+    - Project has been deleted or suspended
+    
+    **Debugging:**
+    ```javascript
+    // Log your configuration to verify
+    console.log('Journium Config:', {
+      projectId: 'your-project-id',
+      apiKey: 'your-api-key',
+      environment: 'your-environment'
+    });
+    
+    // Check if project exists
+    fetch(`https://api.journium.com/v1/projects/${projectId}`, {
+      headers: { 'Authorization': `Bearer ${apiKey}` }
+    })
+    .then(response => {
+      if (response.status === 404) {
+        console.error('Project not found');
+      } else if (response.status === 401) {
+        console.error('Invalid API key');
+      }
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Event Tracking Issues
+
+### Events Not Appearing in Dashboard
+
+**Problem**: Events are tracked but don't show up in the dashboard.
+
+<AccordionGroup>
+  <Accordion title="Event Processing Delay" icon="clock">
+    **Normal processing times:**
+    - Real-time events: 10-30 seconds
+    - Batch processed events: 1-5 minutes
+    - Dashboard updates: 2-10 minutes
+    
+    **Check processing status:**
+    ```javascript
+    // Enable debug mode to see event status
+    Journium.init({
+      // ... other config
+      config: {
+        debugMode: true
+      }
+    });
+    
+    // Check queue status
+    console.log('Queue status:', Journium.getStatus());
+    ```
+  </Accordion>
+  
+  <Accordion title="Event Validation Errors" icon="exclamation-triangle">
+    **Common validation issues:**
+    ```javascript
+    // ❌ Invalid event names
+    Journium.track('user signed up');      // Spaces not allowed
+    Journium.track('user-signed-up');      // Hyphens not recommended
+    Journium.track('USER_SIGNED_UP');      // All caps not recommended
+    
+    // ✅ Valid event names  
+    Journium.track('user_signed_up');
+    Journium.track('userSignedUp');        // camelCase acceptable
+    
+    // ❌ Invalid property values
+    Journium.track('purchase', {
+      amount: 'twenty dollars',            // Should be number
+      user: { complex: { object: true } }  // Too deeply nested
+    });
+    
+    // ✅ Valid properties
+    Journium.track('purchase', {
+      amount: 20.00,
+      currency: 'USD',
+      user_id: 'user123'
+    });
+    ```
+  </Accordion>
+  
+  <Accordion title="Environment Configuration" icon="server">
+    **Check environment settings:**
+    ```javascript
+    // Verify you're looking at the right environment in dashboard
+    const config = Journium.getConfig();
+    console.log('Current environment:', config.environment);
+    console.log('Project ID:', config.projectId);
+    
+    // Events sent to 'development' won't appear in 'production' dashboard
+    ```
+    
+    **Dashboard environment switcher:**
+    1. Go to your Journium dashboard
+    2. Check the environment selector (top-right)
+    3. Make sure it matches your SDK environment setting
+  </Accordion>
+</AccordionGroup>
+
+### Duplicate Events
+
+**Problem**: Same events being tracked multiple times.
+
+<AccordionGroup>
+  <Accordion title="Multiple SDK Initializations" icon="copy">
+    ```javascript
+    // ❌ Common cause: Multiple init calls
+    Journium.init(config);
+    // ... later in code
+    Journium.init(config); // This creates duplicate tracking
+    
+    // ✅ Solution: Check if already initialized
+    if (!Journium.isReady()) {
+      Journium.init(config);
+    }
+    
+    // ✅ Or use a flag
+    let journiumInitialized = false;
+    if (!journiumInitialized) {
+      Journium.init(config);
+      journiumInitialized = true;
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="React Component Re-renders" icon="react">
+    ```jsx
+    // ❌ Problem: Effect runs on every render
+    function MyComponent() {
+      useEffect(() => {
+        Journium.track('component_viewed'); // Tracks on every re-render
+      });
+    }
+    
+    // ✅ Solution: Add dependency array
+    function MyComponent() {
+      useEffect(() => {
+        Journium.track('component_viewed');
+      }, []); // Empty array = run only once
+    }
+    
+    // ✅ Alternative: Track only meaningful changes
+    function MyComponent({ productId }) {
+      useEffect(() => {
+        Journium.track('product_viewed', { product_id: productId });
+      }, [productId]); // Only track when productId changes
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Performance Issues
+
+### Slow Page Loading
+
+**Problem**: Journium SDK is slowing down page load.
+
+<AccordionGroup>
+  <Accordion title="Script Loading Optimization" icon="tachometer-alt">
+    ```html
+    <!-- ❌ Blocking script load -->
+    <head>
+      <script src="https://cdn.journium.com/sdk/v1/journium.min.js"></script>
+    </head>
+    
+    <!-- ✅ Non-blocking async load -->
+    <head>
+      <script async src="https://cdn.journium.com/sdk/v1/journium.min.js"></script>
+    </head>
+    
+    <!-- ✅ Defer until page is parsed -->
+    <head>
+      <script defer src="https://cdn.journium.com/sdk/v1/journium.min.js"></script>
+    </head>
+    
+    <!-- ✅ Load at end of body -->
+    <body>
+      <!-- Your content -->
+      <script src="https://cdn.journium.com/sdk/v1/journium.min.js"></script>
+    </body>
+    ```
+  </Accordion>
+  
+  <Accordion title="Configuration Optimization" icon="cogs">
+    ```javascript
+    // ✅ Optimize for performance
+    Journium.init({
+      projectId: 'your-project-id',
+      apiKey: 'your-api-key',
+      environment: 'production',
+      
+      config: {
+        // Reduce tracking overhead
+        trackScrolling: false,        // High-frequency events
+        trackMouseMovement: false,    // Very high-frequency
+        
+        // Optimize batching
+        batchSize: 50,               // Larger batches
+        flushInterval: 10000,        // Less frequent flushes
+        
+        // Reduce payload size
+        trackUserAgent: false,       // Only if needed
+        trackReferrer: false,        // Only if needed
+        
+        // Sampling for high-traffic sites
+        sampleRate: 0.1             // Track 10% of sessions
+      }
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Memory Leaks
+
+**Problem**: Browser memory usage increases over time.
+
+<AccordionGroup>
+  <Accordion title="Event Listener Cleanup" icon="memory">
+    ```javascript
+    // ❌ Event listeners not cleaned up
+    class MyComponent {
+      componentDidMount() {
+        window.addEventListener('scroll', this.trackScroll);
+        window.addEventListener('click', this.trackClick);
+      }
+      
+      // Missing: componentWillUnmount cleanup
+    }
+    
+    // ✅ Proper cleanup
+    class MyComponent {
+      componentDidMount() {
+        this.trackScroll = this.trackScroll.bind(this);
+        this.trackClick = this.trackClick.bind(this);
+        
+        window.addEventListener('scroll', this.trackScroll);
+        window.addEventListener('click', this.trackClick);
+      }
+      
+      componentWillUnmount() {
+        window.removeEventListener('scroll', this.trackScroll);
+        window.removeEventListener('click', this.trackClick);
+      }
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Queue Management" icon="list">
+    ```javascript
+    // Monitor queue size to prevent memory buildup
+    setInterval(() => {
+      const status = Journium.getStatus();
+      
+      if (status.queueSize > 1000) {
+        console.warn('Event queue is getting large:', status.queueSize);
+        
+        // Force flush
+        Journium.flush();
+        
+        // Or reduce tracking temporarily
+        Journium.updateConfig({ 
+          trackScrolling: false,
+          trackClicks: false 
+        });
+      }
+    }, 30000); // Check every 30 seconds
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## React Integration Issues
+
+### Hook Dependencies
+
+**Problem**: React hooks causing unnecessary re-renders or stale closures.
+
+<AccordionGroup>
+  <Accordion title="useEffect Dependencies" icon="react">
+    ```jsx
+    // ❌ Missing dependencies
+    function ProductCard({ product, userId }) {
+      useEffect(() => {
+        Journium.track('product_viewed', {
+          product_id: product.id,
+          user_id: userId
+        });
+      }, []); // Missing dependencies!
+    }
+    
+    // ✅ Correct dependencies
+    function ProductCard({ product, userId }) {
+      useEffect(() => {
+        Journium.track('product_viewed', {
+          product_id: product.id,
+          user_id: userId
+        });
+      }, [product.id, userId]); // All dependencies included
+    }
+    
+    // ✅ Alternative: Memoize the tracking function
+    function ProductCard({ product, userId }) {
+      const trackProductView = useCallback(() => {
+        Journium.track('product_viewed', {
+          product_id: product.id,
+          user_id: userId
+        });
+      }, [product.id, userId]);
+      
+      useEffect(() => {
+        trackProductView();
+      }, [trackProductView]);
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Context Provider Issues" icon="sitemap">
+    ```jsx
+    // ❌ Provider re-creating context value
+    function AnalyticsProvider({ children }) {
+      const [user, setUser] = useState(null);
+      
+      // This object is re-created on every render!
+      const contextValue = {
+        user,
+        trackEvent: (event, props) => Journium.track(event, props)
+      };
+      
+      return (
+        <AnalyticsContext.Provider value={contextValue}>
+          {children}
+        </AnalyticsContext.Provider>
+      );
+    }
+    
+    // ✅ Memoize context value
+    function AnalyticsProvider({ children }) {
+      const [user, setUser] = useState(null);
+      
+      const trackEvent = useCallback((event, props) => {
+        Journium.track(event, props);
+      }, []);
+      
+      const contextValue = useMemo(() => ({
+        user,
+        trackEvent
+      }), [user, trackEvent]);
+      
+      return (
+        <AnalyticsContext.Provider value={contextValue}>
+          {children}
+        </AnalyticsContext.Provider>
+      );
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Network & Connectivity Issues
+
+### Request Failures
+
+**Problem**: Analytics requests are failing.
+
+<AccordionGroup>
+  <Accordion title="CORS Issues" icon="globe">
+    **Symptoms:**
+    - Console error: `CORS policy: No 'Access-Control-Allow-Origin' header`
+    - Network requests show as failed in DevTools
+    
+    **Solutions:**
+    ```javascript
+    // This shouldn't happen with Journium's CDN, but if using a proxy:
+    
+    // Server-side proxy configuration (Express.js example)
+    app.use('/journium-proxy', (req, res) => {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      
+      // Proxy request to Journium
+      // ... proxy logic
+    });
+    
+    // Client-side: Use the proxy
+    Journium.init({
+      // ... config
+      config: {
+        apiEndpoint: '/journium-proxy'
+      }
+    });
+    ```
+  </Accordion>
+  
+  <Accordion title="Ad Blockers" icon="shield">
+    **Problem:** Ad blockers preventing analytics requests.
+    
+    **Detection:**
+    ```javascript
+    // Detect if Journium requests are being blocked
+    const detectAdBlocker = () => {
+      return new Promise((resolve) => {
+        const testImg = new Image();
+        testImg.onload = () => resolve(false);
+        testImg.onerror = () => resolve(true);
+        testImg.src = 'https://cdn.journium.com/test-pixel.gif?t=' + Date.now();
+      });
+    };
+    
+    detectAdBlocker().then(blocked => {
+      if (blocked) {
+        console.warn('Analytics may be blocked by ad blocker');
+        // Implement fallback tracking or show user message
+      }
+    });
+    ```
+    
+    **Workarounds:**
+    ```javascript
+    // Use first-party subdomain proxy
+    Journium.init({
+      // ... config
+      config: {
+        apiEndpoint: 'https://analytics.yoursite.com/api'
+      }
+    });
+    
+    // Or implement server-side tracking as backup
+    const trackServerSide = (event, properties) => {
+      fetch('/api/analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event, properties })
+      });
+    };
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Offline Handling
+
+**Problem**: Events are lost when users go offline.
+
+<AccordionGroup>
+  <Accordion title="Offline Queue" icon="wifi">
+    ```javascript
+    // Enable offline queueing
+    Journium.init({
+      // ... config
+      config: {
+        offlineQueue: true,
+        maxOfflineEvents: 1000,
+        offlineRetryInterval: 30000 // 30 seconds
+      }
+    });
+    
+    // Monitor connection status
+    window.addEventListener('online', () => {
+      console.log('Back online, flushing queued events');
+      Journium.flush();
+    });
+    
+    window.addEventListener('offline', () => {
+      console.log('Gone offline, queueing events locally');
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Browser Compatibility Issues
+
+### Older Browser Support
+
+**Problem**: SDK doesn't work in older browsers (IE11, older Safari).
+
+<AccordionGroup>
+  <Accordion title="Polyfills" icon="code">
+    ```html
+    <!-- Add polyfills before Journium script -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=fetch,Promise,Object.assign"></script>
+    <script src="https://cdn.journium.com/sdk/v1/journium.min.js"></script>
+    
+    <!-- Or include specific polyfills -->
+    <script>
+      // Fetch polyfill for IE11
+      if (!window.fetch) {
+        document.write('<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.2/dist/fetch.umd.js"><\/script>');
+      }
+      
+      // Promise polyfill for IE11
+      if (!window.Promise) {
+        document.write('<script src="https://cdn.jsdelivr.net/npm/es6-promise@4.2.8/dist/es6-promise.auto.min.js"><\/script>');
+      }
+    </script>
+    ```
+  </Accordion>
+  
+  <Accordion title="Browser Detection" icon="browser">
+    ```javascript
+    // Graceful degradation for unsupported browsers
+    const isSupported = () => {
+      return !!(
+        window.fetch &&
+        window.Promise &&
+        window.Object.assign &&
+        window.JSON
+      );
+    };
+    
+    if (isSupported()) {
+      Journium.init(config);
+    } else {
+      console.warn('Browser not supported, analytics disabled');
+      // Implement server-side fallback or basic img pixel tracking
+      
+      window.Journium = {
+        track: (event, props) => {
+          // Fallback tracking via image pixel
+          const img = new Image();
+          img.src = `/analytics-fallback?event=${encodeURIComponent(event)}&props=${encodeURIComponent(JSON.stringify(props))}`;
+        }
+      };
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Debugging Tools
+
+### Debug Mode
+
+Enable detailed logging to diagnose issues:
+
+```javascript
+Journium.init({
+  // ... config
+  config: {
+    debugMode: true,
+    logLevel: 'verbose' // 'error', 'warn', 'info', 'debug', 'verbose'
+  }
+});
+
+// Check SDK status
+console.log('Journium status:', Journium.getStatus());
+console.log('Journium config:', Journium.getConfig());
+
+// Monitor events
+Journium.on('event_tracked', (event) => {
+  console.log('Event tracked:', event);
+});
+
+Journium.on('event_failed', (event, error) => {
+  console.error('Event failed:', event, error);
+});
+```
+
+### Health Check Function
+
+```javascript
+function journiumHealthCheck() {
+  const status = Journium.getStatus();
+  const config = Journium.getConfig();
+  
+  const health = {
+    initialized: status.initialized,
+    connected: status.connected,
+    queueSize: status.queueSize,
+    errorCount: status.errors,
+    lastFlush: new Date(status.lastFlush),
+    
+    // Configuration checks
+    validApiKey: config.apiKey?.startsWith('pk_'),
+    validProjectId: config.projectId?.startsWith('proj_'),
+    environmentSet: !!config.environment,
+    
+    // Performance checks
+    memoryUsage: performance.memory?.usedJSHeapSize || 'unavailable',
+    queueSizeHealthy: status.queueSize < 100,
+    errorRateHealthy: status.errors / status.totalEvents < 0.01
+  };
+  
+  console.table(health);
+  
+  // Warnings
+  if (!health.validApiKey) console.warn('Invalid API key format');
+  if (!health.connected) console.warn('Not connected to Journium servers');
+  if (!health.queueSizeHealthy) console.warn('Event queue is getting large');
+  
+  return health;
+}
+
+// Run health check
+journiumHealthCheck();
+```
+
+### Browser DevTools Integration
+
+```javascript
+// Add Journium to window for debugging
+if (Journium.getConfig().debugMode) {
+  window.JourniumDebug = {
+    status: () => Journium.getStatus(),
+    config: () => Journium.getConfig(),
+    healthCheck: journiumHealthCheck,
+    clearQueue: () => Journium.clearQueue(),
+    flushNow: () => Journium.flush(),
+    testEvent: () => Journium.track('debug_test_event', { timestamp: Date.now() })
+  };
+  
+  console.log('Journium debug tools available at window.JourniumDebug');
+}
+```
+
+## Getting Help
+
+If you're still experiencing issues after trying these solutions:
+
+<CardGroup cols={2}>
+  <Card title="Contact Support" icon="life-ring" href="mailto:support@journium.com">
+    Email our support team with your specific issue
+  </Card>
+  <Card title="Community Forum" icon="users" href="https://community.journium.com">
+    Ask questions and get help from other developers
+  </Card>
+  <Card title="GitHub Issues" icon="github" href="https://github.com/journium/sdk/issues">
+    Report bugs or request features on GitHub
+  </Card>
+  <Card title="Status Page" icon="heartbeat" href="https://status.journium.com">
+    Check if there are any ongoing service issues
+  </Card>
+</CardGroup>
+
+### Support Information to Include
+
+When contacting support, please include:
+
+1. **SDK Version**: Check `Journium.getConfig().version`
+2. **Browser & OS**: Include version numbers
+3. **Error Messages**: Copy exact error text from console
+4. **Configuration**: Your init config (remove sensitive keys)
+5. **Steps to Reproduce**: Detailed steps to recreate the issue
+6. **Expected vs Actual Behavior**: What you expected vs what happened
+
+```javascript
+// Generate debug info for support
+function generateSupportInfo() {
+  const info = {
+    sdk_version: Journium.getConfig().version,
+    browser: navigator.userAgent,
+    url: window.location.href,
+    timestamp: new Date().toISOString(),
+    status: Journium.getStatus(),
+    config: {
+      ...Journium.getConfig(),
+      apiKey: '[REDACTED]' // Don't include sensitive info
+    }
+  };
+  
+  console.log('Support Info:', JSON.stringify(info, null, 2));
+  return info;
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="FAQ" icon="question-circle" href="/troubleshooting/faq">
+    Check frequently asked questions for quick answers
+  </Card>
+  <Card title="Best Practices" icon="star" href="/configuration/setup#best-practices">
+    Follow best practices to avoid common issues
+  </Card>
+</CardGroup>

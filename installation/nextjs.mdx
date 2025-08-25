@@ -1,0 +1,748 @@
+---
+title: "Next.js Integration"
+description: "Integrate Journium into your Next.js applications with SSR support and optimized performance"
+---
+
+## Overview
+
+The Journium Next.js SDK provides seamless integration for Next.js applications, with full support for Server-Side Rendering (SSR), Static Site Generation (SSG), and Client-Side Rendering (CSR). It's optimized for Next.js routing and includes performance enhancements specific to the framework.
+
+## Installation
+
+Install the Next.js SDK:
+
+```bash
+npm install @journium/nextjs
+```
+
+## Basic Setup
+
+### App Router (Next.js 13+)
+
+For apps using the new App Router:
+
+#### 1. Create a Providers Component
+
+Create `app/providers.jsx`:
+
+```jsx
+'use client';
+
+import { JourniumProvider } from '@journium/nextjs';
+
+export function Providers({ children }) {
+  return (
+    <JourniumProvider
+      projectId={process.env.NEXT_PUBLIC_JOURNIUM_PROJECT_ID}
+      apiKey={process.env.NEXT_PUBLIC_JOURNIUM_API_KEY}
+      environment={process.env.NODE_ENV === 'production' ? 'production' : 'development'}
+      config={{
+        trackPageViews: true,
+        trackRouteChanges: true,
+        trackScrolling: true,
+        enableRecommendations: true,
+        ssr: true // Enable SSR support
+      }}
+    >
+      {children}
+    </JourniumProvider>
+  );
+}
+```
+
+#### 2. Wrap Your Root Layout
+
+Update `app/layout.jsx`:
+
+```jsx
+import { Providers } from './providers';
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
+    </html>
+  );
+}
+```
+
+### Pages Router (Next.js 12 and earlier)
+
+For apps using the Pages Router:
+
+#### Update `pages/_app.js`
+
+```jsx
+import { JourniumProvider } from '@journium/nextjs';
+
+export default function MyApp({ Component, pageProps }) {
+  return (
+    <JourniumProvider
+      projectId={process.env.NEXT_PUBLIC_JOURNIUM_PROJECT_ID}
+      apiKey={process.env.NEXT_PUBLIC_JOURNIUM_API_KEY}
+      environment={process.env.NODE_ENV === 'production' ? 'production' : 'development'}
+      config={{
+        trackPageViews: true,
+        trackRouteChanges: true,
+        trackScrolling: true,
+        enableRecommendations: true,
+        ssr: true
+      }}
+    >
+      <Component {...pageProps} />
+    </JourniumProvider>
+  );
+}
+```
+
+## Environment Variables
+
+Create a `.env.local` file in your project root:
+
+```bash
+# Journium Configuration
+NEXT_PUBLIC_JOURNIUM_PROJECT_ID=your-project-id
+NEXT_PUBLIC_JOURNIUM_API_KEY=your-api-key
+
+# Optional: Separate keys for different environments
+NEXT_PUBLIC_JOURNIUM_PROJECT_ID_DEV=your-dev-project-id
+NEXT_PUBLIC_JOURNIUM_API_KEY_DEV=your-dev-api-key
+```
+
+<Warning>
+Make sure to prefix your environment variables with `NEXT_PUBLIC_` so they're available in the browser.
+</Warning>
+
+## Configuration Options
+
+### Next.js-Specific Configuration
+
+```jsx
+<JourniumProvider
+  projectId={process.env.NEXT_PUBLIC_JOURNIUM_PROJECT_ID}
+  apiKey={process.env.NEXT_PUBLIC_JOURNIUM_API_KEY}
+  environment="production"
+  
+  config={{
+    // Next.js specific options
+    ssr: true,                      // Enable SSR support
+    trackRouteChanges: true,        // Auto-track Next.js route changes
+    trackStaticGeneration: true,    // Track SSG page generation
+    trackApiRoutes: true,           // Track API route calls
+    
+    // Performance options
+    preloadScript: true,            // Preload Journium script
+    deferInitialization: false,     // Wait for user interaction to initialize
+    
+    // Standard options
+    trackPageViews: true,
+    trackClicks: true,
+    trackScrolling: true,
+    trackFormSubmissions: true,
+    enableRecommendations: true
+  }}
+  
+  // Optional: Custom loading behavior
+  suspense={true}
+  fallback={<div>Loading analytics...</div>}
+>
+  <App />
+</JourniumProvider>
+```
+
+## Server-Side Rendering (SSR)
+
+### Identifying Users on the Server
+
+```jsx
+// pages/profile.js or app/profile/page.js
+import { getServerSideProps } from 'next';
+import { useJournium } from '@journium/nextjs';
+import { useEffect } from 'react';
+
+export default function Profile({ user }) {
+  const { identify, track } = useJournium();
+
+  useEffect(() => {
+    if (user) {
+      // Identify user on client side after hydration
+      identify(user.id, {
+        email: user.email,
+        name: user.name,
+        plan: user.plan
+      });
+    }
+  }, [user, identify]);
+
+  return <div>Profile page for {user.name}</div>;
+}
+
+export async function getServerSideProps(context) {
+  // Get user data on server
+  const user = await getUserFromSession(context);
+  
+  return {
+    props: {
+      user
+    }
+  };
+}
+```
+
+### Server-Side Event Tracking
+
+```jsx
+// utils/serverAnalytics.js
+import { JourniumServer } from '@journium/nextjs/server';
+
+const serverJournium = new JourniumServer({
+  projectId: process.env.JOURNIUM_PROJECT_ID, // Note: no NEXT_PUBLIC prefix for server-only
+  apiKey: process.env.JOURNIUM_API_KEY,
+  environment: process.env.NODE_ENV
+});
+
+export async function trackServerEvent(event, properties, userId = null) {
+  await serverJournium.track(event, properties, { userId });
+}
+
+// Example API route: pages/api/purchase.js
+export default async function handler(req, res) {
+  if (req.method === 'POST') {
+    const { userId, productId, amount } = req.body;
+    
+    // Process purchase...
+    
+    // Track server-side event
+    await trackServerEvent('purchase_completed', {
+      product_id: productId,
+      amount: amount,
+      currency: 'USD',
+      server_timestamp: new Date().toISOString()
+    }, userId);
+    
+    res.status(200).json({ success: true });
+  }
+}
+```
+
+## Static Site Generation (SSG)
+
+### Build-Time Analytics
+
+```jsx
+// pages/blog/[slug].js
+import { useJournium } from '@journium/nextjs';
+import { useEffect } from 'react';
+
+export default function BlogPost({ post, buildTime }) {
+  const { track } = useJournium();
+
+  useEffect(() => {
+    track('blog_post_viewed', {
+      post_slug: post.slug,
+      post_title: post.title,
+      post_category: post.category,
+      build_time: buildTime,
+      generation_type: 'ssg'
+    });
+  }, [post, buildTime, track]);
+
+  return (
+    <article>
+      <h1>{post.title}</h1>
+      <div>{post.content}</div>
+    </article>
+  );
+}
+
+export async function getStaticProps({ params }) {
+  const post = await getPost(params.slug);
+  
+  return {
+    props: {
+      post,
+      buildTime: new Date().toISOString()
+    },
+    revalidate: 3600 // Revalidate every hour
+  };
+}
+
+export async function getStaticPaths() {
+  const posts = await getAllPosts();
+  
+  return {
+    paths: posts.map((post) => ({
+      params: { slug: post.slug }
+    })),
+    fallback: 'blocking'
+  };
+}
+```
+
+## API Routes Tracking
+
+### Automatic API Tracking
+
+```jsx
+// middleware.js (Next.js 12+)
+import { NextResponse } from 'next/server';
+import { trackApiRequest } from '@journium/nextjs/middleware';
+
+export function middleware(request) {
+  // Track API requests automatically
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    return trackApiRequest(request, NextResponse.next());
+  }
+  
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: '/api/:path*'
+};
+```
+
+### Manual API Tracking
+
+```jsx
+// pages/api/users/[id].js
+import { withJourniumTracking } from '@journium/nextjs/api';
+
+async function handler(req, res) {
+  const { id } = req.query;
+  const user = await getUser(id);
+  
+  // Manual tracking within API route
+  req.journium.track('user_profile_accessed', {
+    user_id: id,
+    method: req.method,
+    user_agent: req.headers['user-agent']
+  });
+  
+  res.status(200).json(user);
+}
+
+export default withJourniumTracking(handler, {
+  trackCalls: true,
+  trackPerformance: true,
+  trackErrors: true
+});
+```
+
+## Routing and Navigation
+
+### Automatic Route Tracking
+
+The SDK automatically tracks route changes in Next.js:
+
+```jsx
+// This happens automatically with trackRouteChanges: true
+import Link from 'next/link';
+
+function Navigation() {
+  return (
+    <nav>
+      <Link href="/products">Products</Link>
+      <Link href="/about">About</Link>
+      <Link href="/contact">Contact</Link>
+    </nav>
+  );
+}
+// Route changes are tracked automatically
+```
+
+### Custom Route Tracking
+
+```jsx
+import { useRouter } from 'next/router';
+import { useJournium } from '@journium/nextjs';
+import { useEffect } from 'react';
+
+function CustomRouteTracker() {
+  const router = useRouter();
+  const { page } = useJournium();
+
+  useEffect(() => {
+    const handleRouteChange = (url) => {
+      page(url, {
+        referrer: router.asPath,
+        route_type: 'client_navigation',
+        timestamp: Date.now()
+      });
+    };
+
+    router.events.on('routeChangeComplete', handleRouteChange);
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange);
+    };
+  }, [router, page]);
+
+  return null;
+}
+
+// Add to your app
+function MyApp({ Component, pageProps }) {
+  return (
+    <JourniumProvider {...config}>
+      <CustomRouteTracker />
+      <Component {...pageProps} />
+    </JourniumProvider>
+  );
+}
+```
+
+## Performance Optimization
+
+### Dynamic Imports
+
+```jsx
+// components/AnalyticsProvider.js
+import dynamic from 'next/dynamic';
+
+const JourniumProvider = dynamic(
+  () => import('@journium/nextjs').then((mod) => mod.JourniumProvider),
+  {
+    ssr: false, // Only load on client side if SSR not needed
+    loading: () => <div>Loading analytics...</div>
+  }
+);
+
+export default function AnalyticsProvider({ children }) {
+  return (
+    <JourniumProvider {...config}>
+      {children}
+    </JourniumProvider>
+  );
+}
+```
+
+### Conditional Loading
+
+```jsx
+// Only load Journium in production
+import { JourniumProvider } from '@journium/nextjs';
+
+function ConditionalProvider({ children }) {
+  if (process.env.NODE_ENV !== 'production') {
+    return children;
+  }
+
+  return (
+    <JourniumProvider {...config}>
+      {children}
+    </JourniumProvider>
+  );
+}
+```
+
+### Script Optimization
+
+```jsx
+// Use Next.js Script component for optimal loading
+import Script from 'next/script';
+import { JourniumProvider } from '@journium/nextjs';
+
+function MyApp({ Component, pageProps }) {
+  return (
+    <>
+      <Script
+        src="https://cdn.journium.com/sdk/v1/journium.min.js"
+        strategy="afterInteractive" // or "lazyOnload" for non-critical tracking
+      />
+      <JourniumProvider
+        {...config}
+        waitForScript={true} // Wait for external script to load
+      >
+        <Component {...pageProps} />
+      </JourniumProvider>
+    </>
+  );
+}
+```
+
+## Image and Asset Tracking
+
+### Next.js Image Optimization Tracking
+
+```jsx
+import Image from 'next/image';
+import { useJournium } from '@journium/nextjs';
+
+function OptimizedImage({ src, alt, ...props }) {
+  const { track } = useJournium();
+
+  const handleImageLoad = () => {
+    track('image_loaded', {
+      image_src: src,
+      image_alt: alt,
+      optimization: 'nextjs'
+    });
+  };
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      onLoad={handleImageLoad}
+      {...props}
+    />
+  );
+}
+```
+
+## Internationalization (i18n) Support
+
+```jsx
+// next.config.js
+module.exports = {
+  i18n: {
+    locales: ['en', 'es', 'fr'],
+    defaultLocale: 'en',
+  },
+};
+
+// Track locale changes
+import { useRouter } from 'next/router';
+import { useJournium } from '@journium/nextjs';
+import { useEffect } from 'react';
+
+function LocaleTracker() {
+  const router = useRouter();
+  const { track } = useJournium();
+
+  useEffect(() => {
+    track('locale_viewed', {
+      locale: router.locale,
+      default_locale: router.defaultLocale,
+      available_locales: router.locales
+    });
+  }, [router.locale, track]);
+
+  return null;
+}
+```
+
+## Error Handling
+
+### Error Boundary for Next.js
+
+```jsx
+// components/ErrorBoundary.js
+import { Component } from 'react';
+import { withJournium } from '@journium/nextjs';
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    this.props.journium.track('react_error', {
+      error_message: error.message,
+      error_stack: error.stack,
+      component_stack: errorInfo.componentStack,
+      framework: 'nextjs'
+    });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h1>Something went wrong.</h1>;
+    }
+
+    return this.props.children;
+  }
+}
+
+export default withJournium(ErrorBoundary);
+```
+
+### Global Error Handling
+
+```jsx
+// pages/_error.js
+import { useJournium } from '@journium/nextjs';
+import { useEffect } from 'react';
+
+function Error({ statusCode, hasGetInitialPropsRun, err }) {
+  const { track } = useJournium();
+
+  useEffect(() => {
+    if (!hasGetInitialPropsRun && err) {
+      track('nextjs_error', {
+        status_code: statusCode,
+        error_message: err.message,
+        error_stack: err.stack,
+        page_url: window.location.href
+      });
+    }
+  }, [statusCode, hasGetInitialPropsRun, err, track]);
+
+  return (
+    <p>
+      {statusCode
+        ? `An error ${statusCode} occurred on server`
+        : 'An error occurred on client'}
+    </p>
+  );
+}
+
+Error.getInitialProps = ({ res, err }) => {
+  const statusCode = res ? res.statusCode : err ? err.statusCode : 404;
+  return { statusCode, hasGetInitialPropsRun: true };
+};
+
+export default Error;
+```
+
+## Best Practices
+
+### 1. Environment-Specific Configuration
+
+```jsx
+const getJourniumConfig = () => {
+  const baseConfig = {
+    projectId: process.env.NEXT_PUBLIC_JOURNIUM_PROJECT_ID,
+    apiKey: process.env.NEXT_PUBLIC_JOURNIUM_API_KEY,
+  };
+
+  if (process.env.NODE_ENV === 'production') {
+    return {
+      ...baseConfig,
+      environment: 'production',
+      config: {
+        trackPageViews: true,
+        trackRouteChanges: true,
+        debugMode: false
+      }
+    };
+  }
+
+  return {
+    ...baseConfig,
+    environment: 'development',
+    config: {
+      trackPageViews: true,
+      trackRouteChanges: true,
+      debugMode: true
+    }
+  };
+};
+```
+
+### 2. Type Safety
+
+```tsx
+// types/journium.ts
+export interface JourniumEvent {
+  event: string;
+  properties: Record<string, any>;
+  userId?: string;
+}
+
+// components/TypedTracker.tsx
+import { useJournium } from '@journium/nextjs';
+
+interface ProductViewEvent {
+  product_id: string;
+  product_name: string;
+  category: string;
+  price: number;
+}
+
+export function ProductTracker({ product }: { product: Product }) {
+  const { track } = useJournium();
+
+  const trackProductView = () => {
+    const eventData: ProductViewEvent = {
+      product_id: product.id,
+      product_name: product.name,
+      category: product.category,
+      price: product.price
+    };
+    
+    track('product_viewed', eventData);
+  };
+
+  return <button onClick={trackProductView}>View Product</button>;
+}
+```
+
+### 3. Performance Monitoring
+
+```jsx
+// hooks/usePerformanceTracking.js
+import { useJournium } from '@journium/nextjs';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
+
+export function usePerformanceTracking() {
+  const { track } = useJournium();
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleRouteChangeStart = () => {
+      window.routeChangeStart = Date.now();
+    };
+
+    const handleRouteChangeComplete = () => {
+      if (window.routeChangeStart) {
+        const routeChangeTime = Date.now() - window.routeChangeStart;
+        track('route_change_performance', {
+          route: router.asPath,
+          change_time: routeChangeTime
+        });
+        delete window.routeChangeStart;
+      }
+    };
+
+    router.events.on('routeChangeStart', handleRouteChangeStart);
+    router.events.on('routeChangeComplete', handleRouteChangeComplete);
+
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChangeStart);
+      router.events.off('routeChangeComplete', handleRouteChangeComplete);
+    };
+  }, [router, track]);
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Hydration mismatches**
+- Ensure SSR is properly configured
+- Use `suppressHydrationWarning` for client-only content
+
+**Environment variables not found**
+- Make sure variables are prefixed with `NEXT_PUBLIC_`
+- Check that `.env.local` is in the project root
+
+**Route tracking not working**
+- Verify `trackRouteChanges: true` in config
+- Check that JourniumProvider wraps your entire app
+
+**Performance issues**
+- Use dynamic imports for non-critical tracking
+- Consider `deferInitialization` for better initial load times
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Advanced Configuration" icon="cog" href="/configuration/setup">
+    Learn advanced configuration options for Next.js
+  </Card>
+  <Card title="API Integration" icon="code" href="/api-reference/introduction">
+    Integrate with Journium's REST API from your Next.js backend
+  </Card>
+</CardGroup>

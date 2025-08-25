@@ -1,0 +1,774 @@
+---
+title: "A/B Testing & Optimization"
+description: "Run data-driven experiments to optimize your website's conversion rate and user experience"
+---
+
+## Overview
+
+Journium's A/B testing platform allows you to test different versions of your website elements to determine which performs better. Make data-driven decisions to optimize conversion rates, reduce bounce rates, and improve user engagement with statistical confidence.
+
+## Getting Started with A/B Testing
+
+### What You Can Test
+
+Journium allows you to test virtually any element on your website:
+
+<CardGroup cols={2}>
+  <Card title="Headlines & Copy" icon="text">
+    Test different headlines, descriptions, and call-to-action text
+  </Card>
+  <Card title="Button Design" icon="cursor-click">
+    Experiment with colors, sizes, text, and placement of buttons
+  </Card>
+  <Card title="Page Layout" icon="layout">
+    Test different page structures and content arrangements
+  </Card>
+  <Card title="Forms" icon="form">
+    Optimize form fields, length, and validation messages
+  </Card>
+  <Card title="Images & Media" icon="image">
+    Test different hero images, videos, and visual elements
+  </Card>
+  <Card title="Pricing" icon="dollar-sign">
+    Experiment with pricing strategies and presentation
+  </Card>
+</CardGroup>
+
+### Basic A/B Test Setup
+
+```javascript
+// Initialize A/B test with Journium
+Journium.createTest({
+  testName: 'homepage_hero_button',
+  description: 'Test CTA button color on homepage hero section',
+  
+  // Define variants
+  variants: [
+    {
+      name: 'control',
+      description: 'Current blue button (#1E40AF)',
+      trafficAllocation: 50 // 50% of traffic
+    },
+    {
+      name: 'treatment',
+      description: 'New orange button (#EA580C)', 
+      trafficAllocation: 50 // 50% of traffic
+    }
+  ],
+  
+  // Success metrics
+  primaryMetric: 'conversion_rate',
+  secondaryMetrics: ['click_through_rate', 'bounce_rate'],
+  
+  // Test configuration
+  minimumSampleSize: 1000,
+  minimumDetectableEffect: 10, // 10% improvement
+  statisticalSignificance: 95,
+  maxDuration: 30 // days
+});
+```
+
+### Implementing Test Variants
+
+```javascript
+// Check which variant the user should see
+const variant = Journium.getTestVariant('homepage_hero_button');
+
+// Apply the appropriate treatment
+if (variant === 'treatment') {
+  // Show orange button
+  document.getElementById('hero-cta').style.backgroundColor = '#EA580C';
+  document.getElementById('hero-cta').textContent = 'Start Your Free Trial';
+} else {
+  // Show control (blue button)  
+  document.getElementById('hero-cta').style.backgroundColor = '#1E40AF';
+  document.getElementById('hero-cta').textContent = 'Get Started';
+}
+
+// Track the exposure
+Journium.track('ab_test_exposure', {
+  test_name: 'homepage_hero_button',
+  variant: variant,
+  user_id: getCurrentUserId(),
+  session_id: getSessionId()
+});
+```
+
+## Advanced Testing Strategies
+
+### Multivariate Testing
+
+Test multiple elements simultaneously to understand interactions:
+
+```javascript
+const multivariateTest = {
+  testName: 'checkout_optimization',
+  description: 'Test multiple checkout page elements',
+  
+  variables: [
+    {
+      name: 'headline',
+      variants: [
+        'Complete Your Purchase',
+        'Secure Checkout',
+        'Almost Done!'
+      ]
+    },
+    {
+      name: 'button_color',
+      variants: ['blue', 'green', 'orange']
+    },
+    {
+      name: 'trust_signals',
+      variants: ['badges_visible', 'badges_hidden']
+    }
+  ],
+  
+  // This creates 3 × 3 × 2 = 18 different combinations
+  trafficAllocation: 'equal', // Equal traffic to all variants
+  primaryMetric: 'checkout_completion_rate'
+};
+```
+
+### Sequential Testing
+
+Run tests in sequence to compound improvements:
+
+```javascript
+const testingSequence = [
+  {
+    phase: 1,
+    test: 'homepage_headline',
+    duration: 2, // weeks
+    expectedUplift: 15
+  },
+  {
+    phase: 2,
+    test: 'cta_button_design', 
+    duration: 2,
+    expectedUplift: 12,
+    baseline: 'phase_1_winner' // Use phase 1 results as new baseline
+  },
+  {
+    phase: 3,
+    test: 'social_proof_placement',
+    duration: 3,
+    expectedUplift: 8,
+    baseline: 'phase_2_winner'
+  }
+];
+
+// Expected compound improvement: ~38% total uplift
+```
+
+### Personalized Testing
+
+Run different tests for different user segments:
+
+```javascript
+const personalizedTesting = {
+  segments: [
+    {
+      name: 'new_visitors',
+      criteria: 'session_count === 1',
+      tests: [
+        {
+          name: 'new_user_onboarding',
+          focus: 'explanation_and_trust_building'
+        }
+      ]
+    },
+    {
+      name: 'returning_customers',
+      criteria: 'purchase_count > 0',
+      tests: [
+        {
+          name: 'loyalty_program_promotion',
+          focus: 'retention_and_upselling'
+        }
+      ]
+    },
+    {
+      name: 'mobile_users',
+      criteria: 'device_type === "mobile"',
+      tests: [
+        {
+          name: 'mobile_checkout_optimization',
+          focus: 'touch_friendly_design'
+        }
+      ]
+    }
+  ]
+};
+```
+
+## Test Implementation Patterns
+
+### React Component Testing
+
+```jsx
+import { useJourniumTest } from '@journium/react';
+
+function HeroSection() {
+  const { variant, isReady } = useJourniumTest('homepage_hero_test');
+  
+  if (!isReady) {
+    return <div>Loading...</div>;
+  }
+  
+  const getButtonProps = () => {
+    switch (variant) {
+      case 'variant_a':
+        return {
+          color: 'blue',
+          text: 'Get Started',
+          size: 'large'
+        };
+      case 'variant_b':
+        return {
+          color: 'orange', 
+          text: 'Start Free Trial',
+          size: 'large'
+        };
+      case 'variant_c':
+        return {
+          color: 'green',
+          text: 'Try It Now',
+          size: 'extra-large'
+        };
+      default:
+        return {
+          color: 'blue',
+          text: 'Get Started', 
+          size: 'large'
+        };
+    }
+  };
+  
+  const buttonProps = getButtonProps();
+  
+  return (
+    <section className="hero">
+      <h1>Transform Your Business Today</h1>
+      <p>Join thousands of companies that trust our solution</p>
+      <button 
+        className={`cta-button ${buttonProps.color} ${buttonProps.size}`}
+        onClick={() => {
+          // Track conversion event
+          Journium.track('cta_clicked', {
+            test_name: 'homepage_hero_test',
+            variant: variant,
+            button_text: buttonProps.text
+          });
+          
+          // Navigate to signup
+          navigateToSignup();
+        }}
+      >
+        {buttonProps.text}
+      </button>
+    </section>
+  );
+}
+```
+
+### Feature Flag Integration
+
+```javascript
+// Combine feature flags with A/B testing
+const testConfiguration = {
+  testName: 'new_checkout_flow',
+  
+  // Only run test if feature flag is enabled
+  enabled: featureFlags.checkout_v2_enabled,
+  
+  variants: [
+    {
+      name: 'control',
+      description: 'Current checkout flow',
+      weight: 50
+    },
+    {
+      name: 'treatment',
+      description: 'New streamlined checkout',
+      weight: 50
+    }
+  ],
+  
+  // Gradual rollout strategy
+  rolloutStrategy: {
+    week1: { treatment: 10, control: 90 },
+    week2: { treatment: 25, control: 75 },
+    week3: { treatment: 50, control: 50 },
+    // Increase treatment traffic if results are positive
+  }
+};
+```
+
+## Statistical Analysis
+
+### Sample Size Calculation
+
+```javascript
+// Calculate required sample size for statistical significance
+const calculateSampleSize = (params) => {
+  const {
+    baselineRate = 0.05,        // Current conversion rate (5%)
+    minimumDetectableEffect = 0.2, // 20% relative improvement
+    alpha = 0.05,               // Type I error rate (5%)
+    beta = 0.2,                 // Type II error rate (20%, power = 80%)
+    variants = 2                // Number of variants
+  } = params;
+  
+  const effectSize = baselineRate * minimumDetectableEffect;
+  const z_alpha = 1.96; // Z-score for 95% confidence
+  const z_beta = 0.84;  // Z-score for 80% power
+  
+  const sampleSizePerVariant = Math.ceil(
+    (2 * Math.pow(z_alpha + z_beta, 2) * baselineRate * (1 - baselineRate)) /
+    Math.pow(effectSize, 2)
+  );
+  
+  return {
+    sampleSizePerVariant,
+    totalSampleSize: sampleSizePerVariant * variants,
+    estimatedDuration: Math.ceil(sampleSizePerVariant / (dailyTraffic / variants)) + ' days'
+  };
+};
+
+// Example calculation
+const sampleSize = calculateSampleSize({
+  baselineRate: 0.034,     // 3.4% current conversion rate
+  minimumDetectableEffect: 0.15, // Want to detect 15% improvement
+  dailyTraffic: 1000       // 1000 visitors per day
+});
+
+console.log(sampleSize);
+// Output: { sampleSizePerVariant: 4842, totalSampleSize: 9684, estimatedDuration: '10 days' }
+```
+
+### Results Analysis
+
+```javascript
+// Analyze test results with statistical significance
+const analyzeTestResults = (testData) => {
+  const { control, treatment } = testData;
+  
+  // Calculate conversion rates
+  const controlRate = control.conversions / control.visitors;
+  const treatmentRate = treatment.conversions / treatment.visitors;
+  
+  // Calculate improvement
+  const relativeImprovement = (treatmentRate - controlRate) / controlRate;
+  const absoluteImprovement = treatmentRate - controlRate;
+  
+  // Statistical significance test (Chi-square)
+  const pooledRate = (control.conversions + treatment.conversions) / 
+                     (control.visitors + treatment.visitors);
+  
+  const standardError = Math.sqrt(
+    pooledRate * (1 - pooledRate) * 
+    (1/control.visitors + 1/treatment.visitors)
+  );
+  
+  const zScore = (treatmentRate - controlRate) / standardError;
+  const pValue = 2 * (1 - normalCDF(Math.abs(zScore))); // Two-tailed test
+  
+  // Confidence interval
+  const marginOfError = 1.96 * standardError; // 95% confidence
+  const confidenceInterval = [
+    relativeImprovement - marginOfError/controlRate,
+    relativeImprovement + marginOfError/controlRate
+  ];
+  
+  return {
+    controlConversionRate: controlRate,
+    treatmentConversionRate: treatmentRate,
+    relativeImprovement: relativeImprovement,
+    absoluteImprovement: absoluteImprovement,
+    pValue: pValue,
+    isSignificant: pValue < 0.05,
+    confidenceLevel: (1 - pValue) * 100,
+    confidenceInterval: confidenceInterval,
+    recommendation: pValue < 0.05 && relativeImprovement > 0 ? 
+      'Implement treatment' : 'Continue testing or revert to control'
+  };
+};
+```
+
+## Advanced Testing Features
+
+### Bayesian Testing
+
+Alternative to traditional frequentist testing:
+
+```javascript
+const bayesianTest = {
+  testName: 'pricing_page_optimization',
+  approach: 'bayesian',
+  
+  priors: {
+    control: { alpha: 1, beta: 20 }, // Prior belief: ~5% conversion rate
+    treatment: { alpha: 1, beta: 20 }
+  },
+  
+  // Decision criteria
+  decisionThreshold: {
+    probabilityToBeatControl: 0.95, // 95% probability treatment is better
+    minimumLift: 0.1, // At least 10% improvement
+    minimumSampleSize: 500
+  },
+  
+  // Advantages: Earlier decision making, better handling of multiple variants
+  earlyStoppingEnabled: true
+};
+```
+
+### Multi-Armed Bandit Testing
+
+Automatically allocate more traffic to better-performing variants:
+
+```javascript
+const banditTest = {
+  testName: 'dynamic_cta_optimization',
+  algorithm: 'epsilon_greedy', // or 'thompson_sampling', 'ucb1'
+  
+  variants: [
+    { name: 'blue_button', initialWeight: 25 },
+    { name: 'orange_button', initialWeight: 25 },
+    { name: 'green_button', initialWeight: 25 },
+    { name: 'red_button', initialWeight: 25 }
+  ],
+  
+  exploration: {
+    epsilon: 0.1, // 10% exploration, 90% exploitation
+    decayRate: 0.99 // Reduce exploration over time
+  },
+  
+  // Automatically shift traffic to winning variants
+  autoOptimize: true,
+  minConfidenceForShift: 0.8
+};
+```
+
+### Holdout Testing
+
+Validate overall testing program impact:
+
+```javascript
+const holdoutTest = {
+  name: 'testing_program_validation',
+  description: 'Measure impact of entire A/B testing program',
+  
+  allocation: {
+    testing_group: 90,  // 90% of users see A/B tests
+    holdout_group: 10   // 10% never see any tests (control group)
+  },
+  
+  // Compare overall metrics between groups
+  metrics: [
+    'overall_conversion_rate',
+    'revenue_per_visitor',
+    'customer_lifetime_value',
+    'user_satisfaction_score'
+  ],
+  
+  duration: '6_months' // Long-term validation
+};
+```
+
+## Testing Best Practices
+
+### 1. Test One Variable at a Time
+
+```javascript
+// ✅ Good: Test single variable
+const focusedTest = {
+  testName: 'headline_optimization',
+  variable: 'headline_text',
+  variants: [
+    'Increase Your Sales Today',
+    'Double Your Revenue in 30 Days'
+  ]
+};
+
+// ❌ Avoid: Testing multiple variables simultaneously
+const confusedTest = {
+  testName: 'everything_test',
+  changes: [
+    'headline_text',
+    'button_color', 
+    'page_layout',
+    'pricing_display',
+    'testimonials'
+  ]
+  // Hard to determine what caused the change
+};
+```
+
+### 2. Set Clear Success Metrics
+
+```javascript
+// ✅ Good: Clear, measurable goals
+const clearTest = {
+  primaryMetric: 'email_signup_rate',
+  secondaryMetrics: [
+    'click_through_rate',
+    'time_on_page',
+    'bounce_rate'
+  ],
+  businessImpact: 'increase_lead_generation'
+};
+
+// ❌ Avoid: Vague metrics
+const vagueTest = {
+  goal: 'make_page_better',
+  metrics: ['engagement', 'user_experience']
+  // Too subjective and hard to measure
+};
+```
+
+### 3. Ensure Sufficient Sample Size
+
+```javascript
+// Calculate and validate sample size before starting
+const validateSampleSize = (testConfig) => {
+  const requiredSampleSize = calculateSampleSize(testConfig);
+  const dailyTraffic = getCurrentDailyTraffic();
+  const estimatedDuration = requiredSampleSize.totalSampleSize / dailyTraffic;
+  
+  if (estimatedDuration > 30) {
+    console.warn(`Test will take ${Math.ceil(estimatedDuration)} days. Consider:`);
+    console.warn('- Increasing traffic to the test page');
+    console.warn('- Reducing minimum detectable effect');
+    console.warn('- Testing on higher-traffic pages');
+  }
+  
+  return requiredSampleSize;
+};
+```
+
+### 4. Avoid Peeking at Results
+
+```javascript
+// Set up proper test monitoring without frequent peeking
+const testMonitoring = {
+  checkFrequency: 'weekly', // Not daily
+  earlyStoppingRules: {
+    minSampleSize: 1000,
+    minTestDuration: 7, // days
+    maxTestDuration: 30
+  },
+  
+  significanceCheck: (results) => {
+    // Only check significance after minimum requirements are met
+    if (results.sampleSize < testMonitoring.earlyStoppingRules.minSampleSize) {
+      return { canStop: false, reason: 'insufficient_sample_size' };
+    }
+    
+    if (results.duration < testMonitoring.earlyStoppingRules.minTestDuration) {
+      return { canStop: false, reason: 'insufficient_duration' };
+    }
+    
+    return { 
+      canStop: results.pValue < 0.05 && results.confidenceLevel > 95,
+      reason: 'significant_result'
+    };
+  }
+};
+```
+
+### 5. Document Everything
+
+```javascript
+// Maintain detailed test documentation
+const testDocumentation = {
+  testId: 'homepage_cta_v3',
+  hypothesis: 'Changing CTA button from blue to orange will increase conversions because orange creates more urgency',
+  
+  implementation: {
+    startDate: '2024-01-15',
+    endDate: '2024-01-29',
+    trafficSplit: '50/50',
+    targetPages: ['/'],
+    excludedUsers: ['employees', 'bots']
+  },
+  
+  results: {
+    winner: 'treatment',
+    improvement: 0.187, // 18.7%
+    confidence: 97.2,
+    businessImpact: '$12,450 additional monthly revenue'
+  },
+  
+  lessons: [
+    'Orange buttons perform better on our homepage',
+    'Urgency-focused messaging resonates with our audience',
+    'Mobile users showed even higher improvement (24.3%)'
+  ],
+  
+  nextSteps: [
+    'Implement orange buttons site-wide',
+    'Test urgency messaging in email campaigns',
+    'Investigate mobile-specific optimizations'
+  ]
+};
+```
+
+## Test Management Dashboard
+
+### Test Portfolio Overview
+
+```javascript
+const testPortfolio = {
+  active_tests: 3,
+  completed_tests: 12,
+  total_uplift: 0.23, // 23% overall improvement
+  
+  current_tests: [
+    {
+      name: 'checkout_flow_v2',
+      status: 'running',
+      progress: 0.65, // 65% complete
+      early_results: 'promising',
+      estimated_completion: '2024-02-01'
+    },
+    {
+      name: 'pricing_page_layout',
+      status: 'running',
+      progress: 0.23,
+      early_results: 'inconclusive',
+      estimated_completion: '2024-02-15'
+    }
+  ],
+  
+  upcoming_tests: [
+    {
+      name: 'mobile_navigation',
+      planned_start: '2024-02-05',
+      priority: 'high',
+      expected_impact: 'medium'
+    }
+  ]
+};
+```
+
+### Automated Test Reporting
+
+```javascript
+// Set up automated weekly test reports
+const automatedReporting = {
+  schedule: 'every_monday_9am',
+  recipients: ['product@company.com', 'marketing@company.com'],
+  
+  reportContent: {
+    testSummary: true,
+    significantResults: true,
+    recommendedActions: true,
+    upcomingTests: true,
+    portfolioPerformance: true
+  },
+  
+  emailTemplate: `
+    Weekly A/B Testing Report - Week of {{date}}
+    
+    🎯 Active Tests: {{active_count}}
+    📊 Completed Tests: {{completed_count}}  
+    📈 Portfolio Uplift: {{total_uplift}}%
+    
+    {{#significant_results}}
+    🏆 Significant Results:
+    {{#each results}}
+    - {{test_name}}: {{improvement}}% improvement ({{confidence}}% confidence)
+    {{/each}}
+    {{/significant_results}}
+    
+    {{#recommended_actions}}
+    🔧 Recommended Actions:
+    {{#each actions}}
+    - {{action}}
+    {{/each}}
+    {{/recommended_actions}}
+  `
+};
+```
+
+## Integration with Other Tools
+
+### Google Optimize Integration
+
+```javascript
+// Sync tests with Google Optimize
+const googleOptimizeSync = {
+  syncTests: async (journiumTests) => {
+    for (const test of journiumTests) {
+      // Create corresponding experiment in Google Optimize
+      await createGoogleOptimizeExperiment({
+        name: test.name,
+        url: test.targetUrl,
+        variants: test.variants,
+        objective: test.primaryMetric
+      });
+    }
+  },
+  
+  syncResults: async (testId) => {
+    // Import results from Google Optimize
+    const goResults = await getGoogleOptimizeResults(testId);
+    
+    // Combine with Journium data for comprehensive analysis
+    const combinedResults = {
+      journium_data: await getJourniumResults(testId),
+      google_optimize_data: goResults,
+      cross_validation: compareResults(journiumResults, goResults)
+    };
+    
+    return combinedResults;
+  }
+};
+```
+
+### Customer Data Platform Integration
+
+```javascript
+// Sync test data with your CDP
+const cdpIntegration = {
+  syncTestExposures: (userId, testName, variant) => {
+    // Send test exposure data to CDP
+    CDP.track(userId, 'experiment_exposure', {
+      experiment_name: testName,
+      variant: variant,
+      timestamp: Date.now(),
+      source: 'journium'
+    });
+  },
+  
+  enrichWithUserData: async (testResults) => {
+    // Enrich test results with additional user data
+    const enrichedResults = await Promise.all(
+      testResults.map(async (result) => {
+        const userData = await CDP.getUser(result.userId);
+        return {
+          ...result,
+          user_segment: userData.segment,
+          lifetime_value: userData.ltv,
+          acquisition_channel: userData.acquisition_channel
+        };
+      })
+    );
+    
+    return enrichedResults;
+  }
+};
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Analytics Dashboard" icon="chart-line" href="/features/analytics">
+    Monitor your test results and overall performance
+  </Card>
+  <Card title="Custom Events" icon="cursor-click" href="/configuration/events">
+    Set up conversion tracking for your tests
+  </Card>
+</CardGroup>

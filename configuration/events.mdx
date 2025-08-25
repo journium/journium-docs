@@ -1,0 +1,809 @@
+---
+title: "Custom Events"
+description: "Track custom business events and user interactions specific to your application"
+---
+
+## Overview
+
+Custom events allow you to track specific user actions and business metrics that are unique to your application. This guide covers how to define, implement, and optimize custom event tracking for maximum insights.
+
+## Event Fundamentals
+
+### Basic Event Structure
+
+```javascript
+// Basic event tracking
+Journium.track('event_name', {
+  property1: 'value1',
+  property2: 123,
+  property3: true,
+  timestamp: Date.now()
+});
+
+// Event with user context
+Journium.track('feature_used', {
+  feature_name: 'advanced_search',
+  user_id: 'user_123',
+  user_plan: 'premium',
+  session_id: 'session_abc',
+  page_url: window.location.href
+});
+```
+
+### Event Naming Conventions
+
+```javascript
+// ✅ Good: Use clear, descriptive names
+Journium.track('product_added_to_cart', { ... });
+Journium.track('user_signed_up', { ... });
+Journium.track('payment_failed', { ... });
+
+// ❌ Avoid: Vague or inconsistent names
+Journium.track('click', { ... });
+Journium.track('userSignUp', { ... });
+Journium.track('payment error', { ... });
+
+// Recommended naming patterns:
+// [object]_[action] - e.g., 'product_viewed', 'user_deleted'
+// [action]_[outcome] - e.g., 'signup_completed', 'login_failed'
+```
+
+## E-commerce Events
+
+### Product Interaction Events
+
+```javascript
+// Product viewed
+Journium.track('product_viewed', {
+  product_id: 'prod_12345',
+  product_name: 'Wireless Headphones',
+  product_category: 'Electronics',
+  product_brand: 'AudioTech',
+  price: 99.99,
+  currency: 'USD',
+  availability: 'in_stock',
+  discount_percentage: 15,
+  view_source: 'search_results' // or 'category_page', 'recommendation'
+});
+
+// Product added to cart
+Journium.track('product_added_to_cart', {
+  product_id: 'prod_12345',
+  product_name: 'Wireless Headphones',
+  quantity: 1,
+  price: 99.99,
+  total_value: 99.99,
+  cart_total_items: 3,
+  cart_total_value: 299.97,
+  add_method: 'buy_now_button' // or 'add_to_cart_button'
+});
+
+// Product removed from cart
+Journium.track('product_removed_from_cart', {
+  product_id: 'prod_12345',
+  reason: 'quantity_changed', // or 'user_removed', 'out_of_stock'
+  quantity_removed: 1,
+  remaining_quantity: 0,
+  cart_total_items: 2,
+  cart_total_value: 199.98
+});
+```
+
+### Purchase Flow Events
+
+```javascript
+// Checkout started
+Journium.track('checkout_started', {
+  cart_total_items: 3,
+  cart_total_value: 299.97,
+  currency: 'USD',
+  products: [
+    {
+      product_id: 'prod_12345',
+      quantity: 1,
+      price: 99.99
+    },
+    {
+      product_id: 'prod_67890',
+      quantity: 2,
+      price: 99.99
+    }
+  ]
+});
+
+// Payment information added
+Journium.track('payment_info_added', {
+  payment_method: 'credit_card',
+  payment_provider: 'stripe',
+  total_value: 299.97,
+  currency: 'USD',
+  step: 2,
+  total_steps: 4
+});
+
+// Purchase completed
+Journium.track('purchase_completed', {
+  order_id: 'order_789',
+  total_value: 299.97,
+  tax_amount: 24.00,
+  shipping_amount: 9.99,
+  discount_amount: 30.00,
+  currency: 'USD',
+  payment_method: 'credit_card',
+  shipping_method: 'standard',
+  coupon_code: 'SAVE10',
+  products: [
+    {
+      product_id: 'prod_12345',
+      product_name: 'Wireless Headphones',
+      category: 'Electronics',
+      quantity: 1,
+      price: 99.99
+    }
+  ],
+  customer_type: 'returning', // or 'new'
+  order_source: 'website'     // or 'mobile_app', 'phone'
+});
+
+// Purchase failed
+Journium.track('purchase_failed', {
+  error_code: 'card_declined',
+  error_message: 'Your card was declined',
+  payment_method: 'credit_card',
+  total_value: 299.97,
+  currency: 'USD',
+  retry_count: 2,
+  failure_step: 'payment_processing'
+});
+```
+
+## User Lifecycle Events
+
+### Authentication Events
+
+```javascript
+// User signed up
+Journium.track('user_signed_up', {
+  user_id: 'user_12345',
+  email: 'user@example.com',
+  signup_method: 'email', // or 'google', 'facebook', 'github'
+  referral_source: 'google_search',
+  utm_campaign: 'summer_promotion',
+  account_type: 'free',
+  onboarding_completed: false,
+  signup_duration: 120000, // Time taken to complete signup in ms
+  form_errors: 0
+});
+
+// User logged in
+Journium.track('user_logged_in', {
+  user_id: 'user_12345',
+  login_method: 'email', // or 'google', 'facebook', 'remember_me'
+  device_type: 'desktop',
+  location: 'US',
+  session_count: 25,
+  last_login: '2024-01-15T10:30:00Z',
+  login_duration: 5000 // Time taken to log in
+});
+
+// Password reset
+Journium.track('password_reset_requested', {
+  user_id: 'user_12345',
+  email: 'user@example.com',
+  request_method: 'forgot_password_link',
+  previous_attempts: 1
+});
+
+Journium.track('password_reset_completed', {
+  user_id: 'user_12345',
+  reset_token_age: 1800000, // 30 minutes
+  password_strength: 'strong'
+});
+```
+
+### Subscription Events
+
+```javascript
+// Subscription started
+Journium.track('subscription_started', {
+  user_id: 'user_12345',
+  plan_id: 'premium_monthly',
+  plan_name: 'Premium Monthly',
+  price: 29.99,
+  currency: 'USD',
+  billing_cycle: 'monthly',
+  trial_days: 14,
+  payment_method: 'credit_card',
+  promotion_code: 'FIRST_MONTH_FREE',
+  upgrade_from: 'free_plan'
+});
+
+// Subscription upgraded
+Journium.track('subscription_upgraded', {
+  user_id: 'user_12345',
+  old_plan: 'basic_monthly',
+  new_plan: 'premium_monthly',
+  price_difference: 15.00,
+  upgrade_reason: 'feature_limit_reached',
+  prorated_amount: 12.50
+});
+
+// Subscription cancelled
+Journium.track('subscription_cancelled', {
+  user_id: 'user_12345',
+  plan_id: 'premium_monthly',
+  cancellation_reason: 'too_expensive',
+  cancellation_method: 'self_service',
+  subscription_duration: 90, // days
+  refund_requested: false,
+  retention_offer_shown: true,
+  retention_offer_accepted: false
+});
+```
+
+## Feature Usage Events
+
+### Feature Interaction
+
+```javascript
+// Feature used
+Journium.track('feature_used', {
+  feature_name: 'advanced_search',
+  feature_category: 'search',
+  user_id: 'user_12345',
+  user_plan: 'premium',
+  usage_count: 5, // How many times user has used this feature
+  session_usage_count: 1,
+  feature_value: 'high', // business value of the feature
+  time_to_use: 30000, // Time from page load to feature use
+  success: true
+});
+
+// Feature limit reached
+Journium.track('feature_limit_reached', {
+  feature_name: 'api_calls',
+  limit_type: 'monthly',
+  limit_value: 1000,
+  current_usage: 1000,
+  user_plan: 'basic',
+  upgrade_prompt_shown: true,
+  user_id: 'user_12345'
+});
+
+// Tutorial completed
+Journium.track('tutorial_completed', {
+  tutorial_name: 'onboarding_flow',
+  tutorial_steps: 5,
+  completion_time: 180000, // 3 minutes
+  steps_skipped: 1,
+  user_id: 'user_12345',
+  completion_rate: 0.8 // 80% of tutorial completed
+});
+```
+
+### Content Interaction
+
+```javascript
+// Article viewed
+Journium.track('article_viewed', {
+  article_id: 'article_456',
+  article_title: 'How to Increase Conversions',
+  article_category: 'marketing',
+  article_author: 'Jane Smith',
+  word_count: 1200,
+  estimated_read_time: 6, // minutes
+  view_source: 'search', // or 'category', 'related', 'homepage'
+  user_id: 'user_12345'
+});
+
+// Video played
+Journium.track('video_played', {
+  video_id: 'video_789',
+  video_title: 'Product Demo',
+  video_duration: 300, // seconds
+  video_quality: '1080p',
+  player_type: 'embedded',
+  autoplay: false,
+  user_id: 'user_12345'
+});
+
+// Video milestone reached
+Journium.track('video_milestone', {
+  video_id: 'video_789',
+  milestone_percentage: 50, // 50% watched
+  current_time: 150, // seconds
+  watch_duration: 150,
+  user_id: 'user_12345'
+});
+```
+
+## Form and Survey Events
+
+### Form Interactions
+
+```javascript
+// Form started
+Journium.track('form_started', {
+  form_id: 'contact_form',
+  form_name: 'Contact Us',
+  form_type: 'lead_generation',
+  page_url: window.location.href,
+  user_id: 'user_12345'
+});
+
+// Form field completed
+Journium.track('form_field_completed', {
+  form_id: 'contact_form',
+  field_name: 'email',
+  field_type: 'email',
+  field_position: 2,
+  total_fields: 5,
+  time_to_complete: 5000, // ms
+  validation_errors: 0,
+  user_id: 'user_12345'
+});
+
+// Form submitted
+Journium.track('form_submitted', {
+  form_id: 'contact_form',
+  form_name: 'Contact Us',
+  completion_time: 120000, // 2 minutes
+  field_count: 5,
+  completed_fields: 5,
+  validation_errors: 0,
+  submission_attempt: 1,
+  success: true,
+  user_id: 'user_12345'
+});
+
+// Form abandoned
+Journium.track('form_abandoned', {
+  form_id: 'contact_form',
+  abandonment_point: 'phone_number', // Last field interacted with
+  completed_fields: 3,
+  total_fields: 5,
+  time_on_form: 45000, // 45 seconds
+  reason: 'timeout', // or 'navigation', 'close_tab'
+  user_id: 'user_12345'
+});
+```
+
+### Survey and Feedback
+
+```javascript
+// Survey started
+Journium.track('survey_started', {
+  survey_id: 'nps_survey_q1_2024',
+  survey_type: 'nps',
+  trigger_event: 'post_purchase',
+  user_id: 'user_12345'
+});
+
+// Survey completed
+Journium.track('survey_completed', {
+  survey_id: 'nps_survey_q1_2024',
+  nps_score: 9,
+  completion_time: 30000,
+  questions_answered: 3,
+  total_questions: 3,
+  user_id: 'user_12345'
+});
+
+// Feedback submitted
+Journium.track('feedback_submitted', {
+  feedback_type: 'bug_report',
+  category: 'user_interface',
+  severity: 'medium',
+  page_url: window.location.href,
+  user_agent: navigator.userAgent,
+  screenshot_included: true,
+  user_id: 'user_12345'
+});
+```
+
+## Business-Specific Events
+
+### Lead Generation
+
+```javascript
+// Lead generated
+Journium.track('lead_generated', {
+  lead_id: 'lead_789',
+  lead_source: 'website_form',
+  lead_quality: 'hot', // or 'warm', 'cold'
+  form_type: 'demo_request',
+  company_size: '50-100',
+  industry: 'technology',
+  estimated_value: 5000,
+  sales_rep_assigned: 'john_doe',
+  follow_up_scheduled: true
+});
+
+// Demo scheduled
+Journium.track('demo_scheduled', {
+  demo_id: 'demo_456',
+  demo_type: 'product_demo',
+  scheduled_date: '2024-02-15T14:00:00Z',
+  duration_minutes: 30,
+  attendee_count: 3,
+  lead_id: 'lead_789',
+  sales_rep: 'john_doe',
+  demo_tool: 'zoom'
+});
+
+// Quote requested
+Journium.track('quote_requested', {
+  quote_id: 'quote_123',
+  product_categories: ['software', 'consulting'],
+  estimated_users: 50,
+  budget_range: '10000-25000',
+  timeline: 'q2_2024',
+  decision_maker: true,
+  lead_id: 'lead_789'
+});
+```
+
+### Support and Help
+
+```javascript
+// Support ticket created
+Journium.track('support_ticket_created', {
+  ticket_id: 'ticket_456',
+  category: 'billing',
+  priority: 'high',
+  user_plan: 'premium',
+  user_id: 'user_12345',
+  creation_method: 'help_widget',
+  estimated_resolution_time: 24 // hours
+});
+
+// Help article viewed
+Journium.track('help_article_viewed', {
+  article_id: 'help_789',
+  article_title: 'How to Reset Password',
+  category: 'account_management',
+  search_query: 'forgot password',
+  view_source: 'search_results',
+  user_id: 'user_12345',
+  helpful_rating: null // Will be updated if user rates
+});
+
+// Live chat started
+Journium.track('live_chat_started', {
+  chat_id: 'chat_123',
+  trigger: 'user_initiated', // or 'proactive', 'bot_escalation'
+  page_url: window.location.href,
+  user_plan: 'premium',
+  previous_chat_count: 2,
+  user_id: 'user_12345'
+});
+```
+
+## Event Validation and Quality
+
+### Event Schema Validation
+
+```javascript
+// Define event schemas for validation
+const eventSchemas = {
+  'product_viewed': {
+    required: ['product_id', 'product_name', 'price'],
+    optional: ['category', 'brand', 'discount_percentage'],
+    types: {
+      product_id: 'string',
+      product_name: 'string',
+      price: 'number',
+      category: 'string'
+    }
+  }
+};
+
+// Validate events before sending
+function validateAndTrack(eventName, properties) {
+  const schema = eventSchemas[eventName];
+  
+  if (schema) {
+    // Check required properties
+    const missingRequired = schema.required.filter(
+      prop => !properties.hasOwnProperty(prop)
+    );
+    
+    if (missingRequired.length > 0) {
+      console.warn(`Missing required properties: ${missingRequired.join(', ')}`);
+      return;
+    }
+    
+    // Validate types
+    for (const [prop, expectedType] of Object.entries(schema.types)) {
+      if (properties[prop] && typeof properties[prop] !== expectedType) {
+        console.warn(`Property ${prop} should be ${expectedType}`);
+      }
+    }
+  }
+  
+  Journium.track(eventName, properties);
+}
+
+// Usage
+validateAndTrack('product_viewed', {
+  product_id: 'prod_123',
+  product_name: 'Headphones',
+  price: 99.99,
+  category: 'Electronics'
+});
+```
+
+### Event Property Standards
+
+```javascript
+// Standard property naming and formatting
+const standardProperties = {
+  // User properties
+  user_id: 'string',
+  user_email: 'string',
+  user_plan: 'string', // 'free', 'basic', 'premium', 'enterprise'
+  user_type: 'string', // 'new', 'returning', 'guest'
+  
+  // Product properties
+  product_id: 'string',
+  product_name: 'string',
+  product_category: 'string',
+  price: 'number',
+  currency: 'string', // ISO currency code
+  
+  // Event context
+  page_url: 'string',
+  referrer: 'string',
+  session_id: 'string',
+  timestamp: 'number', // Unix timestamp
+  
+  // Performance properties
+  load_time: 'number', // milliseconds
+  response_time: 'number', // milliseconds
+  
+  // Boolean properties
+  success: 'boolean',
+  first_time: 'boolean',
+  mobile: 'boolean'
+};
+
+// Helper function to format properties
+function formatEventProperties(properties) {
+  const formatted = { ...properties };
+  
+  // Format currency to 2 decimal places
+  if (formatted.price) {
+    formatted.price = Number(formatted.price.toFixed(2));
+  }
+  
+  // Ensure timestamp is present
+  if (!formatted.timestamp) {
+    formatted.timestamp = Date.now();
+  }
+  
+  // Convert strings to lowercase for consistency
+  if (formatted.currency) {
+    formatted.currency = formatted.currency.toUpperCase();
+  }
+  
+  return formatted;
+}
+```
+
+## Event Testing and Debugging
+
+### Development Testing
+
+```javascript
+// Test mode for development
+const isTestMode = process.env.NODE_ENV === 'development';
+
+function trackWithTesting(eventName, properties) {
+  const eventData = {
+    event: eventName,
+    properties: formatEventProperties(properties),
+    timestamp: Date.now()
+  };
+  
+  if (isTestMode) {
+    console.group(`🔍 Event: ${eventName}`);
+    console.table(eventData.properties);
+    console.log('Full event data:', eventData);
+    console.groupEnd();
+    
+    // Validate against schema
+    validateEvent(eventName, eventData.properties);
+  }
+  
+  Journium.track(eventName, eventData.properties);
+}
+
+// Event debugging helper
+function debugEvent(eventName, properties) {
+  console.log(`Event: ${eventName}`);
+  console.log('Properties:', properties);
+  console.log('User context:', Journium.getUser());
+  console.log('Session info:', Journium.getSession());
+}
+```
+
+### A/B Testing Event Tracking
+
+```javascript
+// Track A/B test exposures and conversions
+function trackAbTest(testName, variant, converted = false) {
+  // Track test exposure
+  Journium.track('ab_test_exposure', {
+    test_name: testName,
+    variant: variant,
+    user_id: getCurrentUserId(),
+    session_id: getSessionId(),
+    timestamp: Date.now()
+  });
+  
+  // Track conversion if applicable
+  if (converted) {
+    Journium.track('ab_test_conversion', {
+      test_name: testName,
+      variant: variant,
+      user_id: getCurrentUserId(),
+      conversion_type: 'primary_goal',
+      timestamp: Date.now()
+    });
+  }
+}
+
+// Usage in component
+function PricingButton({ variant }) {
+  const handleClick = () => {
+    // Track the test exposure and conversion
+    trackAbTest('pricing_button_test', variant, true);
+    
+    // Your button click logic
+    navigateToCheckout();
+  };
+  
+  return <button onClick={handleClick}>Get Started</button>;
+}
+```
+
+## Event Performance Optimization
+
+### Batching and Throttling
+
+```javascript
+// Throttle high-frequency events
+const throttledTrack = throttle((eventName, properties) => {
+  Journium.track(eventName, properties);
+}, 1000); // Maximum once per second
+
+// Debounce user input events
+const debouncedTrack = debounce((eventName, properties) => {
+  Journium.track(eventName, properties);
+}, 500); // Wait 500ms after last event
+
+// Usage
+window.addEventListener('scroll', () => {
+  throttledTrack('page_scrolled', {
+    scroll_depth: getScrollPercentage(),
+    page_url: window.location.href
+  });
+});
+
+document.querySelector('#search').addEventListener('input', (e) => {
+  debouncedTrack('search_query_typed', {
+    query_length: e.target.value.length,
+    has_suggestions: e.target.value.length > 2
+  });
+});
+```
+
+### Event Sampling
+
+```javascript
+// Sample events based on user tier or volume
+function sampleAndTrack(eventName, properties, sampleRate = 1.0) {
+  if (Math.random() <= sampleRate) {
+    Journium.track(eventName, {
+      ...properties,
+      sampled: true,
+      sample_rate: sampleRate
+    });
+  }
+}
+
+// Different sampling rates for different event types
+const sampleRates = {
+  'page_view': 1.0,        // Track all page views
+  'button_click': 0.5,     // Track 50% of button clicks
+  'scroll_event': 0.1,     // Track 10% of scroll events
+  'mouse_move': 0.01       // Track 1% of mouse movements
+};
+
+function intelligentTrack(eventName, properties) {
+  const sampleRate = sampleRates[eventName] || 1.0;
+  sampleAndTrack(eventName, properties, sampleRate);
+}
+```
+
+## Best Practices
+
+### 1. Event Naming Standards
+
+```javascript
+// ✅ Good event names
+'user_signed_up'
+'product_added_to_cart'
+'checkout_completed'
+'subscription_cancelled'
+'feature_limit_reached'
+
+// ❌ Avoid these patterns
+'click'              // Too generic
+'userSignUp'         // Inconsistent casing
+'product-view'       // Use underscores
+'BUTTON_CLICKED'     // All caps
+'form submitted'     // Spaces
+```
+
+### 2. Property Consistency
+
+```javascript
+// ✅ Consistent property structure
+const eventProperties = {
+  // Always include user context
+  user_id: 'user_12345',
+  session_id: 'session_abc',
+  
+  // Always include page context
+  page_url: window.location.href,
+  page_title: document.title,
+  
+  // Consistent naming
+  product_id: 'prod_123',
+  product_name: 'Widget',
+  
+  // Include business context
+  user_plan: 'premium',
+  user_signup_date: '2024-01-15',
+  
+  // Technical context
+  timestamp: Date.now(),
+  client_version: '1.2.3'
+};
+```
+
+### 3. Event Documentation
+
+```javascript
+/**
+ * Track when a user adds a product to their cart
+ * 
+ * @param {string} productId - Unique product identifier
+ * @param {string} productName - Human-readable product name
+ * @param {number} price - Product price in smallest currency unit
+ * @param {number} quantity - Number of items added
+ * @param {string} source - Where the add-to-cart action originated
+ */
+function trackAddToCart(productId, productName, price, quantity, source) {
+  Journium.track('product_added_to_cart', {
+    product_id: productId,
+    product_name: productName,
+    price: price,
+    quantity: quantity,
+    source: source,
+    timestamp: Date.now()
+  });
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Analytics Dashboard" icon="chart-line" href="/features/analytics">
+    Learn how to analyze your custom events in the dashboard
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/events">
+    Explore the Events API for server-side tracking
+  </Card>
+</CardGroup>

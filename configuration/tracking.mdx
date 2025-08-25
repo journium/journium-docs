@@ -1,0 +1,740 @@
+---
+title: "Tracking Configuration"
+description: "Configure automatic and manual tracking for pages, user behavior, and performance metrics"
+---
+
+## Overview
+
+Journium provides comprehensive tracking capabilities that can be configured to match your application's needs. This guide covers page view tracking, user behavior monitoring, performance metrics, and custom tracking configurations.
+
+## Page View Tracking
+
+### Automatic Page View Tracking
+
+```javascript
+Journium.init({
+  projectId: 'your-project-id',
+  apiKey: 'your-api-key',
+  environment: 'production',
+  
+  config: {
+    trackPageViews: true,
+    
+    // Page view configuration
+    pageTracking: {
+      trackTitle: true,           // Track page title changes
+      trackUrl: true,            // Track URL changes
+      trackReferrer: true,       // Track referrer information
+      trackSearchParams: true,   // Track URL search parameters
+      trackHashChanges: false,   // Track hash changes (SPAs)
+      
+      // URL cleaning
+      cleanUrls: true,           // Remove query parameters for cleaner URLs
+      urlPatterns: [             // Patterns to clean/normalize URLs
+        { pattern: '/users/\\d+', replacement: '/users/:id' },
+        { pattern: '/products/\\d+', replacement: '/products/:id' }
+      ]
+    }
+  }
+});
+```
+
+### Manual Page View Tracking
+
+```javascript
+// Track page views manually (useful for SPAs)
+Journium.page('/dashboard', {
+  title: 'User Dashboard',
+  referrer: document.referrer,
+  search: window.location.search,
+  user_type: 'authenticated',
+  section: 'analytics'
+});
+
+// Track virtual page views
+Journium.page('/app/modal/settings', {
+  title: 'Settings Modal',
+  modal: true,
+  parent_page: '/app/dashboard'
+});
+```
+
+### SPA (Single Page Application) Tracking
+
+```javascript
+// Configure for React Router, Vue Router, etc.
+Journium.init({
+  // ... basic config
+  config: {
+    trackPageViews: true,
+    
+    // SPA-specific settings
+    spaTracking: {
+      enabled: true,
+      trackHashChanges: true,
+      trackPushState: true,
+      trackReplaceState: true,
+      debounceTime: 300 // Wait 300ms before tracking route changes
+    }
+  }
+});
+
+// Manual SPA tracking
+function trackRouteChange(to, from) {
+  Journium.page(to.path, {
+    title: to.meta.title,
+    previous_page: from.path,
+    route_params: to.params,
+    route_query: to.query
+  });
+}
+```
+
+## User Behavior Tracking
+
+### Click Tracking
+
+```javascript
+Journium.init({
+  // ... basic config
+  config: {
+    trackClicks: true,
+    
+    clickTracking: {
+      // What to track
+      trackButtons: true,
+      trackLinks: true,
+      trackFormElements: true,
+      trackImages: true,
+      
+      // Advanced click tracking
+      trackElementText: true,    // Track button/link text
+      trackElementAttributes: [  // Track specific attributes
+        'data-track', 'id', 'class'
+      ],
+      trackPosition: true,       // Track click coordinates
+      
+      // Filtering
+      ignoreSelectors: [         // Elements to ignore
+        '.ignore-tracking',
+        '[data-no-track]'
+      ],
+      onlyTrackSelectors: [      // Only track these elements
+        '.track-me',
+        '[data-track]'
+      ]
+    }
+  }
+});
+
+// Manual click tracking
+Journium.track('element_clicked', {
+  element_type: 'button',
+  element_text: 'Sign Up Now',
+  element_id: 'signup-cta',
+  position: { x: 150, y: 200 },
+  page_url: window.location.href
+});
+```
+
+### Scroll Tracking
+
+```javascript
+Journium.init({
+  // ... basic config
+  config: {
+    trackScrolling: true,
+    
+    scrollTracking: {
+      // Scroll depth tracking
+      trackScrollDepth: true,
+      scrollThresholds: [10, 25, 50, 75, 90, 100], // Percentage thresholds
+      
+      // Time-based tracking
+      trackScrollTime: true,
+      timeThresholds: [10, 30, 60, 120], // Seconds
+      
+      // Element visibility tracking
+      trackElementVisibility: true,
+      visibilityElements: [
+        '.hero-section',
+        '.pricing-table',
+        '.testimonials'
+      ],
+      visibilityThreshold: 0.5, // 50% visible
+      
+      // Performance
+      throttleDelay: 250 // Throttle scroll events
+    }
+  }
+});
+```
+
+### Form Tracking
+
+```javascript
+Journium.init({
+  // ... basic config
+  config: {
+    trackFormSubmissions: true,
+    
+    formTracking: {
+      // What to track
+      trackSubmissions: true,
+      trackFieldInteractions: true,
+      trackFormAbandonment: true,
+      trackValidationErrors: true,
+      
+      // Field interaction tracking
+      trackFieldFocus: true,
+      trackFieldBlur: true,
+      trackFieldChanges: true,
+      
+      // Data collection
+      collectFieldNames: true,
+      collectFieldValues: false, // Be careful with PII
+      collectFormIds: true,
+      
+      // Privacy
+      sensitiveFields: [        // Fields to never track values for
+        'password', 'ssn', 'credit-card'
+      ],
+      hashPII: true            // Hash sensitive data
+    }
+  }
+});
+
+// Manual form tracking
+Journium.track('form_submitted', {
+  form_id: 'contact-form',
+  form_fields: ['name', 'email', 'message'],
+  completion_time: 45000, // 45 seconds
+  validation_errors: 0
+});
+```
+
+## Performance Tracking
+
+### Automatic Performance Monitoring
+
+```javascript
+Journium.init({
+  // ... basic config
+  config: {
+    trackPerformance: true,
+    
+    performanceTracking: {
+      // Core Web Vitals
+      trackCoreWebVitals: true,
+      
+      // Navigation timing
+      trackNavigationTiming: true,
+      trackResourceTiming: true,
+      trackUserTiming: true,
+      
+      // Custom metrics
+      trackLargestContentfulPaint: true,
+      trackFirstInputDelay: true,
+      trackCumulativeLayoutShift: true,
+      trackTimeToInteractive: true,
+      
+      // Sampling (to reduce data volume)
+      performanceSampleRate: 0.1, // Track 10% of sessions
+      
+      // Thresholds for alerting
+      thresholds: {
+        lcp: 2500,    // Largest Contentful Paint (ms)
+        fid: 100,     // First Input Delay (ms)
+        cls: 0.1      // Cumulative Layout Shift
+      }
+    }
+  }
+});
+```
+
+### Custom Performance Tracking
+
+```javascript
+// Track custom performance metrics
+function trackCustomMetric(name, value, unit = 'ms') {
+  Journium.track('performance_metric', {
+    metric_name: name,
+    metric_value: value,
+    metric_unit: unit,
+    page_url: window.location.href,
+    timestamp: Date.now()
+  });
+}
+
+// Example: Track API response time
+async function apiCall(endpoint) {
+  const startTime = performance.now();
+  
+  try {
+    const response = await fetch(endpoint);
+    const endTime = performance.now();
+    
+    trackCustomMetric('api_response_time', endTime - startTime);
+    return response;
+  } catch (error) {
+    const endTime = performance.now();
+    
+    Journium.track('api_error', {
+      endpoint: endpoint,
+      error_message: error.message,
+      response_time: endTime - startTime
+    });
+    
+    throw error;
+  }
+}
+```
+
+## Error and Exception Tracking
+
+### Automatic Error Tracking
+
+```javascript
+Journium.init({
+  // ... basic config
+  config: {
+    trackErrors: true,
+    
+    errorTracking: {
+      // Types of errors to track
+      trackJavaScriptErrors: true,
+      trackUnhandledRejections: true,
+      trackConsoleErrors: false, // Usually too noisy
+      trackNetworkErrors: true,
+      
+      // Error details
+      captureStackTraces: true,
+      captureUserAgent: true,
+      capturePageInfo: true,
+      
+      // Filtering
+      ignoreErrors: [
+        'Script error',
+        'Non-Error promise rejection captured'
+      ],
+      ignoreUrls: [
+        'chrome-extension://',
+        'moz-extension://'
+      ],
+      
+      // Privacy
+      scrubFields: ['password', 'token', 'key'],
+      maxBreadcrumbs: 50
+    }
+  }
+});
+```
+
+### Manual Error Tracking
+
+```javascript
+// Track custom errors
+try {
+  riskyFunction();
+} catch (error) {
+  Journium.track('custom_error', {
+    error_type: 'business_logic',
+    error_message: error.message,
+    error_stack: error.stack,
+    function_name: 'riskyFunction',
+    user_id: getCurrentUserId(),
+    context: {
+      user_action: 'data_processing',
+      data_size: dataSet.length
+    }
+  });
+}
+
+// Track handled errors
+function handleApiError(error, context) {
+  Journium.track('api_error_handled', {
+    error_code: error.status,
+    error_message: error.message,
+    endpoint: context.endpoint,
+    retry_count: context.retryCount,
+    user_id: getCurrentUserId()
+  });
+}
+```
+
+## User Session Tracking
+
+### Session Configuration
+
+```javascript
+Journium.init({
+  // ... basic config
+  config: {
+    sessionTracking: {
+      enabled: true,
+      
+      // Session definition
+      sessionTimeout: 1800000,     // 30 minutes of inactivity
+      trackSessionStart: true,
+      trackSessionEnd: true,
+      trackSessionHeartbeat: true,
+      heartbeatInterval: 30000,    // 30 seconds
+      
+      // Session data
+      trackSessionDuration: true,
+      trackPageViewsPerSession: true,
+      trackEventsPerSession: true,
+      trackDeviceInfo: true,
+      
+      // Cross-device tracking
+      enableCrossDevice: true,
+      deviceFingerprinting: false  // Privacy-friendly option
+    }
+  }
+});
+```
+
+### Manual Session Tracking
+
+```javascript
+// Force start a new session
+Journium.startSession({
+  session_source: 'direct',
+  landing_page: window.location.href,
+  referrer: document.referrer
+});
+
+// End current session
+Journium.endSession({
+  session_duration: Date.now() - sessionStartTime,
+  pages_viewed: pageViewCount,
+  events_tracked: eventCount,
+  conversion_achieved: hasConversion
+});
+
+// Update session data
+Journium.updateSession({
+  feature_used: 'advanced_search',
+  engagement_score: calculateEngagementScore(),
+  last_activity: Date.now()
+});
+```
+
+## Device and Environment Tracking
+
+### Automatic Device Tracking
+
+```javascript
+Journium.init({
+  // ... basic config
+  config: {
+    deviceTracking: {
+      enabled: true,
+      
+      // Device information
+      trackDeviceType: true,      // mobile, tablet, desktop
+      trackScreenSize: true,      // screen resolution
+      trackViewportSize: true,    // viewport dimensions
+      trackPixelRatio: true,      // device pixel ratio
+      trackOrientation: true,     // portrait/landscape
+      
+      // Browser information
+      trackBrowser: true,         // browser name and version
+      trackOS: true,             // operating system
+      trackLanguage: true,        // browser language
+      trackTimezone: true,        // user timezone
+      
+      // Network information
+      trackConnectionType: true,  // wifi, cellular, etc.
+      trackConnectionSpeed: true, // effective connection type
+      
+      // Privacy considerations
+      anonymizeIP: true,
+      respectDoNotTrack: true
+    }
+  }
+});
+```
+
+## Geographic Tracking
+
+### Location-Based Tracking
+
+```javascript
+Journium.init({
+  // ... basic config
+  config: {
+    geoTracking: {
+      enabled: true,
+      
+      // IP-based geolocation
+      trackCountry: true,
+      trackRegion: true,
+      trackCity: false,           // More privacy-friendly
+      
+      // GPS-based geolocation (requires permission)
+      enableGPS: false,           // Usually not needed for web apps
+      gpsAccuracy: 'low',         // 'high', 'medium', 'low'
+      
+      // Privacy
+      anonymizeLocation: true,     // Fuzzy location data
+      locationConsent: true        // Require explicit consent
+    }
+  }
+});
+
+// Manual location tracking (with user consent)
+function trackLocationWithConsent() {
+  if (hasLocationConsent()) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      Journium.track('user_location', {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+        timestamp: Date.now()
+      });
+    });
+  }
+}
+```
+
+## Advanced Tracking Patterns
+
+### Custom Event Enrichment
+
+```javascript
+// Automatically enrich all events with common data
+Journium.addGlobalProperties({
+  app_version: '2.1.0',
+  build_number: '12345',
+  user_tier: 'premium',
+  feature_flags: getActiveFeatureFlags(),
+  ab_tests: getActiveAbTests()
+});
+
+// Dynamic property enrichment
+Journium.addPropertyEnricher((event, properties) => {
+  return {
+    ...properties,
+    page_load_time: getPageLoadTime(),
+    user_engagement_score: calculateEngagementScore(),
+    session_page_count: getSessionPageCount()
+  };
+});
+```
+
+### Conditional Tracking
+
+```javascript
+// Track events based on conditions
+Journium.init({
+  // ... basic config
+  config: {
+    conditionalTracking: {
+      // Only track for specific user segments
+      userSegments: ['premium', 'beta_tester'],
+      
+      // Only track on certain pages
+      pagePatterns: ['/app/*', '/dashboard/*'],
+      
+      // Skip tracking for certain user agents
+      ignoreUserAgents: ['bot', 'crawler', 'spider'],
+      
+      // Custom condition function
+      shouldTrack: (event, properties) => {
+        return !properties.user_id?.includes('test_');
+      }
+    }
+  }
+});
+```
+
+### Batch Event Processing
+
+```javascript
+// Configure batching for high-volume applications
+Journium.init({
+  // ... basic config
+  config: {
+    eventBatching: {
+      enabled: true,
+      batchSize: 50,              // Events per batch
+      flushInterval: 5000,        // Flush every 5 seconds
+      maxWaitTime: 30000,         // Max time to hold events
+      
+      // Compression
+      enableCompression: true,
+      compressionLevel: 6,        // 1-9, higher = better compression
+      
+      // Priority handling
+      highPriorityEvents: [       // Send immediately
+        'error_occurred',
+        'purchase_completed'
+      ],
+      
+      // Retry logic
+      maxRetries: 3,
+      retryBackoff: 'exponential' // 'linear', 'exponential'
+    }
+  }
+});
+```
+
+## Privacy and Compliance Features
+
+### GDPR/CCPA Compliance
+
+```javascript
+Journium.init({
+  // ... basic config
+  config: {
+    privacy: {
+      // Consent management
+      requireConsent: true,
+      consentTypes: ['analytics', 'marketing', 'functional'],
+      defaultConsent: false,
+      
+      // Data minimization
+      collectMinimalData: true,
+      dataRetentionDays: 365,
+      anonymizeAfterDays: 90,
+      
+      // User rights
+      enableDataExport: true,
+      enableDataDeletion: true,
+      enableOptOut: true,
+      
+      // Technical measures
+      encryptPII: true,
+      hashUserIds: true,
+      useSessionStorage: true     // Instead of localStorage
+    }
+  }
+});
+
+// Handle consent updates
+Journium.updateConsent({
+  analytics: true,
+  marketing: false,
+  functional: true
+});
+```
+
+## Testing and Debugging
+
+### Debug Configuration
+
+```javascript
+Journium.init({
+  // ... basic config
+  config: {
+    debugMode: true,
+    
+    debugging: {
+      logLevel: 'verbose',        // 'error', 'warn', 'info', 'debug', 'verbose'
+      logToConsole: true,
+      logToServer: false,         // Send debug logs to server
+      
+      // Event validation
+      validateEvents: true,
+      warnOnMissingProperties: true,
+      
+      // Performance monitoring
+      trackSdkPerformance: true,
+      logSlowOperations: true,
+      slowOperationThreshold: 100 // ms
+    }
+  }
+});
+
+// Debug helpers
+Journium.debug.getConfig();           // Get current configuration
+Journium.debug.getQueue();           // Get event queue
+Journium.debug.getStats();           // Get performance stats
+Journium.debug.validateEvent(event); // Validate event structure
+```
+
+## Best Practices
+
+### 1. Start Simple, Scale Up
+
+```javascript
+// Phase 1: Basic tracking
+const basicConfig = {
+  trackPageViews: true,
+  trackClicks: false,
+  trackScrolling: false
+};
+
+// Phase 2: Add interactions
+const intermediateConfig = {
+  ...basicConfig,
+  trackClicks: true,
+  trackFormSubmissions: true
+};
+
+// Phase 3: Full tracking
+const advancedConfig = {
+  ...intermediateConfig,
+  trackScrolling: true,
+  trackPerformance: true,
+  trackErrors: true
+};
+```
+
+### 2. Performance Considerations
+
+```javascript
+// Use sampling for high-frequency events
+Journium.init({
+  // ... basic config
+  config: {
+    eventSampling: {
+      'scroll_event': 0.1,       // Sample 10% of scroll events
+      'mouse_move': 0.01,        // Sample 1% of mouse movements
+      'page_view': 1.0           // Track all page views
+    },
+    
+    // Defer non-critical tracking
+    deferredTracking: [
+      'scroll_event',
+      'mouse_move'
+    ]
+  }
+});
+```
+
+### 3. Privacy by Design
+
+```javascript
+// Configure with privacy as default
+Journium.init({
+  // ... basic config
+  config: {
+    respectDoNotTrack: true,
+    anonymizeIPs: true,
+    enableCookies: false,       // Use sessionStorage instead
+    trackingConsent: 'required',
+    
+    // Minimize data collection
+    trackPageViews: true,
+    trackClicks: false,         // Require explicit consent
+    trackScrolling: false,      // Require explicit consent
+    
+    // Data lifecycle
+    dataRetentionDays: 90,      // Shorter retention
+    autoDeleteData: true
+  }
+});
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Custom Events" icon="cursor-click" href="/configuration/events">
+    Learn how to track custom business events
+  </Card>
+  <Card title="Analytics Dashboard" icon="chart-line" href="/features/analytics">
+    Explore the analytics and reporting features
+  </Card>
+</CardGroup>

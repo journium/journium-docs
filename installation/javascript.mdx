@@ -1,0 +1,404 @@
+---
+title: "JavaScript Integration"
+description: "Add Journium to any JavaScript application or website"
+---
+
+## Overview
+
+The Journium JavaScript SDK can be integrated into any web application, whether you're using vanilla JavaScript, jQuery, or any other JavaScript framework. This guide covers both CDN and npm installation methods.
+
+## Installation Methods
+
+### CDN Installation (Recommended for quick setup)
+
+Add Journium to your HTML page using our CDN:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your App</title>
+</head>
+<body>
+    <!-- Your content -->
+    
+    <!-- Add before closing body tag -->
+    <script src="https://cdn.journium.com/sdk/v1/journium.min.js"></script>
+    <script>
+        Journium.init({
+            projectId: 'your-project-id',
+            apiKey: 'your-api-key',
+            environment: 'production', // or 'development'
+            config: {
+                trackPageViews: true,
+                trackClicks: true,
+                trackScrolling: true
+            }
+        });
+    </script>
+</body>
+</html>
+```
+
+### NPM Installation
+
+For modern JavaScript applications using a bundler:
+
+```bash
+npm install @journium/sdk
+```
+
+Then initialize Journium in your main JavaScript file:
+
+```javascript
+import Journium from '@journium/sdk';
+
+// Initialize Journium
+Journium.init({
+    projectId: 'your-project-id',
+    apiKey: 'your-api-key',
+    environment: 'production',
+    config: {
+        trackPageViews: true,
+        trackClicks: true,
+        trackScrolling: true,
+        enableRecommendations: true
+    }
+});
+
+// Optional: Wait for initialization to complete
+Journium.ready(() => {
+    console.log('Journium is ready!');
+});
+```
+
+## Configuration Options
+
+### Basic Configuration
+
+```javascript
+Journium.init({
+    projectId: 'your-project-id',        // Required: Your project ID
+    apiKey: 'your-api-key',              // Required: Your API key
+    environment: 'production',           // Required: 'development' or 'production'
+    
+    // Optional configuration
+    config: {
+        trackPageViews: true,            // Automatically track page views
+        trackClicks: true,               // Track click events
+        trackScrolling: true,            // Track scroll depth
+        trackFormSubmissions: true,      // Track form submissions
+        enableRecommendations: true,     // Enable AI recommendations
+        debugMode: false                 // Enable debug logging
+    }
+});
+```
+
+### Advanced Configuration
+
+```javascript
+Journium.init({
+    projectId: 'your-project-id',
+    apiKey: 'your-api-key',
+    environment: 'production',
+    
+    config: {
+        // Tracking configuration
+        trackPageViews: true,
+        trackClicks: true,
+        trackScrolling: true,
+        trackFormSubmissions: true,
+        
+        // Performance tracking
+        trackPerformance: true,
+        trackErrors: true,
+        
+        // User identification
+        identifyUsers: true,
+        
+        // Custom settings
+        apiEndpoint: 'https://api.journium.com',  // Custom API endpoint
+        batchSize: 10,                            // Events batch size
+        flushInterval: 5000,                      // Flush interval in ms
+        
+        // Privacy settings
+        respectDoNotTrack: true,
+        anonymizeIPs: true,
+        
+        // Debug mode
+        debugMode: false
+    }
+});
+```
+
+## Tracking Events
+
+### Automatic Tracking
+
+Journium automatically tracks several events when configured:
+
+- **Page views**: Tracks when users visit different pages
+- **Click events**: Records clicks on buttons, links, and other elements
+- **Scroll depth**: Measures how far users scroll on pages
+- **Form submissions**: Tracks form completions and abandonment
+- **Performance metrics**: Load times, render times, and other performance data
+
+### Custom Event Tracking
+
+Track specific events important to your business:
+
+```javascript
+// Track a custom event
+Journium.track('button_clicked', {
+    button_text: 'Sign Up',
+    page_url: window.location.href,
+    user_type: 'visitor'
+});
+
+// Track a conversion event
+Journium.track('purchase_completed', {
+    amount: 99.99,
+    currency: 'USD',
+    product_id: 'prod_123',
+    category: 'premium'
+});
+
+// Track user engagement
+Journium.track('video_played', {
+    video_id: 'intro_video',
+    duration: 120,
+    completion_rate: 0.75
+});
+```
+
+### User Identification
+
+Identify users to get more detailed analytics:
+
+```javascript
+// Identify a user
+Journium.identify('user_123', {
+    email: 'user@example.com',
+    name: 'John Doe',
+    plan: 'premium',
+    signup_date: '2024-01-15'
+});
+
+// Update user properties
+Journium.updateUser({
+    last_login: new Date(),
+    page_views: 25,
+    feature_flags: ['beta_feature', 'new_ui']
+});
+```
+
+## Page Tracking
+
+### Single Page Applications (SPAs)
+
+For SPAs, manually track page changes:
+
+```javascript
+// Track page change in SPA
+function trackPageChange(pageName, pageData = {}) {
+    Journium.page(pageName, {
+        url: window.location.href,
+        title: document.title,
+        referrer: document.referrer,
+        ...pageData
+    });
+}
+
+// Example usage
+trackPageChange('dashboard', {
+    section: 'analytics',
+    user_role: 'admin'
+});
+```
+
+### Router Integration
+
+Example integration with popular routers:
+
+```javascript
+// History API (for vanilla JS SPAs)
+window.addEventListener('popstate', (event) => {
+    Journium.page(window.location.pathname);
+});
+
+// Manual tracking for route changes
+function navigateTo(path) {
+    history.pushState(null, null, path);
+    Journium.page(path);
+    // Your route handling logic
+}
+```
+
+## Error Tracking
+
+Track JavaScript errors and exceptions:
+
+```javascript
+// Automatic error tracking (if enabled in config)
+Journium.init({
+    // ... other config
+    config: {
+        trackErrors: true
+    }
+});
+
+// Manual error tracking
+try {
+    // Your code that might throw an error
+    riskyOperation();
+} catch (error) {
+    Journium.track('javascript_error', {
+        error_message: error.message,
+        error_stack: error.stack,
+        page_url: window.location.href,
+        timestamp: new Date().toISOString()
+    });
+    
+    // Re-throw the error if needed
+    throw error;
+}
+```
+
+## Performance Monitoring
+
+Track performance metrics:
+
+```javascript
+// Track custom performance metrics
+Journium.track('page_load_time', {
+    load_time: performance.timing.loadEventEnd - performance.timing.navigationStart,
+    dom_ready_time: performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart,
+    page_url: window.location.href
+});
+
+// Track API response times
+async function trackApiCall(endpoint, requestData) {
+    const startTime = Date.now();
+    
+    try {
+        const response = await fetch(endpoint, requestData);
+        const endTime = Date.now();
+        
+        Journium.track('api_request', {
+            endpoint: endpoint,
+            response_time: endTime - startTime,
+            status_code: response.status,
+            success: response.ok
+        });
+        
+        return response;
+    } catch (error) {
+        const endTime = Date.now();
+        
+        Journium.track('api_request', {
+            endpoint: endpoint,
+            response_time: endTime - startTime,
+            error: error.message,
+            success: false
+        });
+        
+        throw error;
+    }
+}
+```
+
+## Best Practices
+
+### 1. Load Journium Early
+
+Place the Journium script as early as possible in your page load:
+
+```html
+<head>
+    <!-- Other head elements -->
+    <script src="https://cdn.journium.com/sdk/v1/journium.min.js"></script>
+    <script>
+        Journium.init({
+            projectId: 'your-project-id',
+            apiKey: 'your-api-key',
+            environment: 'production'
+        });
+    </script>
+</head>
+```
+
+### 2. Use Environment-Specific Configuration
+
+```javascript
+const isProduction = window.location.hostname !== 'localhost';
+
+Journium.init({
+    projectId: 'your-project-id',
+    apiKey: 'your-api-key',
+    environment: isProduction ? 'production' : 'development',
+    config: {
+        debugMode: !isProduction,
+        trackPageViews: true,
+        trackClicks: true
+    }
+});
+```
+
+### 3. Handle Errors Gracefully
+
+```javascript
+try {
+    Journium.init({
+        projectId: 'your-project-id',
+        apiKey: 'your-api-key',
+        environment: 'production'
+    });
+} catch (error) {
+    console.warn('Failed to initialize Journium:', error);
+    // Your app should continue to work even if Journium fails
+}
+```
+
+### 4. Batch Events for Performance
+
+```javascript
+// Journium automatically batches events, but you can control the behavior
+Journium.init({
+    // ... other config
+    config: {
+        batchSize: 20,        // Send events in batches of 20
+        flushInterval: 3000   // Flush every 3 seconds
+    }
+});
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Journium is not defined**
+- Make sure the Journium script is loaded before you try to use it
+- Check that the CDN URL is correct and accessible
+
+**Events not showing in dashboard**
+- Verify your project ID and API key are correct
+- Check that you're using the right environment (development/production)
+- Ensure your domain is whitelisted in your Journium project settings
+
+**Performance impact concerns**
+- Journium loads asynchronously and shouldn't block your page
+- Events are batched and sent efficiently
+- The SDK is lightweight (~15KB gzipped)
+
+For more troubleshooting help, see our [troubleshooting guide](/troubleshooting/common-issues).
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Configure Events" icon="cursor-click" href="/configuration/events">
+    Set up custom events for your specific use case
+  </Card>
+  <Card title="View Analytics" icon="chart-line" href="/features/analytics">
+    Learn how to interpret your Journium data
+  </Card>
+</CardGroup>

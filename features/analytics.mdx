@@ -1,0 +1,591 @@
+---
+title: "Analytics Dashboard"
+description: "Understand your users and optimize conversions with Journium's comprehensive analytics"
+---
+
+## Overview
+
+Journium's analytics dashboard provides deep insights into user behavior, conversion patterns, and performance metrics. Get real-time data, AI-powered recommendations, and actionable insights to improve your website's conversion rate.
+
+## Dashboard Sections
+
+### Real-Time Overview
+
+Monitor your website's activity as it happens with live metrics and user tracking.
+
+<CardGroup cols={2}>
+  <Card title="Live Users" icon="users">
+    See current active users on your site
+  </Card>
+  <Card title="Real-Time Events" icon="activity">
+    Watch user interactions as they occur
+  </Card>
+  <Card title="Current Conversions" icon="target">
+    Track goal completions in real-time
+  </Card>
+  <Card title="Performance Alerts" icon="bell">
+    Get notified of performance issues instantly
+  </Card>
+</CardGroup>
+
+### User Behavior Analytics
+
+#### Page Analytics
+
+Understanding how users navigate through your website:
+
+```javascript
+// Automatic page tracking provides these insights:
+- Page views and unique page views
+- Average time on page
+- Bounce rate per page
+- Entry and exit rates
+- User flow between pages
+- Popular content and landing pages
+```
+
+**Key Metrics Available:**
+- **Page Views**: Total number of page visits
+- **Unique Page Views**: Number of sessions that included the page
+- **Average Session Duration**: How long users spend on each page
+- **Bounce Rate**: Percentage of single-page sessions
+- **Exit Rate**: Percentage of sessions that ended on each page
+
+#### User Flow Visualization
+
+See how users navigate through your site:
+
+- **Sankey Diagrams**: Visualize user paths from entry to exit
+- **Funnel Analysis**: Track conversion funnels and identify drop-off points
+- **Cohort Analysis**: Understand user retention over time
+- **Session Recordings**: Watch anonymized user sessions (privacy-compliant)
+
+#### Conversion Funnels
+
+Track multi-step conversion processes:
+
+```javascript
+// Example: E-commerce funnel
+1. Product View → 2. Add to Cart → 3. Checkout → 4. Purchase
+
+Funnel Analysis Shows:
+- Conversion rate at each step
+- Drop-off points and reasons
+- Time spent in each step
+- A/B test performance by funnel step
+```
+
+### Performance Analytics
+
+#### Core Web Vitals
+
+Monitor Google's Core Web Vitals and other performance metrics:
+
+- **Largest Contentful Paint (LCP)**: Loading performance
+- **First Input Delay (FID)**: Interactivity
+- **Cumulative Layout Shift (CLS)**: Visual stability
+- **Time to First Byte (TTFB)**: Server response time
+- **First Contentful Paint (FCP)**: Perceived loading speed
+
+#### Performance Insights
+
+Get detailed performance breakdowns:
+
+```javascript
+Performance Dashboard Features:
+- Device-specific performance metrics
+- Geographic performance variations  
+- Browser and OS performance comparison
+- Network speed impact analysis
+- Performance trends over time
+- Core Web Vitals scoring and recommendations
+```
+
+#### Page Speed Analysis
+
+Detailed page-by-page performance analysis:
+
+- **Load Time Distribution**: See performance across all users
+- **Performance by User Segment**: Compare different user groups
+- **Mobile vs Desktop Performance**: Optimize for different devices
+- **Geographic Performance**: Understand global performance variations
+
+### Conversion Analytics
+
+#### Goal Tracking
+
+Monitor your conversion goals and business metrics:
+
+```javascript
+// Example conversion goals you can track:
+{
+  "signup_goal": {
+    "completions": 1247,
+    "conversion_rate": 12.3,
+    "value": 62350, // $623.50 per conversion
+    "trend": "+15.2%" // vs previous period
+  },
+  "purchase_goal": {
+    "completions": 89,
+    "conversion_rate": 3.4,
+    "value": 15820,
+    "trend": "+8.7%"
+  }
+}
+```
+
+#### Revenue Attribution
+
+Understand which channels and campaigns drive the most value:
+
+- **Multi-Touch Attribution**: See the full customer journey
+- **First-Click Attribution**: Credit the initial touchpoint
+- **Last-Click Attribution**: Credit the final interaction
+- **Time-Decay Attribution**: Weight recent interactions more heavily
+
+#### Cohort Analysis
+
+Track user behavior over time:
+
+- **Retention Cohorts**: How many users return after their first visit
+- **Revenue Cohorts**: Revenue generation patterns over time
+- **Behavioral Cohorts**: Feature usage patterns by user groups
+
+### AI-Powered Insights
+
+#### Conversion Recommendations
+
+Get personalized recommendations to improve your conversion rates:
+
+```javascript
+Example Recommendations:
+{
+  "high_impact": [
+    {
+      "type": "cta_optimization",
+      "title": "Optimize Primary CTA Button",
+      "description": "Your 'Get Started' button has a 23% lower click rate than industry average",
+      "expected_improvement": "18-25% increase in conversions",
+      "effort": "low",
+      "priority": "high"
+    },
+    {
+      "type": "page_speed", 
+      "title": "Improve Mobile Load Time",
+      "description": "Mobile users experience 3.2s average load time vs 1.8s optimal",
+      "expected_improvement": "12-18% reduction in bounce rate",
+      "effort": "medium",
+      "priority": "high"
+    }
+  ]
+}
+```
+
+#### Anomaly Detection
+
+Automatically detect unusual patterns in your data:
+
+- **Traffic Anomalies**: Sudden spikes or drops in visitors
+- **Conversion Anomalies**: Unexpected changes in conversion rates
+- **Performance Anomalies**: Page speed or error rate changes
+- **User Behavior Anomalies**: Unusual interaction patterns
+
+#### Predictive Analytics
+
+Forecast future performance based on current trends:
+
+- **Conversion Forecasting**: Predict monthly/quarterly conversion goals
+- **Revenue Forecasting**: Project future revenue based on current trends
+- **User Growth Predictions**: Estimate user acquisition needs
+- **Seasonal Trend Analysis**: Understand cyclical patterns in your business
+
+## Custom Reports and Dashboards
+
+### Report Builder
+
+Create custom reports tailored to your business needs:
+
+```javascript
+// Example custom report configuration
+{
+  "report_name": "Weekly Conversion Summary",
+  "metrics": [
+    "total_conversions",
+    "conversion_rate", 
+    "average_order_value",
+    "customer_acquisition_cost"
+  ],
+  "dimensions": [
+    "traffic_source",
+    "device_type",
+    "user_segment"
+  ],
+  "filters": {
+    "date_range": "last_7_days",
+    "user_type": "returning_customers"
+  },
+  "schedule": "weekly",
+  "recipients": ["team@company.com"]
+}
+```
+
+### Dashboard Customization
+
+Personalize your dashboard for different team members:
+
+- **Executive Dashboard**: High-level KPIs and trends
+- **Marketing Dashboard**: Campaign performance and attribution
+- **Product Dashboard**: Feature usage and user engagement
+- **Technical Dashboard**: Performance metrics and error rates
+
+### Automated Insights
+
+Set up automated reports and alerts:
+
+- **Daily Performance Summary**: Automated email with key metrics
+- **Weekly Conversion Report**: Detailed analysis of conversion performance
+- **Monthly Business Review**: Comprehensive performance analysis
+- **Alert Notifications**: Real-time alerts for significant changes
+
+## Segmentation and Filtering
+
+### User Segmentation
+
+Analyze different user groups separately:
+
+```javascript
+// Example user segments
+const segments = {
+  "new_users": {
+    "definition": "first_visit_date > 7_days_ago",
+    "count": 5420,
+    "conversion_rate": 8.3
+  },
+  "returning_users": {
+    "definition": "session_count > 1",
+    "count": 12890, 
+    "conversion_rate": 15.7
+  },
+  "high_value_users": {
+    "definition": "lifetime_value > 500",
+    "count": 890,
+    "conversion_rate": 34.2
+  }
+};
+```
+
+### Advanced Filtering
+
+Filter your data by multiple criteria:
+
+- **Geographic Filters**: Country, region, city
+- **Device Filters**: Mobile, tablet, desktop
+- **Browser Filters**: Chrome, Safari, Firefox, etc.
+- **Traffic Source Filters**: Organic, paid, social, direct
+- **Custom Property Filters**: Any event property you track
+
+### Comparative Analysis
+
+Compare different time periods, segments, or campaigns:
+
+- **Period Comparison**: This month vs last month
+- **Segment Comparison**: New users vs returning users  
+- **Campaign Comparison**: Campaign A vs Campaign B
+- **Device Comparison**: Mobile vs desktop performance
+
+## Data Export and Integration
+
+### Export Options
+
+Export your data in multiple formats:
+
+```javascript
+// Available export formats
+const exportFormats = [
+  "CSV", "Excel", "JSON", "PDF Report"
+];
+
+// Automated exports
+const scheduledExports = {
+  "daily_summary": {
+    "format": "CSV",
+    "schedule": "daily_9am",
+    "recipients": ["analytics@company.com"]
+  },
+  "weekly_report": {
+    "format": "PDF",
+    "schedule": "monday_morning", 
+    "recipients": ["executive@company.com"]
+  }
+};
+```
+
+### API Access
+
+Access your analytics data programmatically:
+
+```javascript
+// Analytics API examples
+const analyticsAPI = {
+  // Get conversion data
+  getConversions: async (dateRange, filters) => {
+    const response = await fetch('/api/v1/analytics/conversions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ dateRange, filters })
+    });
+    return response.json();
+  },
+  
+  // Get user behavior data
+  getUserBehavior: async (userId, dateRange) => {
+    const response = await fetch(`/api/v1/analytics/users/${userId}/behavior`, {
+      headers: { 'Authorization': `Bearer ${apiKey}` }
+    });
+    return response.json();
+  }
+};
+```
+
+### Third-Party Integrations
+
+Connect Journium with your existing tools:
+
+<CardGroup cols={2}>
+  <Card title="Google Analytics" icon="google">
+    Sync data with GA4 for comprehensive analysis
+  </Card>
+  <Card title="Salesforce" icon="salesforce">
+    Send conversion data to your CRM
+  </Card>
+  <Card title="HubSpot" icon="hubspot">
+    Integrate with marketing automation
+  </Card>
+  <Card title="Slack" icon="slack">
+    Get real-time alerts in your team channels
+  </Card>
+</CardGroup>
+
+## Mobile Analytics
+
+### Mobile-Specific Insights
+
+Understand your mobile users better:
+
+- **Mobile Conversion Funnels**: Optimized for touch interactions
+- **App-Like Web Experience**: Progressive Web App metrics
+- **Touch Heatmaps**: See where users tap most frequently
+- **Scroll Behavior**: Understand mobile scrolling patterns
+- **Form Analytics**: Mobile form completion rates and abandonment
+
+### Cross-Device Tracking
+
+Track users across multiple devices:
+
+```javascript
+// Cross-device user journey example
+const userJourney = {
+  "user_id": "user_12345",
+  "devices": [
+    {
+      "device_type": "mobile",
+      "sessions": 3,
+      "first_seen": "2024-01-15T10:30:00Z",
+      "last_seen": "2024-01-16T14:22:00Z",
+      "conversions": 0
+    },
+    {
+      "device_type": "desktop", 
+      "sessions": 1,
+      "first_seen": "2024-01-16T20:15:00Z",
+      "conversions": 1,
+      "conversion_value": 299.99
+    }
+  ],
+  "total_value": 299.99,
+  "attribution": "mobile_assisted_desktop_conversion"
+};
+```
+
+## Privacy and Compliance
+
+### Privacy-First Analytics
+
+Journium is built with privacy in mind:
+
+- **GDPR Compliant**: Full compliance with European data regulations
+- **CCPA Compliant**: California Consumer Privacy Act compliance
+- **Cookieless Tracking**: Uses privacy-friendly tracking methods
+- **Data Minimization**: Only collect necessary data
+- **User Consent Management**: Respect user privacy preferences
+
+### Data Retention
+
+Control how long data is stored:
+
+```javascript
+// Data retention settings
+const retentionSettings = {
+  "raw_events": "90_days",      // Raw event data
+  "aggregated_data": "2_years", // Processed analytics data
+  "user_profiles": "1_year",    // User identification data
+  "anonymous_data": "indefinite" // Non-PII aggregated data
+};
+```
+
+### Compliance Features
+
+- **Data Deletion**: Right to be forgotten requests
+- **Data Portability**: Export user data on request
+- **Consent Tracking**: Record and respect user consent
+- **Audit Logs**: Track all data access and modifications
+
+## Getting Started with Analytics
+
+### Dashboard Navigation
+
+1. **Login to your Journium dashboard** at [app.journium.com](https://app.journium.com)
+2. **Select your project** from the project dropdown
+3. **Navigate through the main sections**:
+   - Overview: High-level metrics and trends
+   - Users: User behavior and segmentation
+   - Conversions: Goal tracking and funnel analysis  
+   - Performance: Speed and technical metrics
+   - Insights: AI recommendations and predictions
+
+### Setting Up Goals
+
+```javascript
+// Define your conversion goals
+const goals = [
+  {
+    name: "Newsletter Signup",
+    type: "event",
+    event: "newsletter_subscribed",
+    value: 5
+  },
+  {
+    name: "Product Purchase", 
+    type: "event",
+    event: "purchase_completed",
+    value_property: "order_total"
+  },
+  {
+    name: "High Engagement",
+    type: "duration",
+    threshold: 300 // 5 minutes
+  }
+];
+```
+
+### Creating Custom Segments
+
+```javascript
+// Create user segments for analysis
+const segments = [
+  {
+    name: "Premium Users",
+    conditions: [
+      { property: "user_plan", operator: "equals", value: "premium" }
+    ]
+  },
+  {
+    name: "Mobile Users",
+    conditions: [
+      { property: "device_type", operator: "equals", value: "mobile" }
+    ]
+  },
+  {
+    name: "High-Value Customers",
+    conditions: [
+      { property: "lifetime_value", operator: "greater_than", value: 1000 }
+    ]
+  }
+];
+```
+
+## Best Practices
+
+### 1. Start with Core Metrics
+
+Focus on the metrics that matter most to your business:
+
+```javascript
+// Essential metrics to track first
+const coreMetrics = [
+  "conversion_rate",
+  "average_session_duration", 
+  "bounce_rate",
+  "goal_completions",
+  "revenue_per_visitor"
+];
+```
+
+### 2. Set Up Meaningful Goals
+
+Define goals that align with your business objectives:
+
+```javascript
+// ✅ Good goals - specific and measurable
+"email_signup_completed"
+"free_trial_started"
+"purchase_completed"
+"support_ticket_resolved"
+
+// ❌ Avoid vague goals
+"user_engaged"
+"good_experience"
+"positive_interaction"
+```
+
+### 3. Use Segmentation
+
+Analyze different user groups to understand behavior patterns:
+
+- Segment by traffic source (organic, paid, social)
+- Segment by device type (mobile, desktop, tablet)
+- Segment by user lifecycle stage (new, returning, churned)
+- Segment by geographic location
+
+### 4. Regular Review Schedule
+
+Establish a routine for reviewing your analytics:
+
+- **Daily**: Check real-time metrics and alerts
+- **Weekly**: Review conversion performance and trends
+- **Monthly**: Deep dive into user behavior and segments
+- **Quarterly**: Strategic analysis and goal setting
+
+### 5. Act on Insights
+
+Use your analytics data to make informed decisions:
+
+```javascript
+// Example insight-to-action workflow
+const insights = [
+  {
+    insight: "Mobile bounce rate 40% higher than desktop",
+    action: "Optimize mobile page speed and design",
+    expected_outcome: "15-20% reduction in mobile bounce rate"
+  },
+  {
+    insight: "Users from social media have low conversion rate",
+    action: "Create dedicated landing pages for social traffic",
+    expected_outcome: "25% increase in social media conversions"
+  }
+];
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="AI Recommendations" icon="brain" href="/features/recommendations">
+    Explore AI-powered conversion optimization suggestions
+  </Card>
+  <Card title="A/B Testing" icon="flask" href="/features/optimization">
+    Set up experiments to test your optimization ideas
+  </Card>
+</CardGroup>

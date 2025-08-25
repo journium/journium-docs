@@ -1,33 +1,156 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: 'API Reference'
+description: 'Comprehensive reference for Journium SDK methods and REST API endpoints'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Overview
 
-## Welcome
+Journium provides both client-side SDK methods and server-side REST API endpoints to help you integrate conversion tracking and analytics into your applications. This reference covers all available methods, parameters, and response formats.
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+## SDK vs REST API
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+<CardGroup cols={2}>
+  <Card title="Client-Side SDK" icon="js" href="/api-reference/initialization">
+    Use for real-time user tracking, client-side events, and browser-based analytics
+  </Card>
+  <Card title="REST API" icon="cloud" href="/api-reference/rest/authentication">
+    Use for server-side tracking, data export, and backend integrations
+  </Card>
+</CardGroup>
+
+## SDK Methods
+
+The Journium SDK provides the following core methods:
+
+### Tracking Methods
+- `Journium.init()` - Initialize the SDK
+- `Journium.track()` - Track custom events
+- `Journium.page()` - Track page views
+- `Journium.identify()` - Identify users
+- `Journium.updateUser()` - Update user properties
+
+### Utility Methods
+- `Journium.ready()` - Wait for SDK initialization
+- `Journium.reset()` - Clear all data
+- `Journium.getConfig()` - Get current configuration
+- `Journium.isReady()` - Check if SDK is ready
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API requests require authentication using your project's API key. You can find your API key in your [Journium dashboard](https://app.journium.com).
+
+### SDK Authentication
+
+The SDK uses your public API key for client-side tracking:
+
+```javascript
+Journium.init({
+  projectId: 'your-project-id',
+  apiKey: 'your-public-api-key', // Safe to expose in client-side code
+  environment: 'production'
+});
+```
+
+### REST API Authentication
+
+Server-side API requests use your secret API key in the Authorization header:
+
+```bash
+curl -H "Authorization: Bearer your-secret-api-key" \
+     -H "Content-Type: application/json" \
+     https://api.journium.com/v1/events
+```
+
+<Warning>
+Keep your secret API key secure and never expose it in client-side code. Use environment variables to store sensitive keys.
+</Warning>
+
+## Rate Limits
+
+To ensure fair usage and optimal performance, the Journium API implements rate limiting:
+
+- **SDK Events**: 1,000 events per minute per project
+- **REST API**: 100 requests per minute per API key
+- **Bulk Operations**: 10 requests per minute for batch endpoints
+
+Rate limit headers are included in all API responses:
+
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1640995200
+```
+
+## Error Handling
+
+All API endpoints return standard HTTP status codes and error messages:
+
+### Success Codes
+- `200` - OK: Request successful
+- `201` - Created: Resource created successfully
+- `202` - Accepted: Request accepted for processing
+
+### Error Codes
+- `400` - Bad Request: Invalid parameters or request format
+- `401` - Unauthorized: Invalid or missing API key
+- `403` - Forbidden: Insufficient permissions
+- `404` - Not Found: Resource not found
+- `429` - Too Many Requests: Rate limit exceeded
+- `500` - Internal Server Error: Server-side error
+
+### Error Response Format
 
 ```json
-"security": [
-  {
-    "bearerAuth": []
+{
+  "error": {
+    "code": "invalid_request",
+    "message": "The request is missing required parameters",
+    "details": {
+      "missing_fields": ["user_id", "event_name"]
+    }
   }
-]
+}
 ```
+
+## SDKs and Libraries
+
+<CardGroup cols={3}>
+  <Card title="JavaScript" icon="js" href="/installation/javascript">
+    Browser and Node.js SDK
+  </Card>
+  <Card title="React" icon="react" href="/installation/react">
+    React hooks and components
+  </Card>
+  <Card title="Next.js" icon="nextjs" href="/installation/nextjs">
+    Next.js optimized SDK
+  </Card>
+</CardGroup>
+
+## API Versioning
+
+The Journium API uses URL versioning. The current version is `v1`:
+
+```
+https://api.journium.com/v1/
+```
+
+When we release new API versions, previous versions will be supported for at least 12 months to ensure backward compatibility.
+
+## Changelog
+
+Stay updated with the latest API changes:
+
+- **v1.2.0** (2024-01-15): Added bulk event tracking
+- **v1.1.0** (2023-12-01): Enhanced error responses
+- **v1.0.0** (2023-10-15): Initial API release
+
+## Getting Help
+
+<CardGroup cols={2}>
+  <Card title="Support" icon="life-ring" href="mailto:support@journium.com">
+    Contact our support team for API questions
+  </Card>
+  <Card title="Community" icon="users" href="https://community.journium.com">
+    Join our developer community
+  </Card>
+</CardGroup>

@@ -9,10 +9,10 @@ description: 'Preview changes locally to update your docs'
   - A docs repository with a `docs.json` file
 </Info>
 
-Follow these steps to install and run Mintlify on your operating system.
+Follow these steps to install and run the documentation development server on your operating system.
 
 <Steps>
-<Step title="Install the Mintlify CLI">
+<Step title="Install the Documentation CLI">
 
 ```bash
 npm i -g mint
@@ -34,21 +34,21 @@ A local preview of your documentation will be available at `http://localhost:300
 
 ## Custom ports
 
-By default, Mintlify uses port 3000. You can customize the port Mintlify runs on by using the `--port` flag. For example, to run Mintlify on port 3333, use this command:
+By default, the documentation server uses port 3000. You can customize the port by using the `--port` flag. For example, to run on port 3333, use this command:
 
 ```bash
 mint dev --port 3333
 ```
 
-If you attempt to run Mintlify on a port that's already in use, it will use the next available port:
+If you attempt to run on a port that's already in use, it will use the next available port:
 
 ```md
 Port 3000 is already in use. Trying 3001 instead.
 ```
 
-## Mintlify versions
+## CLI versions
 
-Please note that each CLI release is associated with a specific version of Mintlify. If your local preview does not align with the production version, please update the CLI:
+Please note that each CLI release is associated with a specific version of the documentation system. If your local preview does not align with the production version, please update the CLI:
 
 ```bash
 npm mint update
@@ -91,4 +91,4 @@ We suggest using extensions on your IDE to recognize and format MDX. If you're a
   </Accordion>
 </AccordionGroup>
 
-Curious about what changed in the latest CLI version? Check out the [CLI changelog](https://www.npmjs.com/package/mintlify?activeTab=versions).
+Curious about what changed in the latest CLI version? Check out the [CLI changelog](https://www.npmjs.com/package/mint?activeTab=versions).

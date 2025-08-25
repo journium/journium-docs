@@ -1,0 +1,688 @@
+---
+title: "React Integration"
+description: "Integrate Journium into your React applications with hooks and components"
+---
+
+## Overview
+
+The Journium React SDK provides React-specific components, hooks, and utilities to seamlessly integrate conversion tracking into your React applications. It works with React 16.8+ and supports both functional and class components.
+
+## Installation
+
+Install the React SDK via npm:
+
+```bash
+npm install @journium/react
+```
+
+## Basic Setup
+
+### 1. Wrap Your App with JourniumProvider
+
+```jsx
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { JourniumProvider } from '@journium/react';
+import App from './App';
+
+ReactDOM.render(
+  <JourniumProvider
+    projectId="your-project-id"
+    apiKey="your-api-key"
+    environment="production" // or 'development'
+    config={{
+      trackPageViews: true,
+      trackClicks: true,
+      trackScrolling: true,
+      enableRecommendations: true
+    }}
+  >
+    <App />
+  </JourniumProvider>,
+  document.getElementById('root')
+);
+```
+
+### 2. Use Journium in Components
+
+```jsx
+import React from 'react';
+import { useJournium } from '@journium/react';
+
+function MyComponent() {
+  const { track, identify, isReady } = useJournium();
+
+  const handleButtonClick = () => {
+    track('button_clicked', {
+      button_text: 'Get Started',
+      component: 'hero_section',
+      user_type: 'visitor'
+    });
+  };
+
+  if (!isReady) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+      <button onClick={handleButtonClick}>
+        Get Started
+      </button>
+    </div>
+  );
+}
+```
+
+## Configuration Options
+
+### JourniumProvider Props
+
+```jsx
+<JourniumProvider
+  projectId="your-project-id"        // Required
+  apiKey="your-api-key"              // Required
+  environment="production"           // Required: 'development' | 'production'
+  
+  // Optional configuration
+  config={{
+    // Tracking settings
+    trackPageViews: true,            // Auto-track page views
+    trackClicks: true,               // Auto-track click events
+    trackScrolling: true,            // Track scroll depth
+    trackFormSubmissions: true,      // Track form interactions
+    
+    // React-specific settings
+    trackRouteChanges: true,         // Auto-track route changes
+    trackComponentErrors: true,      // Track React error boundaries
+    
+    // Performance settings
+    trackRenderTimes: true,          // Track component render times
+    batchSize: 10,                   // Events batch size
+    flushInterval: 5000,             // Flush interval in ms
+    
+    // Debug mode
+    debugMode: false
+  }}
+  
+  // Optional user data
+  user={{
+    id: 'user_123',
+    email: 'user@example.com',
+    name: 'John Doe'
+  }}
+  
+  // Optional loading component
+  loadingComponent={<div>Loading Journium...</div>}
+  
+  // Optional error boundary
+  onError={(error) => console.error('Journium error:', error)}
+>
+  <App />
+</JourniumProvider>
+```
+
+## Hooks
+
+### useJournium Hook
+
+The main hook for interacting with Journium:
+
+```jsx
+import { useJournium } from '@journium/react';
+
+function MyComponent() {
+  const {
+    track,          // Function to track custom events
+    identify,       // Function to identify users
+    page,          // Function to track page views
+    updateUser,    // Function to update user properties
+    isReady,       // Boolean indicating if Journium is loaded
+    isLoading,     // Boolean indicating loading state
+    error          // Error object if initialization failed
+  } = useJournium();
+
+  // Track an event
+  const handlePurchase = (product) => {
+    track('purchase', {
+      product_id: product.id,
+      amount: product.price,
+      currency: 'USD'
+    });
+  };
+
+  // Identify a user
+  const handleLogin = (user) => {
+    identify(user.id, {
+      email: user.email,
+      name: user.name,
+      plan: user.plan
+    });
+  };
+
+  return (
+    <div>
+      {isReady ? (
+        <button onClick={() => handlePurchase(product)}>
+          Buy Now
+        </button>
+      ) : (
+        <span>Loading...</span>
+      )}
+    </div>
+  );
+}
+```
+
+### useJourniumEvent Hook
+
+A convenient hook for tracking events with automatic cleanup:
+
+```jsx
+import { useJourniumEvent } from '@journium/react';
+
+function ProductCard({ product }) {
+  // Track when component mounts
+  useJourniumEvent('product_viewed', {
+    product_id: product.id,
+    product_name: product.name,
+    price: product.price
+  }, [product.id]); // Dependencies array
+
+  return <div>{product.name}</div>;
+}
+```
+
+### useJourniumUser Hook
+
+Hook for user identification and management:
+
+```jsx
+import { useJourniumUser } from '@journium/react';
+
+function UserProfile() {
+  const { user, identify, updateUser, logout } = useJourniumUser();
+
+  const handleProfileUpdate = (newData) => {
+    updateUser(newData);
+  };
+
+  const handleLogout = () => {
+    logout(); // Clears user identification
+  };
+
+  return (
+    <div>
+      <p>Current user: {user?.name}</p>
+      <button onClick={handleLogout}>Logout</button>
+    </div>
+  );
+}
+```
+
+## Components
+
+### JourniumTracker Component
+
+A declarative component for tracking events:
+
+```jsx
+import { JourniumTracker } from '@journium/react';
+
+function ProductList({ products }) {
+  return (
+    <div>
+      <JourniumTracker
+        event="page_viewed"
+        properties={{
+          page_name: 'product_list',
+          product_count: products.length
+        }}
+      />
+      
+      {products.map(product => (
+        <JourniumTracker
+          key={product.id}
+          event="product_impression"
+          properties={{
+            product_id: product.id,
+            product_name: product.name,
+            position: products.indexOf(product)
+          }}
+        >
+          <ProductCard product={product} />
+        </JourniumTracker>
+      ))}
+    </div>
+  );
+}
+```
+
+### JourniumClick Component
+
+Automatically track click events:
+
+```jsx
+import { JourniumClick } from '@journium/react';
+
+function CallToAction() {
+  return (
+    <JourniumClick
+      event="cta_clicked"
+      properties={{
+        cta_text: 'Start Free Trial',
+        location: 'hero_section'
+      }}
+    >
+      <button className="cta-button">
+        Start Free Trial
+      </button>
+    </JourniumClick>
+  );
+}
+```
+
+### JourniumForm Component
+
+Track form interactions and submissions:
+
+```jsx
+import { JourniumForm } from '@journium/react';
+
+function SignupForm() {
+  return (
+    <JourniumForm
+      trackSubmission={true}
+      trackFieldInteractions={true}
+      formName="signup_form"
+      onSubmit={(formData, track) => {
+        // Custom submission logic
+        track('signup_attempted', {
+          form_data: formData,
+          timestamp: new Date()
+        });
+      }}
+    >
+      <input name="email" type="email" placeholder="Email" />
+      <input name="password" type="password" placeholder="Password" />
+      <button type="submit">Sign Up</button>
+    </JourniumForm>
+  );
+}
+```
+
+## Route Tracking
+
+### Automatic Route Tracking
+
+Works automatically with React Router:
+
+```jsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { JourniumProvider } from '@journium/react';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <JourniumProvider
+        projectId="your-project-id"
+        apiKey="your-api-key"
+        environment="production"
+        config={{
+          trackRouteChanges: true, // Automatically track route changes
+        }}
+      >
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+      </JourniumProvider>
+    </BrowserRouter>
+  );
+}
+```
+
+### Manual Route Tracking
+
+For custom routing solutions:
+
+```jsx
+import { useJournium } from '@journium/react';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+
+function RouteTracker() {
+  const { page } = useJournium();
+  const location = useLocation();
+
+  useEffect(() => {
+    page(location.pathname, {
+      page_title: document.title,
+      referrer: document.referrer,
+      search_params: location.search
+    });
+  }, [location, page]);
+
+  return null;
+}
+
+// Use in your app
+function App() {
+  return (
+    <BrowserRouter>
+      <JourniumProvider {...journiumConfig}>
+        <RouteTracker />
+        {/* Your routes */}
+      </JourniumProvider>
+    </BrowserRouter>
+  );
+}
+```
+
+## Performance Tracking
+
+### Component Render Time Tracking
+
+```jsx
+import { useJourniumPerformance } from '@journium/react';
+
+function ExpensiveComponent({ data }) {
+  const { startTimer, endTimer } = useJourniumPerformance();
+
+  useEffect(() => {
+    const timerId = startTimer('expensive_component_render');
+    
+    // Simulate expensive operation
+    processLargeDataset(data);
+    
+    endTimer(timerId, {
+      component: 'ExpensiveComponent',
+      data_size: data.length
+    });
+  }, [data, startTimer, endTimer]);
+
+  return <div>{/* Rendered content */}</div>;
+}
+```
+
+### Automatic Performance Tracking
+
+```jsx
+import { withJourniumPerformance } from '@journium/react';
+
+// HOC for automatic performance tracking
+const TrackedComponent = withJourniumPerformance(MyComponent, {
+  trackRenderTime: true,
+  trackPropsChanges: true,
+  componentName: 'MyComponent'
+});
+```
+
+## Error Tracking
+
+### Error Boundary Integration
+
+```jsx
+import { JourniumErrorBoundary } from '@journium/react';
+
+function App() {
+  return (
+    <JourniumProvider {...config}>
+      <JourniumErrorBoundary
+        fallback={<div>Something went wrong</div>}
+        onError={(error, errorInfo) => {
+          console.error('React error caught:', error, errorInfo);
+        }}
+      >
+        <MyApp />
+      </JourniumErrorBoundary>
+    </JourniumProvider>
+  );
+}
+```
+
+### Manual Error Tracking
+
+```jsx
+import { useJournium } from '@journium/react';
+
+function MyComponent() {
+  const { track } = useJournium();
+
+  const handleAsyncOperation = async () => {
+    try {
+      await riskyAsyncOperation();
+    } catch (error) {
+      track('component_error', {
+        error_message: error.message,
+        component_name: 'MyComponent',
+        error_stack: error.stack,
+        timestamp: new Date().toISOString()
+      });
+      throw error; // Re-throw if needed
+    }
+  };
+
+  return <button onClick={handleAsyncOperation}>Do Something</button>;
+}
+```
+
+## TypeScript Support
+
+Full TypeScript definitions are included:
+
+```tsx
+import { JourniumProvider, useJournium } from '@journium/react';
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+}
+
+interface CustomEventData {
+  product_id: string;
+  amount: number;
+  currency: string;
+}
+
+function TypedComponent() {
+  const { track, identify } = useJournium();
+
+  const handlePurchase = (eventData: CustomEventData) => {
+    track('purchase', eventData);
+  };
+
+  const handleUserIdentify = (user: User) => {
+    identify(user.id, user);
+  };
+
+  return <div>Typed component</div>;
+}
+```
+
+## Best Practices
+
+### 1. Provider Placement
+
+Place the JourniumProvider as high as possible in your component tree:
+
+```jsx
+// ✅ Good
+function App() {
+  return (
+    <JourniumProvider {...config}>
+      <Router>
+        <Routes>
+          {/* Your routes */}
+        </Routes>
+      </Router>
+    </JourniumProvider>
+  );
+}
+
+// ❌ Avoid
+function App() {
+  return (
+    <Router>
+      <JourniumProvider {...config}>
+        <Routes>
+          {/* Your routes */}
+        </Routes>
+      </JourniumProvider>
+    </Router>
+  );
+}
+```
+
+### 2. Conditional Tracking
+
+```jsx
+function MyComponent() {
+  const { track, isReady } = useJournium();
+
+  const handleClick = () => {
+    if (isReady) {
+      track('button_clicked', { button_id: 'my-button' });
+    }
+    // Continue with your click handler logic
+  };
+
+  return <button onClick={handleClick}>Click me</button>;
+}
+```
+
+### 3. Environment-Specific Configuration
+
+```jsx
+const journiumConfig = {
+  projectId: process.env.REACT_APP_JOURNIUM_PROJECT_ID,
+  apiKey: process.env.REACT_APP_JOURNIUM_API_KEY,
+  environment: process.env.NODE_ENV === 'production' ? 'production' : 'development',
+  config: {
+    debugMode: process.env.NODE_ENV === 'development',
+    trackPageViews: true,
+    trackRouteChanges: true
+  }
+};
+
+function App() {
+  return (
+    <JourniumProvider {...journiumConfig}>
+      <MyApp />
+    </JourniumProvider>
+  );
+}
+```
+
+### 4. Memoization for Performance
+
+```jsx
+import { useMemo } from 'react';
+import { useJournium } from '@journium/react';
+
+function ProductCard({ product }) {
+  const { track } = useJournium();
+
+  const trackProductView = useMemo(() => {
+    return () => track('product_viewed', {
+      product_id: product.id,
+      product_name: product.name
+    });
+  }, [track, product.id, product.name]);
+
+  useEffect(() => {
+    trackProductView();
+  }, [trackProductView]);
+
+  return <div>{product.name}</div>;
+}
+```
+
+## Advanced Usage
+
+### Custom Context Provider
+
+```jsx
+import { createContext, useContext } from 'react';
+import { useJournium } from '@journium/react';
+
+const AnalyticsContext = createContext();
+
+function AnalyticsProvider({ children }) {
+  const journium = useJournium();
+  
+  const customTrack = (event, properties = {}) => {
+    journium.track(event, {
+      ...properties,
+      app_version: '1.0.0',
+      timestamp: Date.now()
+    });
+  };
+
+  return (
+    <AnalyticsContext.Provider value={{ ...journium, customTrack }}>
+      {children}
+    </AnalyticsContext.Provider>
+  );
+}
+
+// Custom hook
+function useAnalytics() {
+  return useContext(AnalyticsContext);
+}
+```
+
+### Dynamic Configuration
+
+```jsx
+import { useState, useEffect } from 'react';
+import { JourniumProvider } from '@journium/react';
+
+function App() {
+  const [config, setConfig] = useState(null);
+
+  useEffect(() => {
+    // Load configuration dynamically
+    loadJourniumConfig().then(setConfig);
+  }, []);
+
+  if (!config) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <JourniumProvider {...config}>
+      <MyApp />
+    </JourniumProvider>
+  );
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Hook called outside of provider**
+- Ensure all components using Journium hooks are wrapped in JourniumProvider
+
+**Events not tracking in development**
+- Check that you're using the correct environment setting
+- Verify your development project ID and API key
+
+**Performance concerns**
+- Use React DevTools Profiler to identify unnecessary re-renders
+- Memoize event tracking functions when appropriate
+- Consider batching events for high-frequency interactions
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Advanced Configuration" icon="cog" href="/configuration/setup">
+    Learn advanced configuration options for React apps
+  </Card>
+  <Card title="Custom Events" icon="cursor-click" href="/configuration/events">
+    Set up custom event tracking for your components
+  </Card>
+</CardGroup>

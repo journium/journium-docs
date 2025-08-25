@@ -1,0 +1,917 @@
+---
+title: "Frequently Asked Questions"
+description: "Quick answers to common questions about Journium integration and usage"
+---
+
+## General Questions
+
+<AccordionGroup>
+  <Accordion title="What is Journium and how does it work?" icon="info-circle">
+    Journium is a conversion optimization platform that helps small businesses improve their website's performance. It works by:
+    
+    1. **Tracking user behavior** - Monitoring how users interact with your website
+    2. **Analyzing patterns** - Using AI to identify optimization opportunities
+    3. **Providing recommendations** - Suggesting specific changes to improve conversions
+    4. **Testing improvements** - Running A/B tests to validate changes
+    
+    The platform combines real-time analytics, AI-powered insights, and easy-to-use A/B testing tools.
+  </Accordion>
+  
+  <Accordion title="How is Journium different from Google Analytics?" icon="chart-line">
+    While Google Analytics focuses on comprehensive web analytics, Journium specifically targets conversion optimization:
+    
+    | Feature | Google Analytics | Journium |
+    |---------|------------------|-----------|
+    | **Focus** | General analytics | Conversion optimization |
+    | **AI Recommendations** | Limited | Core feature |
+    | **A/B Testing** | Via Optimize (deprecated) | Built-in |
+    | **Small Business Focus** | General purpose | Specifically designed |
+    | **Implementation** | Complex setup | Quick integration |
+    | **Actionable Insights** | Requires expertise | Automatic recommendations |
+    
+    Journium complements Google Analytics by providing actionable insights for improving conversion rates.
+  </Accordion>
+  
+  <Accordion title="Is Journium GDPR and CCPA compliant?" icon="shield-check">
+    Yes, Journium is built with privacy compliance in mind:
+    
+    **GDPR Compliance:**
+    - Data minimization by design
+    - User consent management
+    - Right to be forgotten (data deletion)
+    - Data portability
+    - Data protection by default
+    
+    **CCPA Compliance:**
+    - Transparency about data collection
+    - Opt-out mechanisms
+    - No sale of personal information
+    - Data deletion rights
+    
+    **Technical Measures:**
+    - IP anonymization
+    - Cookieless tracking options
+    - Encrypted data transmission
+    - Secure data storage
+    - Regular security audits
+    
+    You can configure Journium to respect user privacy preferences and comply with applicable regulations.
+  </Accordion>
+</AccordionGroup>
+
+## Installation & Setup
+
+<AccordionGroup>
+  <Accordion title="How long does it take to set up Journium?" icon="clock">
+    **Quick Setup (5-10 minutes):**
+    - CDN script integration
+    - Basic configuration
+    - Start tracking immediately
+    
+    **Full Setup (30-60 minutes):**
+    - NPM package installation
+    - Custom event configuration
+    - Goal setup
+    - Team member access
+    
+    **Enterprise Setup (1-2 hours):**
+    - Advanced configuration
+    - Custom integrations
+    - A/B testing setup
+    - Training and onboarding
+    
+    Most users can start getting insights within 10 minutes of signup.
+  </Accordion>
+  
+  <Accordion title="Do I need to install Journium on every page?" icon="globe">
+    **Single Installation:**
+    Install Journium once in your site's header or main layout template, and it will automatically track across all pages.
+    
+    **CDN Installation:**
+    ```html
+    <!-- Add to your main template/layout -->
+    <head>
+      <script src="https://cdn.journium.com/sdk/v1/journium.min.js"></script>
+      <script>
+        Journium.init({
+          projectId: 'your-project-id',
+          apiKey: 'your-api-key',
+          environment: 'production'
+        });
+      </script>
+    </head>
+    ```
+    
+    **React/Next.js:**
+    Add the provider at your app root and it covers all child components.
+    
+    **SPA Considerations:**
+    For single-page applications, ensure the SDK is initialized before route changes occur.
+  </Accordion>
+  
+  <Accordion title="Can I use Journium with my existing analytics tools?" icon="tools">
+    Yes! Journium is designed to complement your existing analytics stack:
+    
+    **Compatible With:**
+    - Google Analytics (GA4, Universal Analytics)
+    - Adobe Analytics
+    - Mixpanel, Amplitude, Segment
+    - Custom analytics solutions
+    - Tag management systems (GTM, Adobe Launch)
+    
+    **Integration Benefits:**
+    - Cross-validate data between platforms
+    - Use Journium's AI insights with your existing data
+    - Maintain existing reporting workflows
+    - Add conversion optimization to your analytics stack
+    
+    **No Conflicts:**
+    - Separate tracking infrastructure
+    - Minimal performance impact
+    - Independent data processing
+  </Accordion>
+  
+  <Accordion title="What's the difference between development and production environments?" icon="code">
+    **Development Environment:**
+    - Used for testing and development
+    - Separate data from production
+    - Debug mode available
+    - Less strict rate limiting
+    - Events marked as test data
+    
+    **Production Environment:**
+    - Live website tracking
+    - Real user data
+    - Optimized performance
+    - Normal rate limits
+    - Data used for business decisions
+    
+    **Best Practice:**
+    ```javascript
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    
+    Journium.init({
+      projectId: isDevelopment ? 'proj_dev_123' : 'proj_prod_456',
+      apiKey: isDevelopment ? 'pk_test_abc' : 'pk_live_xyz',
+      environment: isDevelopment ? 'development' : 'production',
+      config: {
+        debugMode: isDevelopment
+      }
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Features & Functionality
+
+<AccordionGroup>
+  <Accordion title="What types of recommendations does Journium provide?" icon="lightbulb">
+    **Categories of Recommendations:**
+    
+    **High-Impact Quick Wins:**
+    - CTA button optimization (color, text, placement)
+    - Trust signal additions
+    - Form field reduction
+    - Page load speed improvements
+    
+    **UX & Design Improvements:**
+    - Navigation simplification
+    - Mobile optimization
+    - Layout restructuring
+    - Content prioritization
+    
+    **Conversion Flow Optimization:**
+    - Checkout process improvements
+    - Funnel drop-off reduction
+    - Form completion optimization
+    - Payment process streamlining
+    
+    **Content & Messaging:**
+    - Headline optimization
+    - Value proposition clarification
+    - Social proof integration
+    - Copy improvements
+    
+    **Technical Performance:**
+    - Core Web Vitals optimization
+    - Image loading improvements
+    - JavaScript optimization
+    - Mobile performance enhancements
+    
+    Each recommendation includes:
+    - Expected impact estimate
+    - Implementation difficulty
+    - Step-by-step guidance
+    - A/B testing setup
+  </Accordion>
+  
+  <Accordion title="How accurate are the AI recommendations?" icon="brain">
+    **Accuracy Factors:**
+    
+    **Data Quality (85-95% accuracy with sufficient data):**
+    - Minimum 1,000 monthly visitors for reliable recommendations
+    - At least 100 conversions per month for conversion-focused suggestions
+    - 2+ weeks of data collection for pattern recognition
+    
+    **Recommendation Types:**
+    - **Technical improvements**: 90-95% accuracy (measurable metrics)
+    - **UX enhancements**: 80-90% accuracy (some subjectivity)
+    - **Content/copy changes**: 70-85% accuracy (audience-dependent)
+    
+    **Confidence Scoring:**
+    - Each recommendation includes a confidence score (0-100%)
+    - Higher confidence = more data supporting the recommendation
+    - Lower confidence = suggestion based on industry patterns
+    
+    **Validation Process:**
+    - All recommendations should be A/B tested before full implementation
+    - Journium tracks implementation results to improve future accuracy
+    - Success rates vary by industry and audience
+  </Accordion>
+  
+  <Accordion title="Can I run multiple A/B tests simultaneously?" icon="flask">
+    **Yes, but with important considerations:**
+    
+    **Best Practices:**
+    - Test different page elements (not overlapping)
+    - Avoid testing competing hypotheses
+    - Ensure sufficient traffic for each test
+    - Monitor for interaction effects
+    
+    **Safe Combinations:**
+    ```javascript
+    // ✅ Good: Different pages/elements
+    Test 1: Homepage headline
+    Test 2: Product page CTA button
+    Test 3: Checkout form fields
+    
+    // ❌ Avoid: Same element or competing changes
+    Test 1: Homepage CTA button color
+    Test 2: Homepage CTA button text
+    Test 3: Homepage CTA button placement
+    ```
+    
+    **Traffic Requirements:**
+    - Each test needs sufficient traffic for statistical significance
+    - Running 3 tests simultaneously requires ~3x more traffic
+    - Consider sequential testing for lower-traffic sites
+    
+    **Journium automatically:**
+    - Prevents overlapping tests on same elements
+    - Calculates required traffic for multiple tests
+    - Suggests optimal testing schedule
+  </Accordion>
+  
+  <Accordion title="How long should I run an A/B test?" icon="stopwatch">
+    **Minimum Requirements:**
+    - **Duration**: At least 1 week (preferably 2 weeks)
+    - **Sample Size**: Minimum 1,000 visitors per variant
+    - **Conversions**: At least 100 conversions per variant
+    - **Statistical Significance**: 95% confidence level
+    
+    **Factors Affecting Duration:**
+    
+    **Traffic Volume:**
+    - High traffic (>10k/day): 1-2 weeks
+    - Medium traffic (1-10k/day): 2-4 weeks  
+    - Low traffic (<1k/day): 4-8 weeks
+    
+    **Conversion Rate:**
+    - Higher conversion rates = faster results
+    - Lower conversion rates = longer testing needed
+    
+    **Effect Size:**
+    - Large improvements (>20%) = detected faster
+    - Small improvements (<10%) = longer testing needed
+    
+    **Business Cycles:**
+    - Include full business cycles (weekly patterns)
+    - Avoid holiday periods or unusual events
+    - Account for seasonal variations
+    
+    **Journium provides:**
+    - Automatic duration estimates
+    - Progress tracking
+    - Early stopping recommendations
+    - Statistical significance monitoring
+  </Accordion>
+</AccordionGroup>
+
+## Data & Privacy
+
+<AccordionGroup>
+  <Accordion title="What data does Journium collect?" icon="database">
+    **Automatically Collected Data:**
+    
+    **Page & Session Data:**
+    - Page URLs and titles
+    - Referrer information
+    - Session duration and page views
+    - Device type and screen resolution
+    - Browser and operating system
+    
+    **Interaction Data:**
+    - Click events on buttons and links
+    - Form interactions and submissions
+    - Scroll depth and engagement
+    - Time spent on page elements
+    
+    **Performance Data:**
+    - Page load times
+    - Core Web Vitals metrics
+    - JavaScript error rates
+    - Network performance
+    
+    **Geographic Data:**
+    - Country and region (IP-based)
+    - Timezone information
+    - Language preferences
+    
+    **Custom Event Data:**
+    - Events you explicitly track
+    - Custom properties you define
+    - User identification data you provide
+    
+    **NOT Collected:**
+    - Personal information (unless you provide it)
+    - Form field contents (unless configured)
+    - Sensitive data (passwords, payment info)
+    - Keystroke logging
+    - Screen recordings (unless explicitly enabled)
+  </Accordion>
+  
+  <Accordion title="How long is data stored?" icon="archive">
+    **Default Retention Periods:**
+    
+    **Raw Event Data:**
+    - Development environment: 30 days
+    - Production environment: 90 days
+    
+    **Aggregated Analytics Data:**
+    - Summary reports: 2 years
+    - Monthly/quarterly reports: 5 years
+    - Anonymized trends: Indefinitely
+    
+    **User Profile Data:**
+    - Active users: 1 year after last activity
+    - Deleted accounts: 30 days (then purged)
+    
+    **Custom Retention:**
+    - Enterprise plans can configure custom retention periods
+    - Shorter retention available for compliance requirements
+    - Data export available before deletion
+    
+    **Data Deletion:**
+    - Automatic deletion after retention period
+    - Manual deletion available on request
+    - GDPR/CCPA deletion within 30 days
+    - Secure deletion with audit trail
+  </Accordion>
+  
+  <Accordion title="Can users opt out of tracking?" icon="user-slash">
+    **Yes, multiple opt-out mechanisms are available:**
+    
+    **Browser-Based Opt-Out:**
+    ```javascript
+    // Respect Do Not Track header
+    Journium.init({
+      // ... config
+      config: {
+        respectDoNotTrack: true
+      }
+    });
+    
+    // Check user preference
+    if (navigator.doNotTrack === '1') {
+      // Don't initialize tracking
+    }
+    ```
+    
+    **Custom Opt-Out:**
+    ```javascript
+    // Provide opt-out mechanism
+    function handleUserOptOut() {
+      Journium.optOut();
+      localStorage.setItem('journium_opted_out', 'true');
+    }
+    
+    // Check opt-out status before initializing
+    if (!localStorage.getItem('journium_opted_out')) {
+      Journium.init(config);
+    }
+    ```
+    
+    **Consent Management:**
+    ```javascript
+    // Wait for user consent
+    function initWithConsent() {
+      showConsentBanner().then(consent => {
+        if (consent.analytics) {
+          Journium.init(config);
+        }
+      });
+    }
+    ```
+    
+    **Per-Feature Opt-Out:**
+    - Users can opt out of specific tracking features
+    - Granular consent for different data types
+    - Easy opt-out links in privacy policy
+  </Accordion>
+  
+  <Accordion title="Is my data secure?" icon="lock">
+    **Security Measures:**
+    
+    **Data Transmission:**
+    - TLS 1.3 encryption for all data in transit
+    - Certificate pinning for API connections
+    - Secure WebSocket connections for real-time data
+    
+    **Data Storage:**
+    - AES-256 encryption for data at rest
+    - Encrypted database storage
+    - Regular security backups
+    
+    **Infrastructure Security:**
+    - AWS/GCP enterprise-grade security
+    - Regular security audits and penetration testing
+    - SOC 2 Type II compliance
+    - ISO 27001 certified data centers
+    
+    **Access Controls:**
+    - Multi-factor authentication required
+    - Role-based access control (RBAC)
+    - Regular access reviews
+    - Audit logs for all data access
+    
+    **Privacy by Design:**
+    - Data minimization
+    - Purpose limitation
+    - IP anonymization
+    - Pseudonymization of user identifiers
+    
+    **Incident Response:**
+    - 24/7 security monitoring
+    - Automated threat detection
+    - Incident response procedures
+    - Customer notification within 24 hours
+  </Accordion>
+</AccordionGroup>
+
+## Technical Questions
+
+<AccordionGroup>
+  <Accordion title="Does Journium slow down my website?" icon="tachometer-alt">
+    **Performance Impact:**
+    
+    **Minimal Impact:**
+    - SDK size: ~15KB gzipped
+    - Async loading: No blocking of page rendering
+    - CDN delivery: Fast global distribution
+    - Resource optimized: Minimal CPU/memory usage
+    
+    **Benchmarks:**
+    - Page load impact: <50ms additional load time
+    - Runtime impact: <1% CPU usage
+    - Memory footprint: <2MB RAM
+    - Network usage: <10KB per session
+    
+    **Optimization Features:**
+    - Event batching reduces network requests
+    - Smart sampling for high-traffic sites  
+    - Lazy loading of non-critical features
+    - Automatic performance monitoring
+    
+    **Best Practices:**
+    ```javascript
+    // Async loading
+    <script async src="https://cdn.journium.com/sdk/v1/journium.min.js"></script>
+    
+    // Optimized configuration
+    Journium.init({
+      // ... config
+      config: {
+        batchSize: 50,           // Larger batches
+        flushInterval: 10000,    // Less frequent sends
+        sampleRate: 0.1          // Sample 10% for high traffic
+      }
+    });
+    ```
+    
+    **Monitoring:**
+    - Built-in performance monitoring
+    - Core Web Vitals tracking
+    - Performance recommendations
+  </Accordion>
+  
+  <Accordion title="What browsers does Journium support?" icon="browser">
+    **Supported Browsers:**
+    
+    **Modern Browsers (Full Support):**
+    - Chrome 60+
+    - Firefox 55+
+    - Safari 12+
+    - Edge 79+
+    - Opera 47+
+    
+    **Mobile Browsers:**
+    - Chrome Mobile 60+
+    - Safari iOS 12+
+    - Samsung Internet 8+
+    - Firefox Mobile 55+
+    
+    **Legacy Support (Basic Features):**
+    - Internet Explorer 11 (with polyfills)
+    - Older Safari versions (limited functionality)
+    
+    **Required Features:**
+    - JavaScript ES5 support
+    - JSON parsing
+    - XMLHttpRequest or fetch API
+    - localStorage (optional, graceful fallback)
+    
+    **Graceful Degradation:**
+    ```javascript
+    // Check browser support
+    const isSupported = () => {
+      return !!(
+        window.JSON &&
+        (window.fetch || window.XMLHttpRequest) &&
+        window.addEventListener
+      );
+    };
+    
+    if (isSupported()) {
+      Journium.init(config);
+    } else {
+      // Fallback tracking or disable
+      console.warn('Browser not fully supported');
+    }
+    ```
+    
+    **Polyfills Available:**
+    - Fetch API for older browsers
+    - Promise support for IE11
+    - Object.assign for legacy support
+  </Accordion>
+  
+  <Accordion title="Can I use Journium with Content Security Policy (CSP)?" icon="shield-alt">
+    **CSP Configuration:**
+    
+    **Required Directives:**
+    ```html
+    <!-- Minimum CSP for Journium -->
+    <meta http-equiv="Content-Security-Policy" 
+          content="
+            script-src 'self' https://cdn.journium.com;
+            connect-src 'self' https://api.journium.com https://events.journium.com;
+            img-src 'self' https://cdn.journium.com data:;
+          ">
+    ```
+    
+    **Full CSP Example:**
+    ```html
+    <meta http-equiv="Content-Security-Policy" 
+          content="
+            default-src 'self';
+            script-src 'self' https://cdn.journium.com;
+            connect-src 'self' https://api.journium.com https://events.journium.com wss://realtime.journium.com;
+            img-src 'self' https://cdn.journium.com data: blob:;
+            style-src 'self' 'unsafe-inline';
+            font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com;
+          ">
+    ```
+    
+    **Nonce Support:**
+    ```html
+    <!-- Generate nonce server-side -->
+    <script nonce="{{ csp_nonce }}" src="https://cdn.journium.com/sdk/v1/journium.min.js"></script>
+    <script nonce="{{ csp_nonce }}">
+      Journium.init({ ... });
+    </script>
+    ```
+    
+    **Hash Support:**
+    ```html
+    <!-- For inline scripts -->
+    <meta http-equiv="Content-Security-Policy" 
+          content="script-src 'self' 'sha256-[hash-of-inline-script]' https://cdn.journium.com">
+    ```
+  </Accordion>
+  
+  <Accordion title="How do I integrate Journium with my CI/CD pipeline?" icon="code-branch">
+    **Development Workflow:**
+    
+    **Environment Variables:**
+    ```bash
+    # .env.development
+    JOURNIUM_PROJECT_ID=proj_dev_123
+    JOURNIUM_API_KEY=pk_test_abc123
+    JOURNIUM_ENVIRONMENT=development
+    
+    # .env.production  
+    JOURNIUM_PROJECT_ID=proj_prod_456
+    JOURNIUM_API_KEY=pk_live_xyz789
+    JOURNIUM_ENVIRONMENT=production
+    ```
+    
+    **Build Scripts:**
+    ```json
+    // package.json
+    {
+      "scripts": {
+        "build:dev": "JOURNIUM_ENVIRONMENT=development npm run build",
+        "build:prod": "JOURNIUM_ENVIRONMENT=production npm run build",
+        "test:analytics": "npm run test -- --grep 'analytics'"
+      }
+    }
+    ```
+    
+    **GitHub Actions Example:**
+    ```yaml
+    # .github/workflows/deploy.yml
+    name: Deploy
+    on:
+      push:
+        branches: [main]
+    
+    jobs:
+      deploy:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v2
+          
+          - name: Set up Node.js
+            uses: actions/setup-node@v2
+            with:
+              node-version: '18'
+              
+          - name: Install dependencies
+            run: npm ci
+            
+          - name: Run tests
+            run: npm test
+            
+          - name: Build for production
+            run: npm run build:prod
+            env:
+              JOURNIUM_PROJECT_ID: ${{ secrets.JOURNIUM_PROJECT_ID }}
+              JOURNIUM_API_KEY: ${{ secrets.JOURNIUM_API_KEY }}
+              
+          - name: Deploy
+            run: npm run deploy
+    ```
+    
+    **Testing Integration:**
+    ```javascript
+    // Test analytics implementation
+    describe('Analytics Integration', () => {
+      it('should initialize Journium correctly', () => {
+        expect(window.Journium).toBeDefined();
+        expect(Journium.isReady()).toBe(true);
+      });
+      
+      it('should track page views', () => {
+        const spy = jest.spyOn(Journium, 'track');
+        // Navigate to page
+        expect(spy).toHaveBeenCalledWith('page_viewed', expect.any(Object));
+      });
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Pricing & Plans
+
+<AccordionGroup>
+  <Accordion title="What pricing plans are available?" icon="dollar-sign">
+    **Starter Plan (Free):**
+    - Up to 10,000 monthly page views
+    - Basic analytics and recommendations
+    - 1 A/B test at a time
+    - Email support
+    - 30-day data retention
+    
+    **Growth Plan ($49/month):**
+    - Up to 100,000 monthly page views
+    - Advanced AI recommendations
+    - Unlimited A/B tests
+    - Priority support
+    - 90-day data retention
+    - Custom events and goals
+    
+    **Business Plan ($149/month):**
+    - Up to 500,000 monthly page views
+    - Advanced analytics and segmentation
+    - Multi-variant testing
+    - API access
+    - 1-year data retention
+    - Team collaboration features
+    
+    **Enterprise Plan (Custom):**
+    - Unlimited page views
+    - White-label options
+    - Dedicated support
+    - Custom integrations
+    - SLA guarantees
+    - Advanced security features
+    
+    **Pricing Notes:**
+    - All plans include core features
+    - No setup fees or hidden costs
+    - Annual billing available (2 months free)
+    - Non-profit discounts available
+  </Accordion>
+  
+  <Accordion title="How is usage measured?" icon="chart-bar">
+    **Page Views:**
+    - Each unique page load counts as 1 page view
+    - Same user viewing same page multiple times = multiple page views
+    - Single-page app route changes count as page views
+    
+    **What Counts:**
+    - Unique visitor page loads
+    - SPA route changes (when configured)
+    - Iframe loads (if tracking enabled)
+    
+    **What Doesn't Count:**
+    - Bot traffic (automatically filtered)
+    - Internal team traffic (can be excluded)
+    - Failed/error page loads
+    - Prefetched pages (unless actually viewed)
+    
+    **Usage Monitoring:**
+    ```javascript
+    // Check current usage
+    const usage = await Journium.getUsage();
+    console.log('This month:', usage.pageViewsThisMonth);
+    console.log('Plan limit:', usage.planLimit);
+    console.log('Usage %:', usage.usagePercentage);
+    ```
+    
+    **Overage Handling:**
+    - Soft limit: Warning at 80% usage
+    - Hard limit: Tracking continues, billing adjusted
+    - Automatic plan upgrade recommendations
+    - No service interruption
+  </Accordion>
+  
+  <Accordion title="Can I change or cancel my plan?" icon="exchange">
+    **Plan Changes:**
+    - Upgrade anytime (immediate effect)
+    - Downgrade at next billing cycle
+    - Prorated billing for upgrades
+    - No penalties for changes
+    
+    **Cancellation:**
+    - Cancel anytime from dashboard
+    - Service continues until period end
+    - Data export available during grace period
+    - No cancellation fees
+    
+    **Data Retention After Cancellation:**
+    - 30-day grace period for data export
+    - Account reactivation available within 30 days
+    - Permanent deletion after grace period
+    
+    **Enterprise Contracts:**
+    - Custom terms and cancellation policies
+    - Dedicated account management
+    - Migration assistance available
+  </Accordion>
+</AccordionGroup>
+
+## Support & Resources
+
+<AccordionGroup>
+  <Accordion title="How can I get help if I'm stuck?" icon="life-ring">
+    **Support Channels:**
+    
+    **Self-Service:**
+    - [Documentation](/) - Comprehensive guides and tutorials
+    - [Common Issues](/troubleshooting/common-issues) - Solutions to frequent problems
+    - [Community Forum](https://community.journium.com) - Ask questions and share tips
+    
+    **Direct Support:**
+    - **Email**: support@journium.com (24-48 hour response)
+    - **Live Chat**: Available during business hours (Growth+ plans)
+    - **Phone Support**: Available for Business+ plans
+    - **Dedicated Support**: Enterprise plans only
+    
+    **Developer Resources:**
+    - [GitHub Repository](https://github.com/journium/sdk) - SDK source code and issues
+    - [API Documentation](/api-reference/introduction) - Complete API reference
+    - [Code Examples](https://github.com/journium/examples) - Implementation examples
+    
+    **Response Times:**
+    - Starter Plan: 48-72 hours
+    - Growth Plan: 24-48 hours  
+    - Business Plan: 12-24 hours
+    - Enterprise Plan: 4-12 hours
+    
+    **Escalation Process:**
+    1. Check documentation and FAQ
+    2. Search community forum
+    3. Contact support with detailed information
+    4. Technical escalation if needed
+  </Accordion>
+  
+  <Accordion title="Do you offer implementation assistance?" icon="hands-helping">
+    **Implementation Support:**
+    
+    **All Plans:**
+    - Setup documentation and tutorials
+    - Email support for implementation questions
+    - Community forum assistance
+    
+    **Growth+ Plans:**
+    - Live chat support during setup
+    - Screen sharing sessions for complex integrations
+    - Priority response for implementation blockers
+    
+    **Business+ Plans:**
+    - Dedicated onboarding call
+    - Custom implementation guidance
+    - Integration with existing tools
+    - Team training sessions
+    
+    **Enterprise Plans:**
+    - Dedicated implementation manager
+    - Custom integration development
+    - On-site training (if needed)
+    - White-glove setup service
+    
+    **Professional Services:**
+    - Custom development work
+    - Advanced integration consulting
+    - Performance optimization audits
+    - Training workshops
+    
+    **Implementation Timeline:**
+    - Basic setup: Same day
+    - Custom events: 1-2 days
+    - Complex integrations: 1-2 weeks
+    - Enterprise deployments: 2-8 weeks
+  </Accordion>
+  
+  <Accordion title="Where can I find code examples?" icon="code">
+    **Documentation Examples:**
+    - [Quick Start Guide](/quickstart) - Basic implementation
+    - [Platform Guides](/installation/javascript) - Framework-specific examples
+    - [Configuration Examples](/configuration/setup) - Advanced setups
+    
+    **GitHub Repository:**
+    - [Example Applications](https://github.com/journium/examples)
+    - React/Next.js examples
+    - Vanilla JavaScript implementations
+    - Integration patterns
+    
+    **Code Snippets:**
+    ```javascript
+    // Basic tracking
+    Journium.track('button_clicked', { button_id: 'signup' });
+    
+    // E-commerce tracking
+    Journium.track('purchase_completed', {
+      order_id: 'order_123',
+      total: 99.99,
+      currency: 'USD'
+    });
+    
+    // User identification
+    Journium.identify('user_456', {
+      email: 'user@example.com',
+      plan: 'premium'
+    });
+    ```
+    
+    **Interactive Examples:**
+    - [CodePen Collection](https://codepen.io/collection/journium-examples)
+    - [JSFiddle Examples](https://jsfiddle.net/user/journium/fiddles/)
+    - [Repl.it Templates](https://repl.it/@journium)
+    
+    **Tutorial Videos:**
+    - YouTube channel with implementation tutorials
+    - Webinar recordings
+    - Feature demonstration videos
+  </Accordion>
+</AccordionGroup>
+
+## Still Have Questions?
+
+If you can't find the answer you're looking for:
+
+<CardGroup cols={2}>
+  <Card title="Contact Support" icon="envelope" href="mailto:support@journium.com">
+    Get personalized help from our support team
+  </Card>
+  <Card title="Join Community" icon="users" href="https://community.journium.com">
+    Connect with other Journium users and share experiences
+  </Card>
+  <Card title="Schedule Demo" icon="calendar" href="https://app.journium.com/demo">
+    Book a personalized demo to see Journium in action
+  </Card>
+  <Card title="Check Status" icon="heartbeat" href="https://status.journium.com">
+    Monitor service status and planned maintenance
+  </Card>
+</CardGroup>

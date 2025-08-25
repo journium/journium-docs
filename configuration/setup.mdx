@@ -1,0 +1,649 @@
+---
+title: "Configuration & Setup"
+description: "Configure Journium for your specific needs and set up conversion goals"
+---
+
+## Overview
+
+Journium offers flexible configuration options to match your application's needs and business goals. This guide covers initial setup, conversion tracking, privacy settings, and advanced configuration options.
+
+## Basic Configuration
+
+### Initial Setup
+
+```javascript
+Journium.init({
+  projectId: 'your-project-id',
+  apiKey: 'your-api-key',
+  environment: 'production', // 'development' | 'production'
+  
+  config: {
+    // Core tracking
+    trackPageViews: true,
+    trackClicks: true,
+    trackScrolling: true,
+    trackFormSubmissions: true,
+    
+    // Advanced features
+    enableRecommendations: true,
+    trackPerformance: true,
+    trackErrors: true,
+    
+    // Privacy
+    respectDoNotTrack: true,
+    anonymizeIPs: true,
+    
+    // Performance
+    batchSize: 10,
+    flushInterval: 5000
+  }
+});
+```
+
+### Environment-Specific Configuration
+
+```javascript
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+Journium.init({
+  projectId: isDevelopment 
+    ? 'your-dev-project-id' 
+    : 'your-prod-project-id',
+  apiKey: isDevelopment 
+    ? 'your-dev-api-key' 
+    : 'your-prod-api-key',
+  environment: isDevelopment ? 'development' : 'production',
+  
+  config: {
+    debugMode: isDevelopment,
+    trackPageViews: true,
+    trackClicks: !isDevelopment, // Reduce noise in development
+    enableRecommendations: !isDevelopment,
+    batchSize: isDevelopment ? 1 : 10 // Send immediately in dev
+  }
+});
+```
+
+## Conversion Goals
+
+### Setting Up Goals
+
+Define what success means for your application:
+
+```javascript
+// Define conversion goals
+Journium.setGoals([
+  {
+    id: 'signup_goal',
+    name: 'User Signup',
+    description: 'User completes registration',
+    type: 'event',
+    event: 'user_registered',
+    value: 50 // Value in dollars
+  },
+  {
+    id: 'purchase_goal',
+    name: 'Purchase Completion',
+    description: 'User completes a purchase',
+    type: 'event',
+    event: 'purchase_completed',
+    value_property: 'amount' // Dynamic value from event properties
+  },
+  {
+    id: 'engagement_goal',
+    name: 'High Engagement',
+    description: 'User spends more than 5 minutes on site',
+    type: 'duration',
+    threshold: 300000 // 5 minutes in milliseconds
+  },
+  {
+    id: 'page_goal',
+    name: 'Pricing Page Visit',
+    description: 'User visits pricing page',
+    type: 'page',
+    page_pattern: '/pricing*'
+  }
+]);
+```
+
+### Tracking Goal Completions
+
+```javascript
+// Automatic goal tracking (when event matches goal criteria)
+Journium.track('user_registered', {
+  user_id: 'user_123',
+  email: 'user@example.com',
+  source: 'organic'
+}); // Automatically triggers 'signup_goal'
+
+// Manual goal completion
+Journium.completeGoal('custom_goal', {
+  user_id: 'user_123',
+  completion_time: Date.now(),
+  custom_value: 75
+});
+```
+
+## User Identification
+
+### Basic User Identification
+
+```javascript
+// Identify a user when they log in
+Journium.identify('user_123', {
+  email: 'john@example.com',
+  name: 'John Doe',
+  plan: 'premium',
+  signup_date: '2024-01-15',
+  total_spent: 299.99
+});
+
+// Update user properties
+Journium.updateUser({
+  last_login: new Date(),
+  page_views_count: 45,
+  feature_usage: {
+    dashboard: 25,
+    reports: 12,
+    settings: 3
+  }
+});
+```
+
+### Anonymous User Tracking
+
+```javascript
+// Track anonymous users with temporary IDs
+Journium.identifyAnonymous({
+  session_id: 'session_abc123',
+  user_type: 'visitor',
+  device_type: 'desktop',
+  browser: 'chrome'
+});
+
+// Convert anonymous user to identified user
+Journium.mergeUser('user_123', {
+  email: 'john@example.com',
+  name: 'John Doe'
+});
+```
+
+## Privacy & Compliance
+
+### GDPR Compliance
+
+```javascript
+// Check for user consent before initializing
+if (hasUserConsent()) {
+  Journium.init({
+    projectId: 'your-project-id',
+    apiKey: 'your-api-key',
+    environment: 'production',
+    config: {
+      respectDoNotTrack: true,
+      anonymizeIPs: true,
+      enableCookies: false, // Disable cookies if no consent
+      trackingConsent: true
+    }
+  });
+}
+
+// Handle consent changes
+function handleConsentUpdate(hasConsent) {
+  if (hasConsent) {
+    Journium.enableTracking();
+  } else {
+    Journium.disableTracking();
+    Journium.clearUserData(); // Remove stored user data
+  }
+}
+```
+
+### Data Control
+
+```javascript
+// Opt-out individual users
+Journium.optOut('user_123');
+
+// Delete user data
+Journium.deleteUser('user_123');
+
+// Pause tracking temporarily
+Journium.pauseTracking();
+
+// Resume tracking
+Journium.resumeTracking();
+
+// Clear all local data
+Journium.reset();
+```
+
+## Advanced Configuration
+
+### Custom API Endpoints
+
+```javascript
+Journium.init({
+  projectId: 'your-project-id',
+  apiKey: 'your-api-key',
+  environment: 'production',
+  
+  config: {
+    // Custom endpoints
+    apiEndpoint: 'https://your-proxy.com/journium',
+    eventsEndpoint: 'https://events.yourcompany.com',
+    recommendationsEndpoint: 'https://recs.yourcompany.com',
+    
+    // Retry configuration
+    maxRetries: 3,
+    retryDelay: 1000,
+    
+    // Timeout settings
+    requestTimeout: 10000,
+    connectionTimeout: 5000
+  }
+});
+```
+
+### Performance Optimization
+
+```javascript
+Journium.init({
+  projectId: 'your-project-id',
+  apiKey: 'your-api-key',
+  environment: 'production',
+  
+  config: {
+    // Batching settings
+    batchSize: 20,           // Events per batch
+    flushInterval: 3000,     // Flush every 3 seconds
+    maxBatchAge: 10000,      // Max time to hold events
+    
+    // Queue settings
+    maxQueueSize: 100,       // Max events in queue
+    dropOnQueueFull: false,  // Drop old events when queue is full
+    
+    // Network optimization
+    compression: true,       // Compress payloads
+    keepAlive: true,        // Use connection pooling
+    
+    // Performance tracking
+    trackRenderTimes: true,
+    trackNetworkRequests: true,
+    sampleRate: 0.1         // Sample 10% of performance events
+  }
+});
+```
+
+### Custom Sampling
+
+```javascript
+// Custom sampling logic
+Journium.init({
+  projectId: 'your-project-id',
+  apiKey: 'your-api-key',
+  environment: 'production',
+  
+  config: {
+    customSampling: {
+      // Sample different event types at different rates
+      'page_view': 1.0,        // Track all page views
+      'button_click': 0.5,     // Track 50% of button clicks
+      'scroll': 0.1,           // Track 10% of scroll events
+      'api_request': 0.8       // Track 80% of API requests
+    },
+    
+    // User-based sampling
+    userSampling: (userId) => {
+      // Sample premium users at 100%, others at 50%
+      return isPremiumUser(userId) ? 1.0 : 0.5;
+    }
+  }
+});
+```
+
+## Error Handling
+
+### Global Error Configuration
+
+```javascript
+Journium.init({
+  projectId: 'your-project-id',
+  apiKey: 'your-api-key',
+  environment: 'production',
+  
+  config: {
+    // Error handling
+    trackErrors: true,
+    trackUnhandledRejections: true,
+    trackConsoleErrors: true,
+    
+    // Error filtering
+    errorFilter: (error) => {
+      // Don't track certain errors
+      return !error.message.includes('Script error');
+    },
+    
+    // Error callbacks
+    onError: (error, context) => {
+      console.error('Journium error:', error, context);
+      // Send to your error reporting service
+      yourErrorReporter.report(error, context);
+    }
+  }
+});
+```
+
+### Graceful Degradation
+
+```javascript
+// Wrap Journium calls to handle failures gracefully
+function safeTrack(event, properties) {
+  try {
+    if (window.Journium && window.Journium.isReady) {
+      Journium.track(event, properties);
+    }
+  } catch (error) {
+    console.warn('Analytics tracking failed:', error);
+    // Your app continues to work normally
+  }
+}
+
+// Use wrapper function
+safeTrack('button_clicked', { button_id: 'signup' });
+```
+
+## Multi-Environment Setup
+
+### Environment Detection
+
+```javascript
+function getEnvironmentConfig() {
+  const hostname = window.location.hostname;
+  
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return {
+      projectId: 'dev-project-id',
+      apiKey: 'dev-api-key',
+      environment: 'development',
+      debugMode: true
+    };
+  }
+  
+  if (hostname.includes('staging')) {
+    return {
+      projectId: 'staging-project-id',
+      apiKey: 'staging-api-key',
+      environment: 'staging',
+      debugMode: true
+    };
+  }
+  
+  return {
+    projectId: 'prod-project-id',
+    apiKey: 'prod-api-key',
+    environment: 'production',
+    debugMode: false
+  };
+}
+
+Journium.init({
+  ...getEnvironmentConfig(),
+  config: {
+    trackPageViews: true,
+    trackClicks: true
+  }
+});
+```
+
+## Feature Flags Integration
+
+### Dynamic Configuration
+
+```javascript
+// Load feature flags and configure Journium accordingly
+async function initializeWithFeatureFlags() {
+  const featureFlags = await loadFeatureFlags();
+  
+  Journium.init({
+    projectId: 'your-project-id',
+    apiKey: 'your-api-key',
+    environment: 'production',
+    
+    config: {
+      trackPageViews: true,
+      trackClicks: featureFlags.enableClickTracking,
+      trackScrolling: featureFlags.enableScrollTracking,
+      enableRecommendations: featureFlags.enableAIRecommendations,
+      trackPerformance: featureFlags.enablePerformanceTracking
+    }
+  });
+  
+  // Track feature flag exposure
+  Object.entries(featureFlags).forEach(([flag, enabled]) => {
+    Journium.track('feature_flag_exposed', {
+      flag_name: flag,
+      flag_value: enabled,
+      timestamp: Date.now()
+    });
+  });
+}
+
+initializeWithFeatureFlags();
+```
+
+## A/B Testing Integration
+
+### Test Configuration
+
+```javascript
+// Configure A/B testing with Journium
+Journium.init({
+  projectId: 'your-project-id',
+  apiKey: 'your-api-key',
+  environment: 'production',
+  
+  config: {
+    abTesting: {
+      enabled: true,
+      provider: 'your-ab-testing-service', // Optional
+      trackExposures: true,
+      trackConversions: true
+    }
+  }
+});
+
+// Track A/B test exposures
+function trackAbTestExposure(testName, variant) {
+  Journium.track('ab_test_exposure', {
+    test_name: testName,
+    variant: variant,
+    user_id: getCurrentUserId(),
+    timestamp: Date.now()
+  });
+}
+
+// Track A/B test conversions
+function trackAbTestConversion(testName, variant, goalId) {
+  Journium.track('ab_test_conversion', {
+    test_name: testName,
+    variant: variant,
+    goal_id: goalId,
+    user_id: getCurrentUserId(),
+    timestamp: Date.now()
+  });
+}
+```
+
+## Configuration Validation
+
+### Runtime Validation
+
+```javascript
+// Validate configuration at runtime
+function validateConfig(config) {
+  const errors = [];
+  
+  if (!config.projectId) {
+    errors.push('Project ID is required');
+  }
+  
+  if (!config.apiKey) {
+    errors.push('API key is required');
+  }
+  
+  if (!['development', 'production'].includes(config.environment)) {
+    errors.push('Environment must be "development" or "production"');
+  }
+  
+  if (config.config?.batchSize && config.config.batchSize < 1) {
+    errors.push('Batch size must be greater than 0');
+  }
+  
+  if (errors.length > 0) {
+    throw new Error(`Journium configuration errors: ${errors.join(', ')}`);
+  }
+}
+
+// Use validation
+try {
+  const config = getJourniumConfig();
+  validateConfig(config);
+  Journium.init(config);
+} catch (error) {
+  console.error('Failed to initialize Journium:', error);
+}
+```
+
+## Best Practices
+
+### 1. Configuration Management
+
+```javascript
+// Store configuration in a centralized location
+const JourniumConfig = {
+  development: {
+    projectId: process.env.JOURNIUM_DEV_PROJECT_ID,
+    apiKey: process.env.JOURNIUM_DEV_API_KEY,
+    environment: 'development',
+    config: {
+      debugMode: true,
+      trackPageViews: true,
+      trackClicks: false,
+      batchSize: 1
+    }
+  },
+  
+  production: {
+    projectId: process.env.JOURNIUM_PROD_PROJECT_ID,
+    apiKey: process.env.JOURNIUM_PROD_API_KEY,
+    environment: 'production',
+    config: {
+      debugMode: false,
+      trackPageViews: true,
+      trackClicks: true,
+      batchSize: 20,
+      respectDoNotTrack: true,
+      anonymizeIPs: true
+    }
+  }
+};
+
+// Initialize based on environment
+const config = JourniumConfig[process.env.NODE_ENV] || JourniumConfig.development;
+Journium.init(config);
+```
+
+### 2. Progressive Enhancement
+
+```javascript
+// Initialize with basic tracking first
+Journium.init({
+  projectId: 'your-project-id',
+  apiKey: 'your-api-key',
+  environment: 'production',
+  config: {
+    trackPageViews: true // Start with basics
+  }
+});
+
+// Add advanced features after user interaction
+Journium.ready(() => {
+  // Enable advanced tracking after first user interaction
+  document.addEventListener('click', () => {
+    Journium.updateConfig({
+      trackClicks: true,
+      trackScrolling: true,
+      enableRecommendations: true
+    });
+  }, { once: true });
+});
+```
+
+### 3. Performance Monitoring
+
+```javascript
+// Monitor Journium's performance impact
+const performanceObserver = new PerformanceObserver((list) => {
+  const entries = list.getEntries();
+  entries.forEach((entry) => {
+    if (entry.name.includes('journium')) {
+      console.log(`Journium ${entry.entryType}: ${entry.duration}ms`);
+    }
+  });
+});
+
+performanceObserver.observe({ entryTypes: ['navigation', 'resource'] });
+```
+
+## Troubleshooting Configuration
+
+### Debug Mode
+
+```javascript
+Journium.init({
+  projectId: 'your-project-id',
+  apiKey: 'your-api-key',
+  environment: 'development',
+  config: {
+    debugMode: true, // Enable detailed logging
+    logLevel: 'verbose' // 'error' | 'warn' | 'info' | 'verbose'
+  }
+});
+
+// Check configuration status
+console.log('Journium config:', Journium.getConfig());
+console.log('Journium status:', Journium.getStatus());
+```
+
+### Configuration Health Check
+
+```javascript
+// Check if Journium is properly configured
+function healthCheck() {
+  const status = {
+    initialized: Journium.isInitialized(),
+    ready: Journium.isReady(),
+    config: Journium.getConfig(),
+    queue_size: Journium.getQueueSize(),
+    last_flush: Journium.getLastFlushTime()
+  };
+  
+  console.table(status);
+  return status;
+}
+
+// Run health check
+setTimeout(healthCheck, 5000); // Check after 5 seconds
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Event Tracking" icon="cursor-click" href="/configuration/events">
+    Learn how to track custom events and user interactions
+  </Card>
+  <Card title="Analytics Features" icon="chart-line" href="/features/analytics">
+    Explore Journium's analytics and reporting capabilities
+  </Card>
+</CardGroup>
