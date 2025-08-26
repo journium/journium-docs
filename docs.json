@@ -83,12 +83,12 @@
       "anchors": [
         {
           "anchor": "Dashboard",
-          "href": "https://app.journium.com",
+          "href": "https://journium.app",
           "icon": "chart-line"
         },
         {
           "anchor": "Support",
-          "href": "https://help.journium.com",
+          "href": "https://journium.app",
           "icon": "life-ring"
         },
         {
@@ -107,13 +107,13 @@
     "links": [
       {
         "label": "Contact",
-        "href": "mailto:support@journium.com"
+        "href": "mailto:hello@journium.com"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Get Started",
-      "href": "https://app.journium.com/signup"
+      "href": "https://journium.app"
     }
   },
   "contextual": {
