@@ -7,7 +7,10 @@
     "light": "#60A5FA",
     "dark": "#1D4ED8"
   },
-  "favicon": "/favicon.svg",
+  "favicon": {
+    "light": "/images/favicon_gradient_light.png",
+    "dark": "/images/favicon_gradient_dark.png"
+  },
   "navigation": {
     "tabs": [
       {
@@ -97,8 +100,8 @@
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo/brand_mark_light.svg",
+    "dark": "/logo/brand_mark_dark.svg"
   },
   "navbar": {
     "links": [
@@ -119,10 +122,7 @@
      "view",
      "chatgpt",
      "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
+     "perplexity"
    ]
   },
   "footer": {
