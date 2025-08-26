@@ -26,9 +26,10 @@
           {
             "group": "Installation",
             "pages": [
-              "installation/javascript",
+              "installation/nextjs",
               "installation/react",
-              "installation/nextjs"
+              "installation/javascript"
+              
             ]
           },
           {
