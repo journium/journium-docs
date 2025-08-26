@@ -24,7 +24,13 @@ npm i -g mint
 Run the following command at the root of your documentation, where your `docs.json` is located:
 
 ```
-mint dev
+mint dev 
+```
+
+Or to run a particular port e.g. 3345, use:
+
+```
+mint dev --port 3345
 ```
 
 View your local preview at `http://localhost:3000`.
@@ -41,6 +47,6 @@ Changes are automatically deployed to production after pushing to the main branc
 - If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
 
 ### Resources
-- [Journium documentation](https://docs.journium.com)
-- [Journium support](https://help.journium.com)
-- [Contact support](mailto:support@journium.com)
+- [Journium documentation](https://docs.journium.app)
+- [Journium support](https://journium.app)
+- [Contact support](mailto:hello@journium.app)
