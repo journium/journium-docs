@@ -1,0 +1,121 @@
+---
+title: Code
+description: How to write code in Journium Docs
+---
+
+## Code
+
+This is how you write code.
+
+### Typescript
+
+```tsx 
+import { useState } from 'react';
+
+export function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}
+```
+
+### Java
+
+```java
+public class HelloWorld {
+  public static void main(String[] args) {
+    System.out.println("Hello World");
+  }
+}
+```
+
+### Python
+
+```python
+def hello_world():
+    print("Hello World")
+```
+
+### C#
+
+```csharp
+using System;
+
+namespace HelloWorld
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World");
+        }
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+
+int main() {
+    std::cout << "Hello World" << std::endl;
+    return 0;
+}
+```
+
+### YAML
+
+```yaml
+name: Hello World
+age: 20
+email: hello@world.com
+address:
+  street: 123 Main St
+  city: Anytown
+  state: CA
+  zip: 12345
+  country: USA
+tags:
+  - Hello
+  - World
+  - Journium
+  - Docs
+  - Code
+  - YAML
+```
+
+### JSON
+
+```json
+{
+  "name": "Hello World",
+  "age": 20
+}
+```
+
+### XML
+
+```xml
+<HelloWorld>
+  <Name>Hello World</Name>
+  <Age>20</Age>
+</HelloWorld>
+```
+
+### Special Needs
+
+<Cards>
+  <Card href="/docs/deploying/static" title="Configure Static Export" description="Learn how to enable static export on your docs" />
+
+  <Card href="/docs/internationalization" title="Internationalization" description="Learn how to enable i18n" />
+
+  <Card href="/docs/ui/theme" title="Color Themes" description="Add themes to Fumadocs UI" />
+
+  <Card href="/docs/ui/layouts" title="Layouts" description="Customise your Fumadocs UI layouts" />
+</Cards>

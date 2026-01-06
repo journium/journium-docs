@@ -1,0 +1,43 @@
+---
+title: Cards
+description: How to write cards in Journium Docs
+---
+
+import { HomeIcon, RocketIcon } from 'lucide-react';
+
+## Cards
+
+This is how you write cards.
+
+<Cards>
+  <Card title="Quick Start Guide" icon={<RocketIcon className="text-purple-500" />} href="/quickstart" horizontal="true">
+    Get Journium integrated into your app in under 5 minutes
+  </Card>
+</Cards>
+
+
+## Introduction
+
+Fumadocs <span className="text-fd-muted-foreground text-sm">(Foo-ma docs)</span> is a **documentation framework**, designed to be fast, flexible,
+and composes seamlessly into your React framework.
+
+Fumadocs has different parts:
+
+
+
+<Cards>
+  <Card
+    href="https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating"
+    title="Fetching, Caching, and Revalidating"
+  >
+    Learn more about caching in Next.js
+  </Card>
+  <Card title="href is optional">Learn more about `fetch` in Next.js.</Card>
+  <Card icon={<HomeIcon />} href="/" title="Home">
+    You can include icons too.
+  </Card>
+</Cards>
+
+<Callout title="Want to learn more?">
+  Read our in-depth [What is Fumadocs](/docs/what-is-fumadocs) introduction.
+</Callout>
