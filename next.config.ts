@@ -10,6 +10,15 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
   serverExternalPackages: ['typescript', 'twoslash'],
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/docs',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withMDX(nextConfig);
