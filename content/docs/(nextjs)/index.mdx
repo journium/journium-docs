@@ -4,13 +4,7 @@ description: Getting started with Journium
 icon: Rocket
 ---
 
-
-import Introduction from '../shared/introduction.mdx';
-
-<Introduction />
-
-
-
+<include>../shared/.shared.introduction.mdx</include>
 
 ## Setup
 
@@ -25,67 +19,83 @@ Set up Journium for your Next.js application.
 npm i @journium/nextjs
 ```
 
-Create the configuration file:
 
-```ts title="source.config.ts"
-import { defineDocs, defineConfig } from 'fumadocs-mdx/config';
+### Integrate with Journium
 
-export const docs = defineDocs({
-  dir: 'content/docs',
-});
+Wrap your app wih the `NextJourniumProvider` to enable analytics throughout your Next.js application.
 
-export default defineConfig();
+#### App Router
+
+Add the `NextJourniumProvider` to your root layout, usuallay the `app/layout.tsx` file.
+
+```ts title="app/layout.tsx"
+// [!code ++:1]
+import { NextJourniumProvider } from '@journium/nextjs';
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        // [!code ++:1]
+        <NextJourniumProvider>
+          {children}
+        // [!code ++:1]
+        </NextJourniumProvider>
+      </body>
+    </html>
+  );
+}
 ```
 
-Add the plugin to Next.js config:
+#### Pages Router
 
-```js title="next.config.mjs"
-import { createMDX } from 'fumadocs-mdx/next';
+Add the `NextJourniumProvider` to your pages router.
 
-/** @type {import('next').NextConfig} */
-const config = {
-  reactStrictMode: true,
-};
+```ts title="pages/index.tsx"
 
-// [!code ++:4]
-const withMDX = createMDX({
-  // customise the config file path
-  // configPath: "source.config.ts"
-});
+import type { AppProps } from 'next/app';
+// [!code ++:1]
+import { NextJourniumProvider } from '@journium/nextjs';
 
-// [!code highlight]
-export default withMDX(config);
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    // [!code ++:1]
+    <NextJourniumProvider>
+      <Component {...pageProps} />
+    // [!code ++:1]
+    </NextJourniumProvider>
+  );
+}
 ```
 
-<Callout title="ESM Only" type='warn'>
+### Get your Publishable Key
 
-Fumadocs MDX is ESM-only, it's recommended to use `next.config.mjs` for accurate ESM resolution.
+1. **Sign up for a Journium account** at [https://journium.app/signup](https://journium.app/signup)
 
-For TypeScript config file, it requires Native Node.js TypeScript Resolver, you can see [Next.js docs](https://nextjs.org/docs/app/api-reference/config/typescript#using-nodejs-native-typescript-resolver-for-nextconfigts) for details.
+2. **Create a new application** in the Journium dashboard. This is where you will get your API keys.
 
-</Callout>
+3. **Get your Publishable Key** from the **Developers | API Keys** section. 
 
-<include>.shared.mdx</include>
 
-### Integrate with Fumadocs
+### Set your Publishable Key 
 
-You can create a `lib/source.ts` file and obtain Fumadocs source from the `docs` collection output.
+**Set your Publishable Key** in your environment variables. 
+The publishable key can be set in your `.env` or `.env.local` file.
 
-```ts title="lib/source.ts"
-import { docs } from 'fumadocs-mdx:collections/server';
-import { loader } from 'fumadocs-core/source';
-
-export const source = loader({
-  baseUrl: '/docs',
-  source: docs.toFumadocsSource(),
-});
+```bash title=".env"
+NEXT_PUBLIC_JOURNIUM_PUBLISHABLE_KEY=your-publishable-key
 ```
-
-The `.source` folder will be generated when you run `next dev` or `next build`.
 
 ### Done
 
-You can now write content in `content/docs` folder.
+You can now start your application and see the Journium SDK in action. If you navigate around in your application, 
+the Journium SDK will push telemetry to the Journium API. You can see events in the Journium dashboard in the
+**Developers | Events** section of your application. Head over to the 
+[Journium dashboard](https://dashboard.journium.app) to see the events.
 
 </div>
 </section>
