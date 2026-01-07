@@ -6,15 +6,13 @@ import { RootProvider } from 'fumadocs-ui/provider/next';
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-  weight: "variable",
-  display: "swap",
+
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-  weight: "variable",
-  display: "swap",
+
 });
 
 export const metadata: Metadata = {
