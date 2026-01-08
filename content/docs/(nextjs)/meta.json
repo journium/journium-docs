@@ -10,7 +10,8 @@
     "concepts",
     "---SDK Reference---",
     "hooks",
-    "---Demo Repositories"
-
+    "---Example Repositories---",
+    "external:[NextJsIcon][Next.js Example](https://github.com/journium/journium-examples/tree/main/looply-app-nextjs)",
+    "external:[React Example](https://github.com/journium/journium-examples/tree/main/looply-app-react)"
   ]
 }
