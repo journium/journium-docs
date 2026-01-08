@@ -1,0 +1,33 @@
+---
+title: useIdentify()
+description: Use the useIdentify() hook to identify users when they log in or sign up.
+---
+
+## Identify a User
+
+The `useIdentify()` hook is used to identify a user when they log in or sign up.
+
+```tsx title="pages/login.tsx" 
+// [!code ++:1]
+import { useIdentify } from '@journium/nextjs';
+
+function LoginPage() {
+  // [!code ++:1]
+  const identify = useIdentify();
+
+  const handleLogin = async (credentials) => {
+    const user = await authenticateUser(credentials);
+    
+    // [!code ++:5]
+    identify(user.id, {
+      name: user.name,
+      email: user.email,
+      plan: user.plan
+    });
+  };
+
+  return (
+    <LoginForm onSubmit={handleLogin} />
+  );
+}
+```

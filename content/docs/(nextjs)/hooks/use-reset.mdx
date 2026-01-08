@@ -1,0 +1,27 @@
+---
+title: useReset()
+description: Use the useReset() hook to reset user identity when they log out or when you want to clear the user's identity.
+---
+
+## Reset user identity
+
+The `useReset()` hook is used to reset user identity when they log out or when you want to clear the user's identity.
+
+```tsx title="pages/logout.tsx" 
+// [!code ++:1]
+import { useReset } from '@journium/nextjs';
+
+function Header() {
+  // [!code ++:1]
+  const reset = useReset();
+
+  const handleLogout = async () => {
+    await logoutUser();
+    // [!code ++:1]
+    reset();
+    router.push('/');
+  };
+
+  return <button onClick={handleLogout}>Sign Out</button>;
+}
+```
