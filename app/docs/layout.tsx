@@ -5,11 +5,57 @@ import { TerminalIcon } from 'lucide-react';
 import { NextJsIcon } from '@/components/icons/nextjs';
 import { ReactIcon } from '@/components/icons/react';
 import { JsIcon } from '@/components/icons/js';
+import { transformPageTreeWithExternalLinks } from '@/lib/external-links-plugin';
 
 export default function Layout({ children }: LayoutProps<'/docs'>) {
+  // Transform the page tree to inject external links
+  const originalTree = source.getPageTree();
+  const tree = transformPageTreeWithExternalLinks(originalTree);
+  
+  // Debug: Log tree structure to server console
+  // Check your terminal where you run `npm run dev` or `pnpm dev`
+  if (process.env.NODE_ENV === 'development') {
+    console.log('=== Page Tree Debug ===');
+    
+    // Find the Next.js folder
+    const nextjsFolder = originalTree.children.find(
+      c => c.type === 'folder' && c.name === 'Next.js'
+    );
+    if (nextjsFolder && nextjsFolder.type === 'folder') {
+      console.log('Next.js folder found:', {
+        name: nextjsFolder.name,
+        children: nextjsFolder.children?.map(c => ({
+          type: c.type,
+          name: c.name,
+          url: 'url' in c ? c.url : undefined
+        }))
+      });
+      
+      // Check if Demo Repositories separator exists
+      const demoReposIndex = nextjsFolder.children?.findIndex(
+        c => c.type === 'separator' && c.name === 'Demo Repositories'
+      );
+      console.log('Demo Repositories separator index:', demoReposIndex);
+      
+      // Check transformed tree
+      const transformedNextjsFolder = tree.children.find(
+        c => c.type === 'folder' && c.name === 'Next.js'
+      );
+      if (transformedNextjsFolder && transformedNextjsFolder.type === 'folder') {
+        console.log('Transformed Next.js folder children count:', transformedNextjsFolder.children?.length);
+        console.log('Transformed children:', transformedNextjsFolder.children?.map(c => ({
+          type: c.type,
+          name: c.name,
+          url: 'url' in c ? c.url : undefined
+        })));
+      }
+    }
+    console.log('=====================');
+  }
+  
   return (
     <DocsLayout 
-    tree={source.getPageTree()} {...baseOptions()}
+    tree={tree} {...baseOptions()}
     sidebar={{
       tabs: {
         transform(option, node) {
