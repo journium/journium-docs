@@ -8,7 +8,7 @@ interface JourniumLogoProps {
 export function JourniumLogo({ className, size = "md" }: JourniumLogoProps) {
   const sizeClasses = {
     sm: "h-6",
-    md: "h-8", 
+    md: "h-8",
     lg: "h-12",
     xl: "h-16"
   };
