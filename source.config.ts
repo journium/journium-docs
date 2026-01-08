@@ -4,12 +4,14 @@ import remarkMath from 'remark-math';
 import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
+import lastModified from 'fumadocs-mdx/plugins/last-modified';
 
 export const docs = defineDocs({
   dir: 'content/docs',
 });
 
 export default defineConfig({
+  plugins: [lastModified()],
   mdxOptions: {
     remarkPlugins: [remarkMath, remarkMdxMermaid],
     // Place it at first, it should be executed before the syntax highlighter
