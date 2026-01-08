@@ -28,7 +28,7 @@ Wrap your app wih the `NextJourniumProvider` to enable analytics throughout your
 
 Add the `NextJourniumProvider` to your root layout, usuallay the `app/layout.tsx` file.
 
-```ts title="app/layout.tsx"
+```tsx title="app/layout.tsx"
 // [!code ++:1]
 import { NextJourniumProvider } from '@journium/nextjs';
 
@@ -40,10 +40,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        // [!code ++:1]
+         {/* [!code ++:1] */}
         <NextJourniumProvider>
           {children}
-        // [!code ++:1]
+          {/* [!code ++:1] */}
         </NextJourniumProvider>
       </body>
     </html>
@@ -55,18 +55,17 @@ export default function RootLayout({
 
 Add the `NextJourniumProvider` to your pages router.
 
-```ts title="pages/_app.tsx"
-
+```tsx title="pages/_app.tsx"
 import type { AppProps } from 'next/app';
 // [!code ++:1]
 import { NextJourniumProvider } from '@journium/nextjs';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    // [!code ++:1]
+    {/* [!code ++:1] */}
     <NextJourniumProvider>
       <Component {...pageProps} />
-    // [!code ++:1]
+    {/* [!code ++:1] */}
     </NextJourniumProvider>
   );
 }
