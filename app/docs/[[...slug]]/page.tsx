@@ -3,10 +3,13 @@ import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layo
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
-import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { Separator } from '@/components/ui/separator';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { findSiblings } from 'fumadocs-core/page-tree';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import Link from 'fumadocs-core/link';
+import { PathUtils } from 'fumadocs-core/source';
+import * as Twoslash from 'fumadocs-twoslash/ui';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
@@ -39,8 +42,29 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       <DocsBody>
         <MDX
           components={getMDXComponents({
-            // this allows you to link to other pages with relative file paths
-            a: createRelativeLink(source, page),
+            ...Twoslash,
+            a: ({ href, ...props }) => {
+              const found = source.getPageByHref(href ?? '', {
+                dir: PathUtils.dirname(page.path),
+              });
+
+              if (!found) return <Link href={href} {...props} />;
+
+              return (
+                <HoverCard>
+                  <HoverCardTrigger
+                    href={found.hash ? `${found.page.url}#${found.hash}` : found.page.url}
+                    {...props}
+                  >
+                    {props.children}
+                  </HoverCardTrigger>
+                  <HoverCardContent className="text-sm">
+                    <p className="font-medium">{found.page.data.title}</p>
+                    <p className="text-fd-muted-foreground">{found.page.data.description}</p>
+                  </HoverCardContent>
+                </HoverCard>
+              );
+            },
             DocsCategory: ({ url }: { url?: string }) => {
               return <DocsCategory url={url ?? page.url} />;
             },
