@@ -1,0 +1,35 @@
+---
+title: useIdentify()
+description: Use the useIdentify() hook to identify users when they log in or sign up.
+---
+
+## Identify a User
+
+The `useIdentify()` hook is used to identify a user when they log in or sign up.
+
+```tsx title="pages/login.tsx" 
+import React from 'react';
+// [!code ++:1]
+import { useIdentify } from '@journium/react';
+
+function LoginForm() {
+  // [!code ++:1]
+  const identify = useIdentify();
+
+  const handleLogin = async (email, password) => {
+    const user = await loginUser(email, password);
+    
+    // [!code ++:4]
+    identify(user.id, {
+      name: user.name,
+      email: user.email
+    });
+  };
+
+  return (
+    <form onSubmit={handleLogin}>
+      {/* Login form fields */}
+    </form>
+  );
+}
+```

@@ -3,11 +3,14 @@
   "description": "React documentation",
   "root": true,
   "pages": [
-    "---Introduction---",
+    "---[Footprints]Introduction---",
     "index",
     "what-is-journium",
-    "---Guides---",
+    "---[BookOpen]Guides---",
     "concepts",
-    "---SDK Reference---"
+    "---[LibraryBig]SDK Reference---",
+    "hooks",
+    "---[Code]Example Repositories---",
+    "external:[React Example](https://github.com/journium/journium-examples/tree/main/looply-app-react)"
   ]
 }
