@@ -5,6 +5,8 @@ import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { Separator } from '@/components/ui/separator';
+import { Card, Cards } from 'fumadocs-ui/components/card';
+import { findSiblings } from 'fumadocs-core/page-tree';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
@@ -39,6 +41,9 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
           components={getMDXComponents({
             // this allows you to link to other pages with relative file paths
             a: createRelativeLink(source, page),
+            DocsCategory: ({ url }: { url?: string }) => {
+              return <DocsCategory url={url ?? page.url} />;
+            },
           })}
         />
       </DocsBody>
@@ -48,6 +53,26 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 
 export async function generateStaticParams() {
   return source.generateParams();
+}
+
+function DocsCategory({ url }: { url: string }) {
+  return (
+    <Cards>
+      {findSiblings(source.getPageTree(), url).map((item) => {
+        if (item.type === 'separator') return null;
+        if (item.type === 'folder') {
+          if (!item.index) return null;
+          item = item.index;
+        }
+
+        return (
+          <Card key={item.url} title={item.name} href={item.url}>
+            {item.description}
+          </Card>
+        );
+      })}
+    </Cards>
+  );
 }
 
 export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
