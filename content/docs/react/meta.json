@@ -1,5 +1,12 @@
 {
   "title": "React",
   "description": "React documentation",
-  "root": true
+  "root": true,
+  "pages": [
+    "---Introduction---",
+    "index",
+    "what-is-journium",
+    "---References---",
+    "concepts"
+  ]
 }
