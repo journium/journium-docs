@@ -23,7 +23,7 @@ export function ThemeSwitcher({
     return (
       <div
         className={cn(
-          'flex items-center gap-0.5 rounded-full border border-fd-border bg-fd-background p-0.5',
+          'flex items-center gap-0.5 rounded-full border border-fd-border bg-fd-background p-0.5 cursor-pointer',
           className
         )}
         {...props}
@@ -38,14 +38,14 @@ export function ThemeSwitcher({
   return (
     <div
       className={cn(
-        'flex items-center gap-0.5 rounded-full border border-fd-border bg-fd-background p-0.5',
+        'flex items-center gap-0.5 rounded-full border border-fd-border bg-fd-background p-0.5 cursor-pointer',
         className
       )}
       {...props}
     >
       <button
         onClick={() => setTheme('light')}
-        className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors ${
+        className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors cursor-pointer ${
           currentTheme === 'light' && theme !== 'system'
             ? 'bg-fd-accent text-fd-accent-foreground'
             : 'text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground'
@@ -57,7 +57,7 @@ export function ThemeSwitcher({
       </button>
       <button
         onClick={() => setTheme('dark')}
-        className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors ${
+        className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors cursor-pointer ${
           currentTheme === 'dark' && theme !== 'system'
             ? 'bg-fd-accent text-fd-accent-foreground'
             : 'text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground'
@@ -69,7 +69,7 @@ export function ThemeSwitcher({
       </button>
       <button
         onClick={() => setTheme('system')}
-        className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors ${
+        className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors cursor-pointer ${
           theme === 'system'
             ? 'bg-fd-accent text-fd-accent-foreground'
             : 'text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground'
