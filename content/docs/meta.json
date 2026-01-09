@@ -1,3 +1,7 @@
 {
-  "pages": ["(nextjs)", "react", "js"]
+  "pages": [
+    "(nextjs)", 
+    "react", 
+    "js"
+  ]
 }
