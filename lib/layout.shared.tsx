@@ -2,6 +2,7 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import 'katex/dist/katex.css';
 import { JourniumLogo } from '@/components/icons/journium-logo';
 import { Badge } from '@/components/ui/badge';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 
 const logo = (
   <>
@@ -19,6 +20,11 @@ export function baseOptions(): BaseLayoutProps {
       url: '/docs',
     },
     githubUrl: 'https://github.com/journium',
+    themeSwitch: {
+      enabled: true,
+      component: <ThemeSwitcher className="ml-auto" />,
+      mode: 'light-dark-system',
+    },
   };
 }
 
