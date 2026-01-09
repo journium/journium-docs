@@ -1,11 +1,66 @@
 @import "tailwindcss";
-@import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 @import 'fumadocs-twoslash/twoslash.css';
 
+/* Fonts */
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+/* Journium Slate Color Palette - override Fumadocs defaults */
+@theme {
+  --color-fd-background: oklch(1 0 0);
+  --color-fd-foreground: oklch(0.129 0.042 264.695);
+  --color-fd-card: oklch(1 0 0);
+  --color-fd-card-foreground: oklch(0.129 0.042 264.695);
+  --color-fd-popover: oklch(1 0 0);
+  --color-fd-popover-foreground: oklch(0.129 0.042 264.695);
+  --color-fd-primary: oklch(0.208 0.042 265.755);
+  --color-fd-primary-foreground: oklch(0.984 0.003 247.858);
+  --color-fd-secondary: oklch(0.968 0.007 247.896);
+  --color-fd-secondary-foreground: oklch(0.208 0.042 265.755);
+  --color-fd-muted: oklch(0.968 0.007 247.896);
+  --color-fd-muted-foreground: oklch(0.554 0.046 257.417);
+  --color-fd-accent: oklch(0.968 0.007 247.896);
+  --color-fd-accent-foreground: oklch(0.208 0.042 265.755);
+  --color-fd-border: oklch(0.929 0.013 255.508);
+  --color-fd-ring: oklch(0.704 0.04 256.788);
+  --color-fd-overlay: hsla(0, 0%, 0%, 0.2);
+}
+
+/* Static colors - these don't change with theme */
+@theme static {
+  --color-fd-info: oklch(62.3% 0.214 259.815);
+  --color-fd-warning: oklch(76.9% 0.188 70.08);
+  --color-fd-error: oklch(63.7% 0.237 25.331);
+  --color-fd-success: oklch(72.3% 0.219 149.579);
+  --color-fd-idea: oklch(70.5% 0.209 60.849);
+  --color-fd-diff-remove: rgba(200, 10, 100, 0.12);
+  --color-fd-diff-remove-symbol: rgb(230, 10, 100);
+  --color-fd-diff-add: rgba(14, 180, 100, 0.1);
+  --color-fd-diff-add-symbol: rgb(10, 200, 100);
+}
+
+/* Dark mode - Slate palette */
+.dark {
+  --color-fd-background: oklch(0.129 0.042 264.695);
+  --color-fd-foreground: oklch(0.984 0.003 247.858);
+  --color-fd-card: oklch(0.208 0.042 265.755);
+  --color-fd-card-foreground: oklch(0.984 0.003 247.858);
+  --color-fd-popover: oklch(0.208 0.042 265.755);
+  --color-fd-popover-foreground: oklch(0.984 0.003 247.858);
+  --color-fd-primary: oklch(0.929 0.013 255.508);
+  --color-fd-primary-foreground: oklch(0.208 0.042 265.755);
+  --color-fd-secondary: oklch(0.279 0.041 260.031);
+  --color-fd-secondary-foreground: oklch(0.984 0.003 247.858);
+  --color-fd-muted: oklch(0.279 0.041 260.031);
+  --color-fd-muted-foreground: oklch(0.704 0.04 256.788);
+  --color-fd-accent: oklch(0.279 0.041 260.031);
+  --color-fd-accent-foreground: oklch(0.984 0.003 247.858);
+  --color-fd-border: oklch(1 0 0 / 10%);
+  --color-fd-ring: oklch(0.551 0.027 264.364);
+  --color-fd-overlay: hsla(0, 0%, 0%, 0.2);
 }
 
 /* Ensure proper theming - Fumadocs uses CSS variables for theming */
