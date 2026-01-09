@@ -16,7 +16,9 @@ export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
       title: logo,
+      url: '/docs',
     },
+    githubUrl: 'https://github.com/journium',
   };
 }
 
