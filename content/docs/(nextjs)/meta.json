@@ -11,6 +11,7 @@
     "---[LibraryBig]SDK Reference---",
     "hooks",
     "---[Code]Example Repositories---",
-    "external:[NextJsIcon][Next.js Example](https://github.com/journium/journium-examples/tree/main/looply-app-nextjs)"
+    "external:[Next.js (App Router)](https://github.com/journium/journium-examples/tree/main/looply-app-nextjs)",
+    "external:[Next.js (Pages Router)](https://github.com/journium/journium-examples/tree/main/looply-app-nextjs-pages)"
   ]
 }
