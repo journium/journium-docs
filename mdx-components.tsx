@@ -5,6 +5,7 @@ import * as Twoslash from 'fumadocs-twoslash/ui';
 import * as TabsComponents from 'fumadocs-ui/components/tabs';
 import { ThemedImage } from '@/components/ui/themed-image';
 import { CloneExampleRepo } from '@/components/ui/clone-example-repo';
+import * as AccordionsComponents from 'fumadocs-ui/components/accordion';
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
@@ -15,5 +16,6 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ThemedImage,
     CloneExampleRepo,
     ...TabsComponents,
+    ...AccordionsComponents,
   };
 }
