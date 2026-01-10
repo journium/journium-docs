@@ -21,6 +21,16 @@ const nextConfig: NextConfig = {
         destination: '/docs',
         permanent: true,
       },
+      {
+        source: '/docs/next',
+        destination: '/docs',
+        permanent: false,
+      },
+      {
+        source: '/docs/next/:path*',
+        destination: '/docs/:path*',
+        permanent: false,
+      },
     ];
   },
 };

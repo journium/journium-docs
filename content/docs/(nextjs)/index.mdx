@@ -4,13 +4,18 @@ description: This tutorial demonstrates how to integrate Journium with your Next
 icon: Rocket
 ---
 
-
 ## Setup
 
 Set up Journium for your Next.js application.
 
+<CloneExampleRepo 
+  repoUrl="https://github.com/journium/nextjs-app-router-example"
+  message="Clone the Next.js App Router example repository to get started quickly"
+/>
+
 <section id="setup-section">
 <div className="fd-steps [&_h3]:fd-step">
+
 
 ### Install `@journium/nextjs`
 
@@ -23,100 +28,186 @@ Run the following command to install the SDK:
 npm i @journium/nextjs
 ```
 
-
-
 ### Set your Journium Publishable Key 
 
-1. **Create a new application** in the [Journium dashboard](https://dashboard.journium.app). 
-This is where you will get your API keys.
+1. **Sign up for a Journium account** for free at [journium.app/signup](https://journium.app/signup)
 
-2. **Get your Publishable Key** from the **Developers | API Keys** section. 
+2. **[Create an application](https://dashboard.journium.app/apps/new)** in your Journium dashboard
 
-3. Paste your key into your `.env` or `.env.local` file.
+3. **Copy your Publishable Key** from the [Developers | API Keys](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/api-keys) section
 
-The final result will look like this:
+   <Callout type="info">
+   Dashboard URLs automatically navigate to your app - just click!
+   </Callout>
 
+4. **Create a `.env.local` file** in your project root:
 
-```bash title=".env"
-NEXT_PUBLIC_JOURNIUM_PUBLISHABLE_KEY=your-publishable-key
-```
+   ```bash
+   touch .env.local
+   ```
+
+5. **Add your key** to the `.env.local` file:
+
+   ```bash title=".env.local"
+   NEXT_PUBLIC_JOURNIUM_PUBLISHABLE_KEY=your_publishable_key_here
+   ```
+
+6. **Verify your setup** - check that the key is correctly saved:
+
+   ```bash
+   cat .env.local
+   # Should show: NEXT_PUBLIC_JOURNIUM_PUBLISHABLE_KEY=pk_test_...
+   ```
+
+   <Callout type="info">
+   Development instances use `pk_test_` keys. Production keys start with `pk_live_`.
+   </Callout>
 
 ### Add `<NextJourniumProvider>` to your app
 
 The `<NextJourniumProvider>` component provides session and user context to Journium's hooks. 
 It's recommended to wrap your entire app at the entry point with `<NextJourniumProvider>` 
-to make analytics globally accessible throughout your application. 
+to make analytics globally accessible throughout your application.
 
 
-<Tabs groupId="nextjs-framework" items={['App Router', 'Pages Router']} persist defaultIndex={1}>
+<Tabs groupId="nextjs-framework" items={['App Router', 'Pages Router']} persist defaultIndex={0}>
   <Tab value="App Router">
-    
-      ```tsx title="app/layout.tsx"
-      // [!code ++:1]
-      import { NextJourniumProvider } from '@journium/nextjs';
+    ```tsx title="app/layout.tsx"
+    // [!code ++:1]
+    import { NextJourniumProvider } from '@journium/nextjs';
 
-      export default function RootLayout({
-        children,
-      }: {
-        children: React.ReactNode;
-      }) {
-        return (
-          <html lang="en" suppressHydrationWarning>
-            <body>
+    export default function RootLayout({
+      children,
+    }: {
+      children: React.ReactNode;
+    }) {
+      return (
+        <html lang="en" suppressHydrationWarning>
+          <body>
+            {/* [!code ++:1] */}
+            <NextJourniumProvider>
+              {children}
               {/* [!code ++:1] */}
-              <NextJourniumProvider>
-                {children}
-                {/* [!code ++:1] */}
-              </NextJourniumProvider>
-            </body>
-          </html>
-        );
-      }
-      ```
+            </NextJourniumProvider>
+          </body>
+        </html>
+      );
+    }
+    ```
   </Tab>
   <Tab value="Pages Router">
-      ```tsx title="pages/_app.tsx"
-      import type { AppProps } from 'next/app';
-      // [!code ++:1]
-      import { NextJourniumProvider } from '@journium/nextjs';
+    ```tsx title="pages/_app.tsx"
+    import type { AppProps } from 'next/app';
+    // [!code ++:1]
+    import { NextJourniumProvider } from '@journium/nextjs';
 
-      export default function App({ Component, pageProps }: AppProps) {
-        return (
-          {/* [!code ++:1] */}
-          <NextJourniumProvider>
-            <Component {...pageProps} />
-          {/* [!code ++:1] */}
-          </NextJourniumProvider>
-        );
-      }
-  ```
+    export default function App({ Component, pageProps }: AppProps) {
+      return (
+        {/* [!code ++:1] */}
+        <NextJourniumProvider>
+          <Component {...pageProps} />
+        {/* [!code ++:1] */}
+        </NextJourniumProvider>
+      );
+    }
+    ```
   </Tab>
 </Tabs>
 
 
 
+### Run the Development Server
+
+Start your application:
+
+```npm title="Terminal"
+npm run dev
+```
 
 
+<Callout>
+**Using a custom port?** Next.js defaults to port 3000. To use a different port, set the `PORT` environment variable or use `-p` flag: `npm run dev -- -p 3001`
+</Callout>
 
+### Verify Your Setup
+
+Open [http://localhost:3000](http://localhost:3000) (or your custom port) in your browser to see the application running.
+
+### Send Events to Journium
+
+Navigate around your app to automatically send events to Journium.
+
+Then view your collected events at [Developers | Events](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/events).
+
+✅ **Success indicator:** You should see events appearing in your dashboard within a few seconds.
+
+### Generate Your First Insight
+
+<Callout type="info">
+When you create an app in Journium, a default [Insight Tracker](/docs/concepts/insight_tracker) is automatically created. This tracker helps you test data ingestion and insight generation.
+</Callout>
+
+1. Go to your [Developers | Insight Trackers](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/insight-trackers) page
+2. Click the **`Analyze now`** button for the tracker titled **"User Engagement"**
+3. Monitor the job status in [Developers | Jobs](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/jobs)
+4. Wait for the job to complete (usually takes 1-2 minutes)
+5. View your generated insights at [Dashboard | Overview](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/overview)
 
 ### Done
 
-You can now start your application and see the Journium SDK in action. If you navigate around in your application, 
-the Journium SDK will push telemetry to the Journium API. You can see events in the Journium dashboard in the
-**Developers | Events** section of your application. Head over to the 
-[Journium dashboard](https://dashboard.journium.app) to see the events.
+✅ **Congratulations!** You've successfully created your first insight with Journium!
 
 </div>
 </section>
 
+## Troubleshooting
+
+<Accordions type="single">
+  <Accordion title="Events not appearing in dashboard?">
+  - Verify your API key starts with `pk_` and is correctly set in `.env.local`
+  - Check browser console for errors (F12 → Console)
+  - Ensure you're interacting with your **local app** (not the dashboard)
+  - Restart the dev server after changing `.env.local` file
+  </Accordion>
+
+  <Accordion title="Build errors?">
+  - Delete `node_modules` and reinstall dependencies:
+    ```bash
+    rm -rf node_modules && npm install
+    ```
+  - Ensure Node.js version is 18+:
+    ```bash
+    node --version
+    ```
+  </Accordion>
+
+  <Accordion title="Port already in use?">
+  - Use a different port:
+    ```bash
+    npm run dev -- -p 3001
+    ```
+  - Or stop the process using the port:
+    ```bash
+    # macOS/Linux
+    lsof -ti:3000 | xargs kill -9
+    ```
+  </Accordion>
+
+  <Accordion title=".env.local file not loading?">
+  - Ensure the file is named exactly `.env.local` (not `.env.local.txt`)
+  - Restart the development server after creating/modifying `.env.local`
+  - Check file location: it must be in the project root, not in `app/` or `pages/`
+  - For Next.js, environment variables must be prefixed with `NEXT_PUBLIC_` to be accessible in the browser
+  </Accordion>
+</Accordions>
 
 ## What's next?
 
 <Cards>
   <Card title="Custom Events" href="/docs/concepts/events">
-    Learn how to create custom events to feed into Journium.
+    Learn how to send your own custom events to track user behavior.
   </Card>
   <Card title="Insight Trackers" href="/docs/concepts/insight_tracker">
-    How insights are generated using insight trackers.
+    Create custom analytics and understand how insights are generated.
   </Card>
 </Cards>
