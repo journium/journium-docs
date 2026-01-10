@@ -23,5 +23,10 @@ export default defineConfig({
       },
       transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerTwoslash()],
     },
+    remarkNpmOptions: {
+      persist: {
+        id: 'package-manager',
+      },
+    },
   },
 });
