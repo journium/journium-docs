@@ -4,48 +4,25 @@ description: This tutorial demonstrates how to integrate Journium with your Reac
 icon: Rocket
 ---
 
-A fully functional habit tracking example demonstrating Journium integration with React + Vite:
-
-- ✅ User authentication flow
-- ✅ Event tracking with Journium
-- ✅ Real-time insights generation
-- ✅ React + Vite best practices
-
-**Time to complete:** ~10 minutes
-
-## Prerequisites
-
-- Node.js 18+ installed
-- npm, yarn, pnpm, or [Bun](https://bun.sh/) package manager
-
 ## Setup
 
 Set up Journium for your React application.
 
 <CloneExampleRepo 
   repoUrl="https://github.com/journium/react-vite-example"
-  message="Clone the React example repository to get started quickly"
+  message="Clone the React + Vite example repository to get started quickly"
 />
 
 <section id="setup-section">
 <div className="fd-steps [&_h3]:fd-step">
 
-### Clone the Repository (Optional)
 
-If you want to follow along with a working example:
+### Install `@journium/react`
 
-```bash
-git clone https://github.com/journium/react-vite-example.git
-cd react-vite-example
-```
+The [Journium React SDK](/docs/react/hooks) gives you access to pre-built hooks and components to help you generate events 
+in your React application and get insights from your data.
 
-### Install Dependencies
-
-<Callout type="info">
-If you cloned the example repository, the `@journium/react` dependency is already included. Just run your package manager's install command.
-</Callout>
-
-For new projects, install the [Journium React SDK](/docs/react/hooks) to get access to pre-built hooks and components:
+Run the following command to install the SDK:
 
 ```npm title="Terminal"
 npm i @journium/react
@@ -53,13 +30,9 @@ npm i @journium/react
 
 ### Set your Journium Publishable Key 
 
-<Callout type="warn">
-Even if you cloned the example repository, you still need to complete this step to add your own publishable key.
-</Callout>
+1. **Sign up for a Journium account** for free at [journium.app/signup](https://journium.app/signup)
 
-1. **Sign up for a Journium account** at [journium.app/signup](https://journium.app/signup)
-
-2. **Create an application** in your [Journium dashboard](https://dashboard.journium.app) (e.g., name it "Looply" if using the example)
+2. **[Create an application](https://dashboard.journium.app/apps/new)** in your Journium dashboard
 
 3. **Copy your Publishable Key** from the [Developers | API Keys](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/api-keys) section
 
@@ -75,18 +48,18 @@ Even if you cloned the example repository, you still need to complete this step 
 
 5. **Add your key** to the `.env` file:
 
-<Tabs groupId="react-framework" items={['Vite projects', 'React/(CRA) projects']} persist>
-  <Tab value="Vite projects">
-  ```bash title=".env"
-  VITE_JOURNIUM_PUBLISHABLE_KEY=your_publishable_key_here
-  ```
-  </Tab>
-  <Tab value="React/(CRA) projects">
-  ```bash title=".env"
-  REACT_APP_JOURNIUM_PUBLISHABLE_KEY=your_publishable_key_here
-  ```
-  </Tab>
-</Tabs>
+    <Tabs groupId="react-framework" items={['Vite projects', 'React/(CRA) projects']} persist>
+      <Tab value="Vite projects">
+      ```bash title=".env"
+      VITE_JOURNIUM_PUBLISHABLE_KEY=your_publishable_key_here
+      ```
+      </Tab>
+      <Tab value="React/(CRA) projects">
+      ```bash title=".env"
+      REACT_APP_JOURNIUM_PUBLISHABLE_KEY=your_publishable_key_here
+      ```
+      </Tab>
+    </Tabs>
 
 6. **Verify your setup** - check that the key is correctly saved:
 
@@ -105,9 +78,6 @@ The `<JourniumProvider>` component provides session and user context to Journium
 It's recommended to wrap your entire app at the entry point with `<JourniumProvider>` 
 to make analytics globally accessible throughout your application.
 
-<Callout type="info">
-If you cloned the example repository, the `<JourniumProvider>` is already configured in your app. You can skip this step.
-</Callout> 
 
 
 <Tabs groupId="react-framework" items={['Vite projects', 'React/(CRA) projects']} persist defaultIndex={1}>
@@ -166,17 +136,10 @@ If you cloned the example repository, the `<JourniumProvider>` is already config
 
 Start your application:
 
-```bash
+```npm title="Terminal"
 npm run dev
-# or
-pnpm dev
-# or
-yarn dev
-# or
-bun run dev
 ```
 
-For Vite projects, the server typically starts at **http://localhost:5173** (or **http://localhost:8080** for the example repo).
 
 <Callout>
 **Using a custom port?** Add `-- --port 3000` to the dev command (for yarn, use `--port 3000` without the extra `--`).
@@ -184,16 +147,11 @@ For Vite projects, the server typically starts at **http://localhost:5173** (or 
 
 ### Verify Your Setup
 
-Open your application in the browser to verify everything is working correctly.
+Open [http://localhost:5173](http://localhost:5173) (or your custom port) in your browser to see the application running.
 
 ### Send Events to Journium
 
-Navigate around your app to automatically send events to Journium. If using the example repository:
-
-- **Sign up** for a test account (use any email/password, e.g., `test@example.com` / `password123` - data is local only)
-- **Create a habit** (e.g., "Drink water")
-- **Log a habit entry**
-- **Explore different pages** (Home, Insights, Settings)
+Navigate around your app to automatically send events to Journium.
 
 Then view your collected events at [Developers | Events](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/events).
 
@@ -265,11 +223,5 @@ When you create an app in Journium, a default [Insight Tracker](/docs/react/conc
   </Card>
   <Card title="Insight Trackers" href="/docs/react/concepts/insight_tracker">
     Create custom analytics and understand how insights are generated.
-  </Card>
-  <Card title="React Hooks" href="/docs/react/hooks">
-    Explore all available hooks for tracking, identification, and analytics.
-  </Card>
-  <Card title="Application Concepts" href="/docs/react/concepts/application">
-    Understand core Journium concepts and how they work together.
   </Card>
 </Cards>
