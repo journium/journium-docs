@@ -1,78 +1,112 @@
 ---
-title: Quick Start
-description: Getting started with Journium
+title: React Quick Start
+description: This tutorial demonstrates how to integrate Journium with your React application.
 icon: Rocket
 ---
 
-<include>../shared/.shared.introduction.mdx</include>
 
-<Callout title="Want to learn more?">
-  Read our in-depth [What is Journium](/docs/react/what-is-journium) introduction.
-</Callout>
+
 
 ## Setup
 
-Set up Journium for your Next.js application.
+Set up Journium for your React application.
 
 <section id="setup-section">
 <div className="fd-steps [&_h3]:fd-step">
 
-### Installation
+### Install `@journium/react`
+
+The [Journium React SDK](/docs/react/hooks) gives you access to pre-built hooks and components to help you generate events 
+in your React application and get insights from your data.
+
+Run the following command to install the SDK:
 
 ```npm
 npm i @journium/react
 ```
 
+### Set your Journium Publishable Key 
 
-### Initialize Journium
+1. **Create a new application** in the [Journium dashboard](https://dashboard.journium.app). This is where you will get your API keys.
 
-Wrap your app wih the `JourniumProvider` to enable analytics throughout your React application.
+2. **Get your Publishable Key** from the **Developers | API Keys** section. 
 
+3. Paste your key into your `.env` or `.env.local` file.
 
-```tsx title="main.tsx"
+The final result will look like this:
 
-import React from 'react';
-// [!code ++:1]
-import { JourniumProvider } from '@journium/react';
-import App from './App';
+<Tabs items={['Vite projects', 'React/(CRA) projects']}>
+  <Tab value="Vite projects">
+  ```bash title=".env"
+  VITE_JOURNIUM_PUBLISHABLE_KEY=your-publishable-key
+  ```
+  </Tab>
+  <Tab value="React/(CRA) projects">
 
-function Root() {
-  return (
-    {/* [!code ++:1] */}
-    <JourniumProvider>
-      <App />
-    {/* [!code ++:1] */}
-    </JourniumProvider>
-  );
-}
+  ```bash title=".env"
+  REACT_APP_JOURNIUM_PUBLISHABLE_KEY=your-publishable-key
+  ```
+  </Tab>
+</Tabs>
 
-export default Root;
-```
+### Add `<JourniumProvider>` to your app
 
-
-### Get your Publishable Key
-
-1. **Sign up for a Journium account** at [https://journium.app/signup](https://journium.app/signup)
-
-2. **Create a new application** in the Journium dashboard. This is where you will get your API keys.
-
-3. **Get your Publishable Key** from the **Developers | API Keys** section. 
+The `<JourniumProvider>` component provides session and user context to Journium's hooks. 
+It's recommended to wrap your entire app at the entry point with `<JourniumProvider>` 
+to make analytics globally accessible throughout your application. 
 
 
-### Set your Publishable Key 
+<Tabs items={['Vite projects', 'React/(CRA) projects']}>
+  <Tab value="Vite projects">
+    ```tsx title="main.tsx"
+    import { StrictMode } from 'react'
+    import { createRoot } from 'react-dom/client'
+    // [!code ++:1]
+    import { JourniumProvider } from '@journium/react';
+    import App from './App';
 
-**Set your Publishable Key** in your environment variables. 
-The publishable key can be set in your `.env` or `.env.local` file.
+    createRoot(document.getElementById('root')!).render(
+      <StrictMode>
+        {/* [!code ++:5] */}
+        <JourniumProvider
+          config={{
+            publishableKey: import.meta.env.VITE_JOURNIUM_PUBLISHABLE_KEY!
+          }}
+        >
+          <App />
+        {/* [!code ++:1] */}
+        </JourniumProvider>
+      </StrictMode>
+    );
+    ```
+  </Tab>
+  <Tab value="React/(CRA) projects">
+    ```tsx title="main.tsx"
+    import React from 'react';
+    // [!code ++:1]
+    import { JourniumProvider } from '@journium/react';
+    import App from './App';
 
-#### CRA Projects
-```bash title=".env"
-REACT_APP_JOURNIUM_PUBLISHABLE_KEY=your-publishable-key
-```
+    function Root() {
+      return (
+        // [!code ++:5]
+        <JourniumProvider
+          config={{
+            publishableKey: process.env.REACT_APP_JOURNIUM_PUBLISHABLE_KEY!
+          }}
+        >
+          <App />
+        {/* [!code ++:1] */}
+        </JourniumProvider>
+      );
+    }
 
-#### Vite Projects
-```bash title=".env"
-VITE_JOURNIUM_PUBLISHABLE_KEY=your-publishable-key
-```
+    export default Root;
+    ```
+  </Tab>
+</Tabs>
+
+
 
 ### Done
 

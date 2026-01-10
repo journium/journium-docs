@@ -1,14 +1,9 @@
 ---
-title: Quick Start
-description: Getting started with Journium
+title: Next.js Quick Start
+description: This tutorial demonstrates how to integrate Journium with your Next.js application.
 icon: Rocket
 ---
 
-<include>../shared/.shared.introduction.mdx</include>
-
-<Callout title="Want to learn more?">
-  Read our in-depth [What is Journium](/docs/what-is-journium) introduction.
-</Callout>
 
 ## Setup
 
@@ -17,81 +12,92 @@ Set up Journium for your Next.js application.
 <section id="setup-section">
 <div className="fd-steps [&_h3]:fd-step">
 
-### Installation
+### Install `@journium/nextjs`
+
+The [Journium Next.js SDK](/docs/hooks) gives you access to pre-built hooks and components to help you generate events 
+in your Next.js application and get insights from your data.
+
+Run the following command to install the SDK:
 
 ```npm
 npm i @journium/nextjs
 ```
 
 
-### Initialize Journium
 
-Wrap your app wih the `NextJourniumProvider` to enable analytics throughout your Next.js application.
+### Set your Journium Publishable Key 
 
-#### App Router
+1. **Create a new application** in the [Journium dashboard](https://dashboard.journium.app). 
+This is where you will get your API keys.
 
-Add the `NextJourniumProvider` to your root layout, usuallay the `app/layout.tsx` file.
+2. **Get your Publishable Key** from the **Developers | API Keys** section. 
 
-```tsx title="app/layout.tsx"
-// [!code ++:1]
-import { NextJourniumProvider } from '@journium/nextjs';
+3. Paste your key into your `.env` or `.env.local` file.
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body>
-         {/* [!code ++:1] */}
-        <NextJourniumProvider>
-          {children}
-          {/* [!code ++:1] */}
-        </NextJourniumProvider>
-      </body>
-    </html>
-  );
-}
-```
+The final result will look like this:
 
-#### Pages Router
-
-Add the `NextJourniumProvider` to your pages router.
-
-```tsx title="pages/_app.tsx"
-import type { AppProps } from 'next/app';
-// [!code ++:1]
-import { NextJourniumProvider } from '@journium/nextjs';
-
-export default function App({ Component, pageProps }: AppProps) {
-  return (
-    {/* [!code ++:1] */}
-    <NextJourniumProvider>
-      <Component {...pageProps} />
-    {/* [!code ++:1] */}
-    </NextJourniumProvider>
-  );
-}
-```
-
-### Get your Publishable Key
-
-1. **Sign up for a Journium account** at [https://journium.app/signup](https://journium.app/signup)
-
-2. **Create a new application** in the Journium dashboard. This is where you will get your API keys.
-
-3. **Get your Publishable Key** from the **Developers | API Keys** section. 
-
-
-### Set your Publishable Key 
-
-**Set your Publishable Key** in your environment variables. 
-The publishable key can be set in your `.env` or `.env.local` file.
 
 ```bash title=".env"
 NEXT_PUBLIC_JOURNIUM_PUBLISHABLE_KEY=your-publishable-key
 ```
+
+### Add `<NextJourniumProvider>` to your app
+
+The `<NextJourniumProvider>` component provides session and user context to Journium's hooks. 
+It's recommended to wrap your entire app at the entry point with `<NextJourniumProvider>` 
+to make analytics globally accessible throughout your application. 
+
+
+<Tabs items={['App Router', 'Pages Router']}>
+  <Tab value="App Router">
+    
+      ```tsx title="app/layout.tsx"
+      // [!code ++:1]
+      import { NextJourniumProvider } from '@journium/nextjs';
+
+      export default function RootLayout({
+        children,
+      }: {
+        children: React.ReactNode;
+      }) {
+        return (
+          <html lang="en" suppressHydrationWarning>
+            <body>
+              {/* [!code ++:1] */}
+              <NextJourniumProvider>
+                {children}
+                {/* [!code ++:1] */}
+              </NextJourniumProvider>
+            </body>
+          </html>
+        );
+      }
+      ```
+  </Tab>
+  <Tab value="Pages Router">
+      ```tsx title="pages/_app.tsx"
+      import type { AppProps } from 'next/app';
+      // [!code ++:1]
+      import { NextJourniumProvider } from '@journium/nextjs';
+
+      export default function App({ Component, pageProps }: AppProps) {
+        return (
+          {/* [!code ++:1] */}
+          <NextJourniumProvider>
+            <Component {...pageProps} />
+          {/* [!code ++:1] */}
+          </NextJourniumProvider>
+        );
+      }
+  ```
+  </Tab>
+</Tabs>
+
+
+
+
+
+
 
 ### Done
 
