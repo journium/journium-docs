@@ -18,6 +18,7 @@ export function baseOptions(): BaseLayoutProps {
     nav: {
       title: logo,
       url: '/docs',
+      //transparentMode: 'top',
     },
     githubUrl: 'https://github.com/journium',
     themeSwitch: {
