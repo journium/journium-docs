@@ -22,27 +22,9 @@ export function ThemedImage({ srcLight, srcDark, alt, ...props }: ThemedImagePro
     });
   }, []);
 
-  // During SSR and initial hydration, show placeholder to avoid hydration mismatches
-  if (!mounted || !resolvedTheme) {
-    const width = typeof props.width === 'number' ? `${props.width}px` : props.width || 'auto';
-    const height = typeof props.height === 'number' ? `${props.height}px` : props.height || 'auto';
-    
-    return (
-      <div
-        style={{
-          width,
-          height,
-          backgroundColor: 'transparent',
-          display: 'inline-block',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-        aria-label={alt}
-        aria-hidden="true"
-      />
-    );
-  }
-
-  const src = resolvedTheme === 'dark' ? srcDark : srcLight;
+  // Use light theme as default during SSR/initial render to avoid hydration mismatch
+  // After mount, use the resolved theme
+  const src = mounted && resolvedTheme === 'dark' ? srcDark : srcLight;
+  
   return <Image src={src} alt={alt || ''} suppressHydrationWarning {...props} />;
 }
