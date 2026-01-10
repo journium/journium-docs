@@ -11,6 +11,6 @@
     "---[LibraryBig]SDK Reference---",
     "hooks",
     "---[Code]Example Repositories---",
-    "external:[React Example](https://github.com/journium/journium-examples/tree/main/looply-app-react)"
+    "external:[React Example (Vite)](https://github.com/journium/react-vite-example)"
   ]
 }
