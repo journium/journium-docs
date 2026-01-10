@@ -21,7 +21,7 @@ in your React application and get insights from your data.
 
 Run the following command to install the SDK:
 
-```npm
+```npm title="Terminal"
 npm i @journium/react
 ```
 
@@ -35,7 +35,7 @@ npm i @journium/react
 
 The final result will look like this:
 
-<Tabs items={['Vite projects', 'React/(CRA) projects']}>
+<Tabs groupId="react-framework" items={['Vite projects', 'React/(CRA) projects']} persist>
   <Tab value="Vite projects">
   ```bash title=".env"
   VITE_JOURNIUM_PUBLISHABLE_KEY=your-publishable-key
@@ -56,7 +56,7 @@ It's recommended to wrap your entire app at the entry point with `<JourniumProvi
 to make analytics globally accessible throughout your application. 
 
 
-<Tabs items={['Vite projects', 'React/(CRA) projects']}>
+<Tabs groupId="react-framework" items={['Vite projects', 'React/(CRA) projects']} persist defaultIndex={1}>
   <Tab value="Vite projects">
     ```tsx title="main.tsx"
     import { StrictMode } from 'react'
