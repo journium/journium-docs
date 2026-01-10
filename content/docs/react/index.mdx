@@ -24,6 +24,10 @@ Set up Journium for your React application.
 The [Journium React SDK](/docs/react/hooks) gives you access to pre-built hooks and components to help you generate events 
 in your React application and get insights from your data.
 
+<Callout type="info">
+If you cloned the example repository, this dependency is already installed. You can skip this step.
+</Callout>
+
 Run the following command to install the SDK:
 
 ```npm title="Terminal"
@@ -31,6 +35,10 @@ npm i @journium/react
 ```
 
 ### Set your Journium Publishable Key 
+
+<Callout type="warn">
+Even if you cloned the example repository, you still need to complete this step to add your own publishable key.
+</Callout>
 
 1. **Create a new application** in the [Journium dashboard](https://dashboard.journium.app). This is where you will get your API keys.
 
@@ -58,7 +66,11 @@ The final result will look like this:
 
 The `<JourniumProvider>` component provides session and user context to Journium's hooks. 
 It's recommended to wrap your entire app at the entry point with `<JourniumProvider>` 
-to make analytics globally accessible throughout your application. 
+to make analytics globally accessible throughout your application.
+
+<Callout type="info">
+If you cloned the example repository, the `<JourniumProvider>` is already configured in your app. You can skip this step.
+</Callout> 
 
 
 <Tabs groupId="react-framework" items={['Vite projects', 'React/(CRA) projects']} persist defaultIndex={1}>
