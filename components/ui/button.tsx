@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from 'class-variance-authority';
+import { type ComponentPropsWithoutRef, forwardRef } from 'react';
 
 const variants = {
   primary: 'bg-fd-primary text-fd-primary-foreground hover:bg-fd-primary/80',
@@ -9,7 +10,7 @@ const variants = {
 } as const;
 
 export const buttonVariants = cva(
-  'inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring',
+  'inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring no-underline',
   {
     variants: {
       variant: variants,
@@ -26,3 +27,37 @@ export const buttonVariants = cva(
 );
 
 export type ButtonProps = VariantProps<typeof buttonVariants>;
+
+type ButtonComponentProps = ComponentPropsWithoutRef<'button'> &
+  VariantProps<typeof buttonVariants> & {
+    href?: string;
+    target?: string;
+    rel?: string;
+  };
+
+export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonComponentProps>(
+  ({ className, variant, color, size, href, ...props }, ref) => {
+    const classes = buttonVariants({ variant, color, size, className });
+    
+    if (href) {
+      return (
+        <a
+          ref={ref as React.Ref<HTMLAnchorElement>}
+          href={href}
+          className={classes}
+          {...(props as ComponentPropsWithoutRef<'a'>)}
+        />
+      );
+    }
+    
+    return (
+      <button
+        ref={ref as React.Ref<HTMLButtonElement>}
+        className={classes}
+        {...props}
+      />
+    );
+  }
+);
+
+Button.displayName = 'Button';
