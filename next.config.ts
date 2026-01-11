@@ -30,10 +30,14 @@ const nextConfig: NextConfig = {
       },
     ],
     // Custom loader to ensure absolute URLs when assetPrefix is set
-    // This fixes the issue where images accessed via journium.app/docs
-    // try to use journium.app/_next/image instead of docs.journium.app/_next/image
-    loader: 'custom',
-    loaderFile: './lib/image-loader.ts',
+    // assetPrefix doesn't affect Next.js Image optimization URLs, so we need this
+    // Only use custom loader in production when NEXT_PUBLIC_ASSET_PREFIX is set
+    ...(process.env.NEXT_PUBLIC_ASSET_PREFIX
+      ? {
+          loader: 'custom' as const,
+          loaderFile: './lib/image-loader.ts',
+        }
+      : {}),
   },
   async redirects() {
     return [
