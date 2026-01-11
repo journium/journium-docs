@@ -13,7 +13,23 @@ const nextConfig: NextConfig = {
   // Use assetPrefix to ensure assets load from the correct domain when accessed via rewrites
   // This is needed because when journium.app/docs rewrites to docs.journium.app/docs,
   // relative asset paths would otherwise resolve to the wrong domain
+  // REQUIRED: Set NEXT_PUBLIC_ASSET_PREFIX=https://docs.journium.app in production
   assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || undefined,
+  // Image configuration - ensure images can be optimized correctly
+  images: {
+    // Allow images from the same domain (docs.journium.app)
+    // This ensures Next.js Image optimization works correctly
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'docs.journium.app',
+      },
+      {
+        protocol: 'https',
+        hostname: 'journium.app',
+      },
+    ],
+  },
   async redirects() {
     return [
       {
