@@ -15,20 +15,13 @@ const nextConfig: NextConfig = {
   // relative asset paths would otherwise resolve to the wrong domain
   // REQUIRED: Set NEXT_PUBLIC_ASSET_PREFIX=https://docs.journium.app in production
   assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || undefined,
-  // Image configuration - ensure images can be optimized correctly
+  // Image configuration - disable optimization to work with rewrites
+  // When images are accessed via journium.app/docs (rewrite), Vercel's Image Optimization API
+  // rejects proxied requests with INVALID_IMAGE_OPTIMIZE_REQUEST error.
+  // Using unoptimized images allows them to load directly from the public folder,
+  // which works correctly with rewrites via assetPrefix.
   images: {
-    // Allow images from the same domain (docs.journium.app)
-    // This ensures Next.js Image optimization works correctly
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'docs.journium.app',
-      },
-      {
-        protocol: 'https',
-        hostname: 'journium.app',
-      },
-    ],
+    unoptimized: true,
   },
   async redirects() {
     return [
