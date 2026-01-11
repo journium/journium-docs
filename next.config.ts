@@ -29,15 +29,6 @@ const nextConfig: NextConfig = {
         hostname: 'journium.app',
       },
     ],
-    // Custom loader to ensure absolute URLs when assetPrefix is set
-    // assetPrefix doesn't affect Next.js Image optimization URLs, so we need this
-    // Only use custom loader in production when NEXT_PUBLIC_ASSET_PREFIX is set
-    ...(process.env.NEXT_PUBLIC_ASSET_PREFIX
-      ? {
-          loader: 'custom' as const,
-          loaderFile: './lib/image-loader.ts',
-        }
-      : {}),
   },
   async redirects() {
     return [
