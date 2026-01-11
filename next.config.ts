@@ -32,25 +32,8 @@ const nextConfig: NextConfig = {
     // Custom loader to ensure absolute URLs when assetPrefix is set
     // This fixes the issue where images accessed via journium.app/docs
     // try to use journium.app/_next/image instead of docs.journium.app/_next/image
-    loader: (({ src, width, quality }: { src: string; width: number; quality?: number }) => {
-      const baseUrl = process.env.NEXT_PUBLIC_ASSET_PREFIX || '';
-      if (baseUrl) {
-        // Use absolute URL when assetPrefix is set
-        const params = new URLSearchParams({
-          url: src.startsWith('/') ? src : `/${src}`,
-          w: width.toString(),
-          q: (quality || 75).toString(),
-        });
-        return `${baseUrl}/_next/image?${params.toString()}`;
-      }
-      // Default Next.js image optimization URL (relative)
-      const params = new URLSearchParams({
-        url: src.startsWith('/') ? src : `/${src}`,
-        w: width.toString(),
-        q: (quality || 75).toString(),
-      });
-      return `/_next/image?${params.toString()}`;
-    }) as unknown as 'custom',
+    loader: 'custom',
+    loaderFile: './lib/image-loader.ts',
   },
   async redirects() {
     return [
