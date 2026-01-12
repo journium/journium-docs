@@ -89,8 +89,13 @@ DOCUMENTATION ACCESS:
 - For comprehensive documentation access, AI-friendly formats are available:
   - https://journium.app/llms.txt - Structured index of all documentation pages with descriptions
   - https://journium.app/llms-full.txt - Complete documentation content in a single, AI-friendly format
+- LLM-friendly MDX content: For any page URL listed in llms.txt (e.g., /docs/nextjs/concepts/application), 
+  you can access the raw MDX content optimized for AI consumption by prefixing the path with "llms.mdx":
+  - Example: /docs/nextjs/concepts/application → https://journium.app/llms.mdx/docs/nextjs/concepts/application
+  - This provides clean, processed markdown content without HTML/JSX, ideal for AI parsing
 - Use the provideLinks tool to reference specific documentation pages in your responses
-- If you need broader context or comprehensive information, you can reference the llms-full.txt file`;
+- If you need broader context or comprehensive information, you can reference the llms-full.txt file
+- For individual pages, prefer accessing the llms.mdx version for cleaner, more structured content`;
 
 export async function POST(req: Request) {
   const startTime = Date.now();
