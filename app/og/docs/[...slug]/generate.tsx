@@ -20,16 +20,16 @@ const fontBold = readFile('./lib/og/Geist-Bold.ttf').then((data) => ({
 
 export async function getImageResponseOptions(): Promise<ImageResponseOptions> {
   return {
-    width: 1200,
-    height: 630,
-    format: 'webp',
+    width: 2400,
+    height: 1260,
+    format: 'png',
     fonts: await Promise.all([font, fontBold]),
   };
 }
 
 export function generate({ title, description }: GenerateProps) {
   const logo = (
-    <svg width="300" height="74" viewBox="0 0 3250 800" xmlns="http://www.w3.org/2000/svg">
+    <svg width="600" height="148" viewBox="0 0 3250 800" xmlns="http://www.w3.org/2000/svg">
       <g>
         <g opacity="1">
           <path d="M762.994 522.051C725.594 522.051 697.544 512.871 678.844 494.511C660.144 476.151 650.794 451.671 650.794 421.071C650.794 414.271 651.219 407.301 652.069 400.161C652.919 393.021 654.194 386.731 655.894 381.291L745.654 377.211C744.294 381.971 743.189 387.666 742.339 394.296C741.489 400.926 741.064 406.791 741.064 411.891C741.064 425.831 743.954 435.606 749.734 441.216C755.514 446.826 763.334 449.631 773.194 449.631C790.194 449.631 804.389 443.936 815.779 432.546C827.169 421.156 835.244 403.731 840.004 380.271L888.454 151.791L977.194 151.791L928.744 382.311C918.204 432.291 898.824 468.076 870.604 489.666C842.384 511.256 806.514 522.051 762.994 522.051Z" fill="white" fillRule="nonzero" opacity="1" stroke="none"/>
@@ -67,20 +67,20 @@ export function generate({ title, description }: GenerateProps) {
           flexDirection: 'column',
           width: '100%',
           height: '100%',
-          padding: '4rem',
+          padding: '8rem',
         }}
       >
         <span
           style={{
             fontWeight: 600,
-            fontSize: '76px',
+            fontSize: '152px',
           }}
         >
           {title}
         </span>
         <p
           style={{
-            fontSize: '48px',
+            fontSize: '96px',
             color: 'rgba(240,240,240,0.7)',
           }}
         >
