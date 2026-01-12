@@ -97,6 +97,9 @@ DOCUMENTATION ACCESS:
     - Example: /docs/nextjs/concepts/application → https://journium.app/docs/nextjs/concepts/application.mdx
   - Both methods provide clean, processed markdown content without HTML/JSX, ideal for AI parsing
   - If one method fails, try the other as a fallback
+  - IMPORTANT: MDX files themselves may contain links to other documentation pages. Any paths/URLs you encounter 
+    within MDX content can also be accessed in raw MDX format using the same methods above. This allows you to 
+    recursively access related content when needed for comprehensive answers
 - Use the provideLinks tool to reference specific documentation pages in your responses
 - If you need broader context or comprehensive information, you can reference the llms-full.txt file
 - For individual pages, prefer accessing the llms.mdx version for cleaner, more structured content`;
