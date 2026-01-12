@@ -13,31 +13,11 @@ import {
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
 import { useDocsSearch } from 'fumadocs-core/search/client';
-import { OramaCloud } from '@orama/core';
-import { useI18n } from 'fumadocs-ui/contexts/i18n';
-import { useMemo } from 'react';
 
 export default function CustomSearchDialog(props: SharedProps) {
-  const { locale } = useI18n(); // (optional) for i18n
-  
-  const client = useMemo(() => {
-    if (!process.env.NEXT_PUBLIC_ORAMA_PROJECT_ID || !process.env.NEXT_PUBLIC_ORAMA_API_KEY) {
-      // Return a dummy client for builds without env vars (e.g., PR builds)
-      return new OramaCloud({
-        projectId: 'dummy',
-        apiKey: 'dummy',
-      });
-    }
-    return new OramaCloud({
-      projectId: process.env.NEXT_PUBLIC_ORAMA_PROJECT_ID,
-      apiKey: process.env.NEXT_PUBLIC_ORAMA_API_KEY,
-    });
-  }, []);
 
   const { search, setSearch, query } = useDocsSearch({
-    type: 'orama-cloud',
-    client,
-    locale,
+    type: 'fetch'
   });
 
   return (
@@ -50,7 +30,7 @@ export default function CustomSearchDialog(props: SharedProps) {
           <SearchDialogClose />
         </SearchDialogHeader>
         <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
-        <SearchDialogFooter>
+        {/* <SearchDialogFooter>
           <a
             href="https://orama.com"
             rel="noreferrer noopener"
@@ -58,7 +38,7 @@ export default function CustomSearchDialog(props: SharedProps) {
           >
             Search powered by Orama
           </a>
-        </SearchDialogFooter>
+        </SearchDialogFooter> */}
       </SearchDialogContent>
     </SearchDialog>
   );
