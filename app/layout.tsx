@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import CustomSearchDialog from "@/components/ui/search";
+import { AISearchTrigger } from "@/components/search";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -89,6 +90,7 @@ export default function RootLayout({
             SearchDialog: CustomSearchDialog,
           }}
         >
+          <AISearchTrigger />
           {children}
         </RootProvider>
       </body>
