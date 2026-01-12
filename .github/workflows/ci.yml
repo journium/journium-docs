@@ -46,6 +46,10 @@ jobs:
 
       - name: Build project
         run: pnpm build
+        env:
+          NEXT_PUBLIC_ORAMA_PROJECT_ID: ${{ vars.NEXT_PUBLIC_ORAMA_PROJECT_ID }}
+          NEXT_PUBLIC_ORAMA_API_KEY: ${{ vars.NEXT_PUBLIC_ORAMA_API_KEY }}
+          NEXT_PUBLIC_ORAMA_DATASOURCE_ID: ${{ vars.NEXT_PUBLIC_ORAMA_DATASOURCE_ID }}
 
       - name: Sync search content
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
