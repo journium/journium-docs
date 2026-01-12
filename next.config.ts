@@ -9,7 +9,7 @@ const withMDX = createMDX({
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
-  serverExternalPackages: ['typescript', 'twoslash'],
+  serverExternalPackages: ['typescript', 'twoslash', '@takumi-rs/image-response'],
   // Use assetPrefix to ensure assets load from the correct domain when accessed via rewrites
   // This is needed because when journium.app/docs rewrites to docs.journium.app/docs,
   // relative asset paths would otherwise resolve to the wrong domain
