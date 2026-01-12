@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { BookOpen, Home, Play, Search } from 'lucide-react';
+import { BookOpen, Play, Search } from 'lucide-react';
 
 export default function NotFound() {
   return (
