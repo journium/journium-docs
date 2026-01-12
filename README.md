@@ -58,6 +58,40 @@ Run ESLint to check for code issues:
 pnpm lint
 ```
 
+## AI Search Configuration
+
+The documentation site includes an AI-powered search feature. To enable it, configure one of the following AI providers:
+
+### Option 1: OpenAI (Recommended)
+
+Add to your `.env.local` file:
+
+```env
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_MODEL=gpt-4o-mini  # Optional: defaults to gpt-4o-mini. Other options: gpt-4o, gpt-4-turbo, etc.
+```
+
+### Option 2: Anthropic (Claude)
+
+Add to your `.env.local` file:
+
+```env
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+ANTHROPIC_MODEL=claude-3-5-sonnet-20241022  # Optional: defaults to claude-3-5-sonnet-20241022
+```
+
+### Option 3: Custom OpenAI-Compatible API
+
+Add to your `.env.local` file:
+
+```env
+AI_API_KEY=your_api_key_here
+AI_BASE_URL=https://your-api-endpoint.com/v1
+AI_MODEL=your-model-name  # Optional: defaults to gpt-4o-mini
+```
+
+The AI search uses the `provideLinks` tool to cite documentation sources. The configuration is in `app/api/chat/route.ts`.
+
 ## Project Structure
 
 - `app/` - Next.js app directory with routes and layouts
