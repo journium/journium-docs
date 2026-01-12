@@ -47,7 +47,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
         <ViewOptions
           markdownUrl={`${page.url}.mdx`}
-          githubUrl={`https://github.com/journium/journium-docs/blob/main/apps/docs/content/docs/${page.path}`}
+          githubUrl={`https://github.com/journium/journium-docs/blob/main/content/docs/${page.path}`}
         />
       </div>
       <DocsBody>
