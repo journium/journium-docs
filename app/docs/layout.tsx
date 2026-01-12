@@ -6,6 +6,7 @@ import { TerminalIcon } from 'lucide-react';
 import { NextJsIcon } from '@/components/icons/nextjs';
 import { ReactIcon } from '@/components/icons/react';
 import { JsIcon } from '@/components/icons/js';
+import { AISearchPanel } from '@/components/search';
 
 export default function Layout({ children }: LayoutProps<'/docs'>) {
   
@@ -75,8 +76,9 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
     //       //urls: new Set(['/docs/react/react', '/docs/react/nextjs']),
     //     },
     //   ],
-    // }}
+    //     }}
     >
+      <AISearchPanel />
       {children}
     </DocsLayout>
   );

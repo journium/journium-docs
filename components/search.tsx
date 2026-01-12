@@ -40,10 +40,7 @@ function Header() {
       <div className="flex-1 p-3 border rounded-xl bg-fd-card text-fd-card-foreground">
         <p className="text-sm font-medium mb-2">Ask AI</p>
         <p className="text-xs text-fd-muted-foreground">
-          Powered by{' '}
-          <a href="https://inkeep.com" target="_blank" rel="noreferrer noopener">
-            Inkeep AI
-          </a>
+          Ask questions about Journium documentation
         </p>
       </div>
       <button
@@ -236,7 +233,7 @@ function Input(props: ComponentProps<'textarea'>) {
 
 const roleName: Record<string, string> = {
   user: 'you',
-  assistant: 'fumadocs',
+  assistant: 'journium',
 };
 
 function Message({ message, ...props }: { message: UIMessage } & ComponentProps<'div'>) {

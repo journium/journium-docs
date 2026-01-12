@@ -10,6 +10,7 @@
     "sync-content": "node --import tsx scripts/sync-content.ts"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.8",
     "@ai-sdk/openai-compatible": "^2.0.5",
     "@ai-sdk/react": "^3.0.30",
     "@orama/core": "^1.2.16",
