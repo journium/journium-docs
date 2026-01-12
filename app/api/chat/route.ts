@@ -84,7 +84,13 @@ When answering questions:
 - If you're not sure about something related to Journium, say so rather than guessing
 - Never confuse Fumadocs (the docs framework) with Journium (the product)
 
-The documentation is available at https://journium.app/docs and you can reference specific pages using the provideLinks tool.`;
+DOCUMENTATION ACCESS:
+- The documentation is available at https://journium.app/docs
+- For comprehensive documentation access, AI-friendly formats are available:
+  - https://journium.app/llms.txt - Structured index of all documentation pages with descriptions
+  - https://journium.app/llms-full.txt - Complete documentation content in a single, AI-friendly format
+- Use the provideLinks tool to reference specific documentation pages in your responses
+- If you need broader context or comprehensive information, you can reference the llms-full.txt file`;
 
 export async function POST(req: Request) {
   const startTime = Date.now();
