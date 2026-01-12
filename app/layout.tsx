@@ -85,9 +85,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <RootProvider 
-          search={{
-            SearchDialog: CustomSearchDialog,
-          }}
+          // search={{
+          //   SearchDialog: CustomSearchDialog,
+          // }}
         >
           {children}
         </RootProvider>
