@@ -37,9 +37,13 @@ const getAIProvider = () => {
     });
   }
 
-  throw new Error(
-    'No AI provider configured. Please set one of: OPENAI_API_KEY, ANTHROPIC_API_KEY, or AI_API_KEY + AI_BASE_URL'
-  );
+  // For CI builds without API keys, return a dummy provider that will error at runtime
+  // This allows the build to succeed but the API will fail when actually called
+  return createOpenAICompatible({
+    name: 'dummy',
+    apiKey: 'dummy-key-for-build',
+    baseURL: 'https://api.openai.com/v1',
+  });
 };
 
 const getModelName = () => {
@@ -56,15 +60,12 @@ const getModelName = () => {
   return 'gpt-4o-mini';
 };
 
-const aiProvider = getAIProvider();
-const modelName = getModelName();
-
 // Helper to get provider name for logging
 const getProviderName = () => {
   if (process.env.OPENAI_API_KEY) return 'OpenAI';
   if (process.env.ANTHROPIC_API_KEY) return 'Anthropic';
   if (process.env.AI_API_KEY) return 'Custom';
-  return 'Unknown';
+  return 'Dummy (build-only)';
 };
 
 // System prompt for the AI assistant
@@ -90,6 +91,28 @@ export async function POST(req: Request) {
   const requestId = crypto.randomUUID();
   
   try {
+    // Lazy initialization - only check for API keys when the route is actually called
+    const hasValidApiKey = 
+      process.env.OPENAI_API_KEY || 
+      process.env.ANTHROPIC_API_KEY || 
+      (process.env.AI_API_KEY && process.env.AI_BASE_URL);
+    
+    if (!hasValidApiKey) {
+      console.error(`[${requestId}] No AI provider configured`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'AI chat is not configured. Please set one of: OPENAI_API_KEY, ANTHROPIC_API_KEY, or AI_API_KEY + AI_BASE_URL' 
+        }),
+        { 
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    const aiProvider = getAIProvider();
+    const modelName = getModelName();
+    
     console.log(`[${requestId}] ===== Chat API Request Started =====`);
     console.log(`[${requestId}] Provider: ${getProviderName()}, Model: ${modelName}`);
     
