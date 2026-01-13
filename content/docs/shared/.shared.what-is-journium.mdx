@@ -1,18 +1,94 @@
 import { RocketIcon } from 'lucide-react';
 
-**Journium** is an awareness layer for modern applications. Instead of asking humans to hunt 
-through dashboards, Journium sits on top of your telemetry and automatically detects meaningful 
-behavioral change, explains what happened, and surfaces insights proactively — in plain language.
+**Journium** turns raw telemetry into proactive, narrative insights — without charts, queries, or BI. Instead of asking humans to hunt through dashboards, Journium sits on top of your application's data and automatically detects meaningful behavioral changes, explains what happened, and surfaces insights in plain language.
 
 **Data exists. Awareness doesn't.** Journium flips that model.
 
+## The Problem We're Solving
 
-## Core Philosophy
+Modern applications generate mountains of event data — every click, page view, transaction, and user interaction creates a data point. Yet despite this abundance of information, organizations struggle to extract clear, actionable insights in a timely manner.
 
-Journium follows a simple principle:
+### The Traditional Analytics Trap
+
+The conventional approach to analytics follows a broken pattern:
+
+**Telemetry → Storage → Queries → Dashboards → Hope**
+
+Teams collect data, store it, build dashboards, and then... hope someone notices something important. This process demands:
+- **Manual exploration** — analysts must preprocess data, run queries, and interpret results
+- **Domain expertise** — understanding what to look for requires deep knowledge
+- **Significant time** — valuable knowledge often remains buried because generating insights traditionally requires significant manual effort
+- **Reactive discovery** — by the time an insight is found, it may be too late to act
+
+The result? **We have a data overload, but an insights shortage.** Busy product teams and executives rarely have the luxury to sift through dashboards or craft SQL queries on the fly. Important findings may be discovered too late or not at all.
+
+### Why Dashboards Fall Short
+
+Static dashboards can show you *what* happened, but they rarely explain *why*. Even specialized BI tools struggle to surface the root causes behind metric movements. You're left with charts that require interpretation, correlation analysis, and often, a bit of guesswork.
+
+## How Journium Flips the Narrative
+
+Journium reimagines analytics from the ground up. Instead of passive reporting tools, we've built an active system that acts like a data analyst working 24/7.
+
+### The New Model: Telemetry → Meaning → Action
+
+Journium follows a simple, powerful principle:
 
 **Telemetry → Meaning → Action**
 
 Not: Telemetry → Storage → Queries → Dashboards → Hope
 
-Your application doesn't need more dashboards. It needs a way to speak up when something meaningful changes.
+Your application doesn't need more dashboards. It needs a way to **speak up** when something meaningful changes.
+
+### From Passive to Proactive
+
+Traditional analytics asks: *"What do you want to know?"*  
+Journium asks: *"What should you know?"*
+
+Instead of waiting for someone to query the data, Journium continuously monitors your application's behavior, detects significant changes, performs root-cause analysis, and delivers concise insights directly to you — in Slack, email, or wherever you need them.
+
+Think of it this way: Who has the time or interest to dig through charts if an AI can directly tell you *"users from segment X are churning due to feature Y issues, impacting conversion by Z%"* — with the data to back it up?
+
+## Insights as Code: The Foundation
+
+Journium introduces **"Insights as Code"** — a novel approach where insights are treated as a first-class, codified product, and an AI-driven engine transforms raw event data into human-ready insights.
+
+### What This Means
+
+Just as Infrastructure as Code revolutionized how servers and networks are configured, Insights as Code brings software engineering rigor to analytics:
+
+- **Declarative specifications** — Define what you care about in code or configuration, not spreadsheets or Wiki pages
+- **Version-controlled** — Track changes, review insights, and maintain consistency across your team
+- **Automated generation** — Let AI do the heavy lifting of data crunching, pattern finding, and explanation generation
+- **Verifiable and transparent** — Every insight is backed by code and data, making it transparent and trustworthy
+
+### The Power of AI-Driven Analysis
+
+Journium leverages Generative AI and large language models to automate insight generation. But this isn't about dumping data into an LLM and hoping for the best. Instead, we use a sophisticated, multi-step approach:
+
+1. **Continuous monitoring** — Track behavioral patterns and detect significant changes
+2. **Intelligent analysis** — Use AI agents to pose analytical questions, break them into sub-questions, query data, and synthesize findings
+3. **Validation and guardrails** — Ensure insights are both interesting and trustworthy, with automatic validation of claims
+4. **Concise delivery** — Generate short, factual takeaways (not long-winded reports) that get straight to the point
+
+This approach ensures insights are **concise, factual takeaways** rather than shallow observations or obvious outliers.
+
+## The Vision: An Always-On System
+
+Journium transforms analytics from a reactive process into an **always-on system** that actively drives growth. The vision is simple:
+
+1. **Instrument once** — Integrate Journium's SDK into your application
+2. **Define what matters** — Specify your goals and questions in configuration
+3. **Receive insights automatically** — Get proactive, narrative insights delivered continuously
+
+The outcome? An analytics experience that feels almost magical: you integrate an SDK, define high-level goals in a config, and the system speaks to you with facts and explanations continuously — almost like a data-savvy colleague working around the clock.
+
+Yet under the hood, every insight is backed by code and data — transparent and verifiable.
+
+### Why This Matters
+
+In a world inundated with data, those who can harness AI to tell the story of the data will leap ahead. Journium eliminates the traditional divide between "data collection" and "insight generation," drastically reducing the time from question to answer and empowering teams to be truly data-driven without slogging through dashboards.
+
+The barrier to trying a new analysis becomes so low — just write a new tracker and let the AI do the rest. This unlocks creative uses of analytics that were previously too time-consuming or resource-intensive to pursue.
+
+**Stop looking for insights. Let your application tell you.**
