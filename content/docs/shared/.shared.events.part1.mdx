@@ -1,0 +1,28 @@
+## What is an Event?
+
+An event in Journium is a single piece of telemetry data. Its the primary primitive that 
+drives all the analytics and insights. When you use the Journium SDK, you are essentially sending events to Journium.
+Some events are auto-captured by the SDK, such as page views, clicks, form submissions, and errors, but you can control
+what you send to Journium.
+
+## Event Structure
+
+An event in Journium has the following structure:
+
+```typescript
+{
+  event: string;
+  properties: Record<string, unknown>;
+}
+```
+
+- `event`: The name of the event.
+- `properties`: A record of key-value pairs that you can use to add additional context to the event.
+
+## Event Types
+
+There are two main types of events in Journium:
+
+- Custom Events
+- Auto-captured Events
+

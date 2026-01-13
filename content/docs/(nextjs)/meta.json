@@ -6,10 +6,12 @@
     "---[Footprints]Introduction---",
     "index",
     "what-is-journium",
+    "how-journium-works",
     "---[BookOpen]Guides---",
     "concepts",
     "---[LibraryBig]SDK Reference---",
     "hooks",
+    "advanced-configuration",
     "---[Code]Example Repositories---",
     "external:[Next.js (App Router)](https://github.com/journium/nextjs-app-router-example)",
     "external:[Next.js (Pages Router)](https://github.com/journium/nextjs-pages-router-example)"

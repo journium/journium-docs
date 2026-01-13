@@ -1,16 +1,21 @@
 ---
 title: Insight Trackers
-description: Learn how Insight Trackers use AI-driven analytics to automatically transform raw event data 
+description: Insight Trackers use AI-driven analytics to automatically transform raw event data 
              into actionable insights. Configure trackers in the dashboard to continuously monitor your 
              application and surface meaningful patterns.
 icon: InsightTracker
 ---
 
-An Insight Tracker in Journium is a declarative configuration that tells Journium what to analyze and how often. It acts as a bridge between your raw [events](/docs/(nextjs)/concepts/events) and the [insights](/docs/(nextjs)/concepts/insights) that help you understand your application's behavior.
+An Insight Tracker in Journium is a declarative configuration that tells Journium what to 
+analyze and how often. It acts as a bridge between your raw [Events](/docs/concepts/events) 
+and the [Insights](/docs/concepts/insights) that help you understand your application's behavior.
 
 ## What are Insight Trackers?
 
-Insight Trackers are the core of Journium's "Insights as Code" approach. Instead of manually querying data or building dashboards, you define what you want to know about your application, and Journium's AI-driven analytics engine automatically analyzes your event data to generate concise, actionable insights.
+Insight Trackers are the core of Journium's **Insights as Code** approach. Instead of manually 
+querying data or building dashboards, you define what you want to know about your application, 
+and Journium's AI-driven analytics engine automatically analyzes your event data to generate 
+concise, actionable insights.
 
 Think of an Insight Tracker as a continuous data analyst that:
 - Monitors specific events in your application
@@ -37,8 +42,10 @@ from your application instance page.
 
 ## Creating an Insight Tracker
 
-You create Insight Trackers directly in the Journium dashboard. You can create a new tracker for your application instance at [Developers | Insight Trackers | Create New](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/insight-trackers/new)
-Each tracker is configured through several sections:
+You create Insight Trackers directly in the Journium dashboard. You can create a new tracker for your application 
+instance at 
+[Developers | Insight Trackers | Create New](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/insight-trackers/new).
+Each tracker is configured as follows:
 
 ### Status
 
@@ -137,8 +144,3 @@ When creating Insight Trackers:
 **Default Tracker**: When you create an app in Journium, a default "User Engagement" tracker is automatically created. This tracker helps you test data ingestion and insight generation with your initial events.
 </Callout>
 
-## Next Steps
-
-- Learn about [Insights](/docs/(nextjs)/concepts/insights) to understand what trackers generate
-- Explore how to [send events](/docs/(nextjs)/concepts/events) to power your trackers
-- Check out the [dashboard guide](/docs/(nextjs)/dashboard) for managing your trackers

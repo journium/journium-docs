@@ -6,10 +6,12 @@
     "---[Footprints]Introduction---",
     "index",
     "what-is-journium",
+    "how-journium-works",
     "---[BookOpen]Guides---",
     "concepts",
     "---[LibraryBig]SDK Reference---",
     "hooks",
+    "advanced-configuration",
     "---[Code]Example Repositories---",
     "external:[React Example (Vite)](https://github.com/journium/react-vite-example)"
   ]
