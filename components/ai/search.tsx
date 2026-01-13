@@ -11,7 +11,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Loader2, MessageCircleIcon, RefreshCw, Send, X } from 'lucide-react';
+import { Loader2, MessageCircleIcon, RefreshCw, Send, User, X } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { buttonVariants } from '../ui/button';
 import Link from 'fumadocs-core/link';
@@ -21,6 +21,7 @@ import type { z } from 'zod';
 import { DefaultChatTransport } from 'ai';
 import { Markdown } from '../markdown';
 import { Presence } from '@radix-ui/react-presence';
+import Image from 'next/image';
 
 const Context = createContext<{
   open: boolean;
@@ -232,8 +233,8 @@ function Input(props: ComponentProps<'textarea'>) {
 }
 
 const roleName: Record<string, string> = {
-  user: 'you',
-  assistant: 'journium',
+  user: 'You',
+  assistant: 'Journium',
 };
 
 function Message({ message, ...props }: { message: UIMessage } & ComponentProps<'div'>) {
@@ -255,10 +256,33 @@ function Message({ message, ...props }: { message: UIMessage } & ComponentProps<
     <div {...props}>
       <p
         className={cn(
-          'mb-1 text-sm font-medium text-fd-muted-foreground',
+          'mb-1 text-base font-medium text-fd-muted-foreground flex items-center gap-1.5',
           message.role === 'assistant' && 'text-fd-primary',
         )}
       >
+        {message.role === 'user' && (
+          <span className="flex items-center justify-center size-6 rounded-full bg-fd-muted text-fd-muted-foreground">
+            <User className="size-4" />
+          </span>
+        )}
+        {message.role === 'assistant' && (
+          <span className="flex items-center justify-center size-6 rounded-full overflow-hidden">
+            <Image
+              src="/images/journium_logo_light_v1.svg"
+              alt="Journium"
+              width={24}
+              height={24}
+              className="w-full h-full object-cover dark:hidden"
+            />
+            <Image
+              src="/images/journium_logo_dark_v1.svg"
+              alt="Journium"
+              width={24}
+              height={24}
+              className="hidden w-full h-full object-cover dark:block"
+            />
+          </span>
+        )}
         {roleName[message.role] ?? 'unknown'}
       </p>
       <div className="prose text-sm">
