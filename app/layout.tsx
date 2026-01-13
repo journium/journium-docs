@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import CustomSearchDialog from "@/components/ui/search";
-import { AISearch, AISearchTrigger } from "@/components/search";
+import { AISearch, AISearchTrigger } from "@/components/ai/search";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
