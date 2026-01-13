@@ -51,10 +51,10 @@ jobs:
           NEXT_PUBLIC_ORAMA_API_KEY: ${{ vars.NEXT_PUBLIC_ORAMA_API_KEY }}
           NEXT_PUBLIC_ORAMA_DATASOURCE_ID: ${{ vars.NEXT_PUBLIC_ORAMA_DATASOURCE_ID }}
 
-      - name: Sync search content
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        run: pnpm sync-content
-        env:
-          NEXT_PUBLIC_ORAMA_PROJECT_ID: ${{ vars.NEXT_PUBLIC_ORAMA_PROJECT_ID }}
-          ORAMA_PRIVATE_API_KEY: ${{ secrets.ORAMA_PRIVATE_API_KEY }}
-          NEXT_PUBLIC_ORAMA_DATASOURCE_ID: ${{ vars.NEXT_PUBLIC_ORAMA_DATASOURCE_ID }}
+      # - name: Sync search content
+      #   if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      #   run: pnpm sync-content
+      #   env:
+      #     NEXT_PUBLIC_ORAMA_PROJECT_ID: ${{ vars.NEXT_PUBLIC_ORAMA_PROJECT_ID }}
+      #     ORAMA_PRIVATE_API_KEY: ${{ secrets.ORAMA_PRIVATE_API_KEY }}
+      #     NEXT_PUBLIC_ORAMA_DATASOURCE_ID: ${{ vars.NEXT_PUBLIC_ORAMA_DATASOURCE_ID }}
