@@ -1,13 +1,95 @@
 ---
 title: Insight Trackers
-description: What is an Insight Tracker?
+description: Learn how Insight Trackers use AI-driven analytics to automatically transform raw event data 
+             into actionable insights. Configure trackers in the dashboard to continuously monitor your 
+             application and surface meaningful patterns.
 icon: InsightTracker
 ---
 
-An insight tracker in Journium is a tool that helps you track insights in your application.
+An Insight Tracker in Journium is a declarative configuration that tells Journium what to analyze and how often. It acts as a bridge between your raw [events](/docs/(nextjs)/concepts/events) and the [insights](/docs/(nextjs)/concepts/insights) that help you understand your application's behavior.
 
 ## What are Insight Trackers?
 
-An insight tracker in Journium is a tool that helps you track insights in your application.
+Insight Trackers are the core of Journium's "Insights as Code" approach. Instead of manually querying data or building dashboards, you define what you want to know about your application, and Journium's AI-driven analytics engine automatically analyzes your event data to generate concise, actionable insights.
 
-## What is an Insight Tracker?
+Think of an Insight Tracker as a continuous data analyst that:
+- Monitors specific events in your application
+- Analyzes patterns, trends, and anomalies using AI
+- Generates natural language insights explaining what's happening and why
+- Runs automatically on a schedule or on-demand
+
+## How Insight Trackers Work
+
+Insight Trackers transform raw telemetry data into human-readable insights through an AI-driven pipeline:
+
+1. **Event Collection**: The tracker focuses on specific events you've configured (e.g., `purchase_started`, `user_signup`, `error_occurred`)
+2. **Data Analysis**: Journium's AI engine analyzes the event data, looking for patterns, correlations, anomalies, and trends
+3. **Insight Generation**: The AI synthesizes findings into concise, natural language insights (typically 1-3 sentences) backed by verifiable data
+4. **Delivery**: Insights are displayed in your Journium dashboard and can be delivered via integrations like Slack or email
+
+This process eliminates the need for manual data exploration, SQL queries, or dashboard interpretation. The AI does the heavy lifting of data crunching and pattern finding, delivering insights that are both interesting and trustworthy.
+
+## Creating an Insight Tracker
+
+You create Insight Trackers directly in the Journium dashboard. Each tracker requires the following configuration:
+
+### Name
+A descriptive name that identifies what the tracker monitors (e.g., "User Engagement Tracker", "Purchase Funnel Analysis", "Error Rate Monitor").
+
+### Description
+A clear explanation of what the tracker analyzes and what insights you're looking for. This helps the AI understand the context and focus of the analysis.
+
+### Events to Consider
+Specify which events the tracker should analyze. You can:
+- Select specific event types (e.g., only `purchase_started` and `purchase_completed`)
+- Include all events
+- Filter events by properties (e.g., events where `user_type` is `premium`)
+
+The tracker will only analyze the events you specify, allowing you to create focused trackers for different aspects of your application.
+
+### Execution Trigger
+Control when the tracker runs:
+
+- **Manual**: The tracker runs only when you explicitly trigger it from the dashboard. Useful for ad-hoc analysis or testing.
+- **Scheduled**: The tracker runs automatically on a schedule (e.g., daily, weekly, hourly). Ideal for continuous monitoring and proactive insight generation.
+
+## Use Cases
+
+Insight Trackers are versatile and can be used for various analytics needs:
+
+- **User Behavior Analysis**: Understand how users interact with your application, identify drop-off points, and discover usage patterns
+- **Feature Adoption**: Track how new features are being used and identify barriers to adoption
+- **Error Monitoring**: Detect spikes in errors, identify root causes, and understand impact
+- **Conversion Funnels**: Analyze conversion rates and identify where users drop off in key flows
+- **Anomaly Detection**: Automatically surface unusual patterns or significant changes in metrics
+- **Cohort Analysis**: Understand how different user segments behave over time
+
+## Insight Output
+
+When an Insight Tracker runs, it generates insights that are:
+- **Concise**: Typically 1-3 sentences, making them easy to scan and understand
+- **Data-backed**: Every claim is supported by verifiable data from your events
+- **Actionable**: Insights explain not just what's happening, but often why it's happening
+- **Contextual**: Insights consider the specific events and timeframes you've configured
+
+These insights appear in your Journium dashboard, where you can view them, track their history, and see how they evolve over time.
+
+## Best Practices
+
+When creating Insight Trackers:
+
+1. **Be Specific**: Focus each tracker on a particular question or area of interest rather than trying to analyze everything at once
+2. **Choose Relevant Events**: Select events that are meaningful for the insight you're seeking
+3. **Use Descriptive Names**: Name trackers clearly so team members understand what they monitor
+4. **Set Appropriate Schedules**: Use scheduled execution for trackers that need continuous monitoring, and manual execution for exploratory analysis
+5. **Iterate**: Start with broad trackers and refine them based on the insights you receive
+
+<Callout>
+**Default Tracker**: When you create an app in Journium, a default "User Engagement" tracker is automatically created. This tracker helps you test data ingestion and insight generation with your initial events.
+</Callout>
+
+## Next Steps
+
+- Learn about [Insights](/docs/(nextjs)/concepts/insights) to understand what trackers generate
+- Explore how to [send events](/docs/(nextjs)/concepts/events) to power your trackers
+- Check out the [dashboard guide](/docs/(nextjs)/dashboard) for managing your trackers

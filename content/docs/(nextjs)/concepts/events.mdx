@@ -1,13 +1,73 @@
 ---
 title: Events
-description: What are Events?
+description: Learn about events in Journium - single pieces of telemetry data that drive analytics 
+             and insights. Understand how to send custom events and configure auto-captured events.
 icon: Event
 ---
 
-An event in Journium is a single piece of telemetry data.
+
 
 ## What is an Event?
 
-An event in Journium is a single piece of telemetry data.
+An event in Journium is a single piece of telemetry data. Its the primary primitive that 
+drives all the analytics and insights. When you use the Journium SDK, you are essentially sending events to Journium.
+Some events are auto-captured by the SDK, such as page views, clicks, form submissions, and errors, but you can control
+what you send to Journium.
 
-## What is an Event?
+## Event Structure
+
+An event in Journium has the following structure:
+
+```typescript
+{
+  event: string;
+  properties: Record<string, unknown>;
+}
+```
+
+- `event`: The name of the event.
+- `properties`: A record of key-value pairs that you can use to add additional context to the event.
+
+## Event Types
+
+There are two main types of events in Journium:
+
+- Custom Events
+- Auto-captured Events
+
+
+### Custom Events
+
+Custom Events are events that you manually send to Journium. 
+You can send any event you want to Journium, and you can add any properties you want to the event.
+
+```tsx title="app/your-path/page.tsx"
+import { useTrackEvent } from '@journium/nextjs';
+
+function ProductPage() {
+  const trackEvent = useTrackEvent();
+
+  const handlePurchase = () => {
+    trackEvent('purchase_started', {
+      product_id: 'prod_123',
+      page: 'product_detail',
+      value: 29.99
+    });
+  };
+
+  return <button onClick={handlePurchase}>Buy Now</button>;
+}
+```
+
+### Auto-captured Events
+
+Auto-captured Events are events that are automatically captured by the SDK. They can be enabled 
+or disabled by configuring the SDK. See 
+[Advanced Configuration](/docs/(nextjs)/concepts/advanced-configuration) for more details.
+
+<Callout>
+**Configuration Precedence** When you configure at the SDK level, it overrides the configuration in the Journium dashboard.
+The final derived configuration is the combination of the configuration in the Journium dashboard and the configuration in the SDK
+with the SDK configuration taking precedence.
+</Callout>
+
