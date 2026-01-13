@@ -5,22 +5,24 @@ import {
   type ReactNode,
   type SyntheticEvent,
   use,
+  useContext,
   useEffect,
   useEffectEvent,
   useMemo,
   useRef,
   useState,
 } from 'react';
-import { Loader2, MessageCircleIcon, RefreshCw, Send, X } from 'lucide-react';
-import { cn } from '../lib/cn';
-import { buttonVariants } from './ui/button';
+import { Loader2, MessageCircleIcon, RefreshCw, Send, User, X } from 'lucide-react';
+import { cn } from '../../lib/cn';
+import { buttonVariants } from '../ui/button';
 import Link from 'fumadocs-core/link';
 import { type UIMessage, useChat, type UseChatHelpers } from '@ai-sdk/react';
-import type { ProvideLinksToolSchema } from '../lib/inkeep-qa-schema';
+import type { ProvideLinksToolSchema } from '../../lib/inkeep-qa-schema';
 import type { z } from 'zod';
 import { DefaultChatTransport } from 'ai';
-import { Markdown } from './markdown';
+import { Markdown } from '../markdown';
 import { Presence } from '@radix-ui/react-presence';
+import Image from 'next/image';
 
 const Context = createContext<{
   open: boolean;
@@ -232,8 +234,8 @@ function Input(props: ComponentProps<'textarea'>) {
 }
 
 const roleName: Record<string, string> = {
-  user: 'you',
-  assistant: 'journium',
+  user: 'You',
+  assistant: 'Journium',
 };
 
 function Message({ message, ...props }: { message: UIMessage } & ComponentProps<'div'>) {
@@ -255,10 +257,33 @@ function Message({ message, ...props }: { message: UIMessage } & ComponentProps<
     <div {...props}>
       <p
         className={cn(
-          'mb-1 text-sm font-medium text-fd-muted-foreground',
+          'mb-1 text-base font-medium text-fd-muted-foreground flex items-center gap-1.5',
           message.role === 'assistant' && 'text-fd-primary',
         )}
       >
+        {message.role === 'user' && (
+          <span className="flex items-center justify-center size-6 rounded-full bg-fd-muted text-fd-muted-foreground">
+            <User className="size-4" />
+          </span>
+        )}
+        {message.role === 'assistant' && (
+          <span className="flex items-center justify-center size-6 rounded-full overflow-hidden">
+            <Image
+              src="/images/journium_logo_light_v1.svg"
+              alt="Journium"
+              width={24}
+              height={24}
+              className="w-full h-full object-cover dark:hidden"
+            />
+            <Image
+              src="/images/journium_logo_dark_v1.svg"
+              alt="Journium"
+              width={24}
+              height={24}
+              className="hidden w-full h-full object-cover dark:block"
+            />
+          </span>
+        )}
         {roleName[message.role] ?? 'unknown'}
       </p>
       <div className="prose text-sm">
@@ -296,19 +321,41 @@ export function AISearch({ children }: { children: ReactNode }) {
   );
 }
 
-export function AISearchTrigger() {
-  const { open, setOpen } = use(Context)!;
+export function AISearchTrigger({ 
+  className,
+  onClick,
+  ...props 
+}: ComponentProps<'button'>) {
+  const context = useContext(Context);
+  
+  // If context is not available, return null (component is outside AISearch provider)
+  if (!context) {
+    return null;
+  }
+
+  const { open, setOpen } = context;
+
+  const handleClick: ComponentProps<'button'>['onClick'] = (e) => {
+    // Call the passed onClick handler first (e.g., to close search dialog)
+    onClick?.(e);
+    // Then open the AI search panel
+    setOpen(true);
+  };
 
   return (
     <button
+      {...props}
       className={cn(
         buttonVariants({
           variant: 'secondary',
         }),
-        'fixed bottom-4 gap-3 w-24 end-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] text-fd-muted-foreground rounded-2xl shadow-lg z-20 transition-[translate,opacity]',
-        open && 'translate-y-10 opacity-0',
+        'gap-3 text-fd-muted-foreground rounded-2xl transition-[translate,opacity]',
+        // Default fixed positioning styles (can be overridden with className)
+        !className && 'fixed bottom-4 w-24 end-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] shadow-lg z-20',
+        open && !className && 'translate-y-10 opacity-0',
+        className,
       )}
-      onClick={() => setOpen(true)}
+      onClick={handleClick}
     >
       <MessageCircleIcon className="size-4.5" />
       Ask AI
