@@ -85,16 +85,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <RootProvider 
-          search={{
-            SearchDialog: CustomSearchDialog,
-          }}
-        >
-          <AISearch>
+        <AISearch>
+          <RootProvider 
+            search={{
+              SearchDialog: CustomSearchDialog,
+            }}
+          >
             <AISearchTrigger />
             {children}
-          </AISearch>
-        </RootProvider>
+          </RootProvider>
+        </AISearch>
       </body>
     </html>
   );

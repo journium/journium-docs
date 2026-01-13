@@ -5,6 +5,7 @@ import {
   type ReactNode,
   type SyntheticEvent,
   use,
+  useContext,
   useEffect,
   useEffectEvent,
   useMemo,
@@ -320,19 +321,41 @@ export function AISearch({ children }: { children: ReactNode }) {
   );
 }
 
-export function AISearchTrigger() {
-  const { open, setOpen } = use(Context)!;
+export function AISearchTrigger({ 
+  className,
+  onClick,
+  ...props 
+}: ComponentProps<'button'>) {
+  const context = useContext(Context);
+  
+  // If context is not available, return null (component is outside AISearch provider)
+  if (!context) {
+    return null;
+  }
+
+  const { open, setOpen } = context;
+
+  const handleClick: ComponentProps<'button'>['onClick'] = (e) => {
+    // Call the passed onClick handler first (e.g., to close search dialog)
+    onClick?.(e);
+    // Then open the AI search panel
+    setOpen(true);
+  };
 
   return (
     <button
+      {...props}
       className={cn(
         buttonVariants({
           variant: 'secondary',
         }),
-        'fixed bottom-4 gap-3 w-24 end-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] text-fd-muted-foreground rounded-2xl shadow-lg z-20 transition-[translate,opacity]',
-        open && 'translate-y-10 opacity-0',
+        'gap-3 text-fd-muted-foreground rounded-2xl transition-[translate,opacity]',
+        // Default fixed positioning styles (can be overridden with className)
+        !className && 'fixed bottom-4 w-24 end-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] shadow-lg z-20',
+        open && !className && 'translate-y-10 opacity-0',
+        className,
       )}
-      onClick={() => setOpen(true)}
+      onClick={handleClick}
     >
       <MessageCircleIcon className="size-4.5" />
       Ask AI
