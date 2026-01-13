@@ -1,0 +1,30 @@
+---
+title: useTrackEvent()
+description: Use the useTrackEvent() hook to track an event
+---
+
+## Track a custom event
+
+The `useTrackEvent()` hook is used to track a custom event. You can track any event that you want to track in your application.
+
+```tsx title="pages/dashboard.tsx" 
+import React from 'react';
+// [!code ++:1]
+import { useTrackEvent } from '@journium/react';
+
+function SignupButton() {
+  // [!code ++:1]
+  const trackEvent = useTrackEvent();
+
+  const handleSignup = () => {
+    // [!code ++:5]
+    trackEvent('user_signup', {
+      method: 'email',
+      source: 'landing_page',
+      plan: 'free'
+    });
+  };
+
+  return <button onClick={handleSignup}>Sign Up</button>;
+}
+```

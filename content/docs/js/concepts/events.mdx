@@ -1,0 +1,40 @@
+---
+title: Events
+description: Events are single pieces of telemetry data that drive analytics 
+             and insights. Understand how to send custom events and configure auto-captured events.
+icon: Event
+---
+
+<include>../../shared/.shared.events.part1.mdx</include>
+
+
+### Custom Events
+
+Custom Events are events that you manually send to Journium. 
+You can send any event you want to Journium, and you can add any properties you want to the event.
+
+```tsx title="app/your-path/page.tsx"
+import { useTrackEvent } from '@journium/react';
+
+function ProductPage() {
+  const trackEvent = useTrackEvent();
+
+  const handlePurchase = () => {
+    trackEvent('purchase_started', {
+      product_id: 'prod_123',
+      page: 'product_detail',
+      value: 29.99
+    });
+  };
+
+  return <button onClick={handlePurchase}>Buy Now</button>;
+}
+```
+
+### Auto-captured Events
+
+Auto-captured Events are events that are automatically captured by the SDK. They can be enabled 
+or disabled by configuring the SDK. See 
+[Advanced Configuration](/docs/react/advanced-configuration) for more details.
+
+<include>../../shared/.shared.events.part2.mdx</include>

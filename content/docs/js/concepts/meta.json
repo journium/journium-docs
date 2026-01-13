@@ -1,0 +1,13 @@
+{
+    "title": "Concepts",
+    "description": "Concepts documentation",
+    "root": false,
+    "defaultOpen": true,
+    "pages": [
+      "application",
+      "events",
+      "insight_tracker",
+      "jobs",
+      "insights"
+    ]
+  }

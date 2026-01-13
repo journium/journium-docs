@@ -1,0 +1,10 @@
+{
+    "title": "Hooks",
+    "description": "Hooks documentation",
+    "root": false,
+    "pages": [
+      "use-identify",
+      "use-track-event",
+      "use-reset"
+    ]
+  }
