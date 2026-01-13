@@ -4,4 +4,212 @@ description: Learn about advanced configuration options for Journium - customize
              performance settings, and more.
 ---
 
-TODO: Add content here.
+All aspects of Journium can be configured to your liking. This section will cover the advanced configuration options.
+Settings provided in the SDK will take precedence over the settings provided in the dashboard.
+
+## Configuration
+
+
+<Tabs groupId="react-framework" items={['Vite projects', 'React/(CRA) projects']} persist>
+    <Tab value="Vite projects">
+    ```tsx title="main.tsx"
+    import React from 'react';
+    import { JourniumProvider } from '@journium/react';
+    import App from './App';
+
+    function Root() {
+    return (
+        <JourniumProvider
+            config={{
+                publishableKey: import.meta.env.VITE_JOURNIUM_PUBLISHABLE_KEY!,
+                apiHost: 'https://events.journium.app',
+                options: {
+                debug: import.meta.env.VITE_JOURNIUM_DEBUG === 'true',
+                flushAt: 5,
+                flushInterval: 10000,
+                sessionTimeout: 1800000,
+                autoTrackPageviews: true,
+                autocapture: {
+                    captureClicks: true,
+                    captureFormSubmits: true,
+                    captureFormChanges: false,
+                    ignoreClasses: ['no-track', 'sensitive'],
+                    ignoreElements: ['input[type="password"]']
+                }
+            }
+        }}
+        >
+        <App />
+        </JourniumProvider>
+    );
+    }
+
+    export default Root;
+    ```
+    </Tab>
+    <Tab value="React/(CRA) projects">
+    ```tsx title="main.tsx"
+    import React from 'react';
+    import { JourniumProvider } from '@journium/react';
+    import App from './App';
+
+    function Root() {
+    return (
+        <JourniumProvider
+        config={{
+            publishableKey: process.env.REACT_APP_JOURNIUM_PUBLISHABLE_KEY!,
+            apiHost: 'https://events.journium.app',
+            options: {
+            debug: process.env.REACT_APP_JOURNIUM_DEBUG === 'true',
+            flushAt: 5,                    // Send events after N events
+            flushInterval: 10000,          // Send events every N milliseconds
+            sessionTimeout: 1800000,       // Session timeout (30 minutes)
+            autoTrackPageviews: true,      // Automatically track pageview events (default: true)
+            autocapture: {                 // Configure automatic event capture
+                captureClicks: true,         // Track click events
+                captureFormSubmits: true,    // Track form submissions
+                captureFormChanges: false,   // Track form field changes
+                ignoreClasses: ['no-track', 'sensitive'], // CSS classes to ignore
+                ignoreElements: ['input[type="password"]'] // Elements to ignore
+            }
+            }
+        }}
+        >
+        <App />
+        </JourniumProvider>
+    );
+    }
+
+    export default Root;
+    ```
+    </Tab>
+</Tabs>
+
+## API Reference
+
+### Components
+
+#### `<JourniumProvider>`
+Provider component that initializes Journium analytics throughout your React application.
+
+**Props:**
+- `config: JourniumConfig` - Configuration object for Journium
+  - `publishableKey: string` - Your Journium publishable key (required)
+  - `apiHost?: string` - Custom API endpoint (optional, defaults to 'https://events.journium.app')
+  - `options?: JourniumLocalOptions` - Local configuration options (optional)
+- `children: ReactNode` - React children to wrap
+
+### Hooks
+
+#### `useTrackEvent()`
+Returns a function to track custom events.
+
+**Returns:** `(event: string, properties?: Record<string, unknown>) => void`
+- `event: string` - Event name to track
+- `properties?: Record<string, unknown>` - Optional event properties
+
+#### `useIdentify()`
+Returns a function to identify users.
+
+**Returns:** `(distinctId: string, attributes?: Record<string, unknown>) => void`
+- `distinctId: string` - Unique user identifier
+- `attributes?: Record<string, unknown>` - Optional user attributes
+
+#### `useReset()`
+Returns a function to reset user identity (typically on logout).
+
+**Returns:** `() => void`
+
+#### `useTrackPageview()`
+Returns a function to manually track pageview events.
+
+**Returns:** `(properties?: Record<string, unknown>) => void`
+- `properties?: Record<string, unknown>` - Optional pageview properties
+
+#### `useAutoTrackPageview()`
+Automatically tracks pageview when component mounts or dependencies change.
+
+**Parameters:**
+- `dependencies?: React.DependencyList` - Dependencies to watch for changes (defaults to empty array)
+- `properties?: Record<string, unknown>` - Optional pageview properties
+
+**Returns:** `void`
+
+#### `useAutocapture()`
+Returns functions to control automatic event capture.
+
+**Returns:** `{ startAutocapture: () => void, stopAutocapture: () => void }`
+- `startAutocapture()` - Enable automatic event capture
+- `stopAutocapture()` - Disable automatic event capture
+
+#### `useJournium()`
+Returns the Journium context for advanced use cases.
+
+**Returns:** `JourniumContextValue`
+- `analytics: JourniumAnalytics | null` - The analytics instance
+- `config: JourniumConfig | null` - The configuration object
+- `effectiveOptions: JourniumLocalOptions | null` - The effective options (merged local and remote)
+
+### Types
+
+#### `JourniumConfig`
+Configuration object for initializing Journium.
+
+```typescript
+interface JourniumConfig {
+  publishableKey: string;
+  apiHost?: string;
+  options?: JourniumLocalOptions;
+}
+```
+
+#### `JourniumLocalOptions`
+Local configuration options that can be set on the client.
+
+```typescript
+interface JourniumLocalOptions {
+  debug?: boolean;                    // Enable debug logging
+  flushAt?: number;                   // Number of events before auto-flush
+  flushInterval?: number;             // Flush interval in milliseconds
+  autocapture?: boolean | AutocaptureOptions; // Auto-capture configuration
+  autoTrackPageviews?: boolean;       // Automatic pageview tracking
+  sessionTimeout?: number;            // Session timeout in milliseconds
+  sampling?: {
+    enabled?: boolean;
+    rate?: number;
+  };
+  features?: {
+    enableGeolocation?: boolean;
+    enableSessionRecording?: boolean;
+    enablePerformanceTracking?: boolean;
+  };
+}
+```
+
+#### `AutocaptureOptions`
+Configuration for automatic event capture.
+
+```typescript
+interface AutocaptureOptions {
+  captureClicks?: boolean;            // Capture click events
+  captureFormSubmits?: boolean;       // Capture form submissions
+  captureFormChanges?: boolean;       // Capture form field changes
+  captureTextSelection?: boolean;     // Capture text selection events
+  ignoreClasses?: string[];           // CSS classes to ignore
+  ignoreElements?: string[];          // HTML elements to ignore
+  captureContentText?: boolean;       // Capture element text content
+}
+```
+
+#### `JourniumAnalytics`
+The main analytics class instance available through hooks.
+
+**Methods:**
+- `track(event: string, properties?: Record<string, unknown>): void` - Track custom event
+- `identify(distinctId: string, attributes?: Record<string, unknown>): void` - Identify user
+- `reset(): void` - Reset user identity
+- `capturePageview(properties?: Record<string, unknown>): void` - Track pageview
+- `startAutocapture(): void` - Start automatic event capture
+- `stopAutocapture(): void` - Stop automatic event capture
+- `flush(): void` - Flush pending events immediately
+- `getEffectiveOptions(): JourniumLocalOptions` - Get effective configuration

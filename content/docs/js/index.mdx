@@ -8,16 +8,15 @@ icon: Rocket
 
 <Callout type="info">
   
-    We recommend one of the framework specific integrations for the best experience.
-    <ul>
-          <li>
-        <a href="/docs">Next.js</a>
-      </li>
-      <li>
-        <a href="/docs/react">React</a>
-      </li>
-
-    </ul>
+  We recommend one of the framework specific integrations for the best experience.
+  <ul>
+    <li>
+        <a href="/docs/nextjs">Next.js</a>
+    </li>
+    <li>
+      <a href="/docs/react">React</a>
+    </li>
+  </ul>
   
 </Callout>
 
@@ -26,15 +25,15 @@ icon: Rocket
 <div className="fd-steps [&_h3]:fd-step">
 
 
-### Install `@journium/react`
+### Install `@journium/js`
 
-The [Journium React SDK](/docs/react/hooks) gives you access to pre-built hooks and components to help you generate events 
+The [Journium JavaScript SDK](/docs/js/hooks) gives you access to pre-built hooks and components to help you generate events 
 in your React application and get insights from your data.
 
 Run the following command to install the SDK:
 
 ```npm title="Terminal"
-npm i @journium/react
+npm i @journium/js
 ```
 
 ### Set your Journium Publishable Key 
@@ -49,114 +48,50 @@ npm i @journium/react
    Dashboard URLs automatically navigate to your app - just click!
    </Callout>
 
-4. **Create a `.env` file** in your project root:
 
-   ```bash
-   touch .env
-   ```
+### Initialize Journium
 
-5. **Add your key** to the `.env` file:
+Initialize the Journium SDK with your publishable key to start tracking events.
 
-    <Tabs groupId="react-framework" items={['Vite projects', 'React/(CRA) projects']} persist>
-      <Tab value="Vite projects">
-      ```bash title=".env"
-      VITE_JOURNIUM_PUBLISHABLE_KEY=your_publishable_key_here
-      ```
-      </Tab>
-      <Tab value="React/(CRA) projects">
-      ```bash title=".env"
-      REACT_APP_JOURNIUM_PUBLISHABLE_KEY=your_publishable_key_here
-      ```
-      </Tab>
-    </Tabs>
+```ts title="index.ts"
+import { init } from '@journium/js';
 
-6. **Verify your setup** - check that the key is correctly saved:
-
-   ```bash
-   cat .env
-   # Should show: VITE_JOURNIUM_PUBLISHABLE_KEY=pk_test_...
-   ```
-
-   <Callout type="info">
-   Development instances use `pk_test_` keys. Production keys start with `pk_live_`.
-   </Callout>
-
-### Add `<JourniumProvider>` to your app
-
-The `<JourniumProvider>` component provides session and user context to Journium's hooks. 
-It's recommended to wrap your entire app at the entry point with `<JourniumProvider>` 
-to make analytics globally accessible throughout your application.
-
-
-
-<Tabs groupId="react-framework" items={['Vite projects', 'React/(CRA) projects']} persist defaultIndex={1}>
-  <Tab value="Vite projects">
-    ```tsx title="main.tsx"
-    import { StrictMode } from 'react'
-    import { createRoot } from 'react-dom/client'
-    // [!code ++:1]
-    import { JourniumProvider } from '@journium/react';
-    import App from './App';
-
-    createRoot(document.getElementById('root')!).render(
-      <StrictMode>
-        {/* [!code ++:5] */}
-        <JourniumProvider
-          config={{
-            publishableKey: import.meta.env.VITE_JOURNIUM_PUBLISHABLE_KEY!
-          }}
-        >
-          <App />
-        {/* [!code ++:1] */}
-        </JourniumProvider>
-      </StrictMode>
-    );
-    ```
-  </Tab>
-  <Tab value="React/(CRA) projects">
-    ```tsx title="main.tsx"
-    import React from 'react';
-    // [!code ++:1]
-    import { JourniumProvider } from '@journium/react';
-    import App from './App';
-
-    function Root() {
-      return (
-        // [!code ++:5]
-        <JourniumProvider
-          config={{
-            publishableKey: process.env.REACT_APP_JOURNIUM_PUBLISHABLE_KEY!
-          }}
-        >
-          <App />
-        {/* [!code ++:1] */}
-        </JourniumProvider>
-      );
-    }
-
-    export default Root;
-    ```
-  </Tab>
-</Tabs>
-
-
-
-### Run the Development Server
-
-Start your application:
-
-```npm title="Terminal"
-npm run dev
+const journium = init({
+  publishableKey: 'your-journium-publishable-key'
+});
 ```
 
+### Track a Custom Event
 
-<Callout>
-**Using a custom port?** Add `-- --port 3000` to the dev command (for yarn, use `--port 3000` without the extra `--`).
-</Callout>
+Track user actions and business events with custom properties.
 
-### Verify Your Setup
+```ts title="index.ts"
+journium.track('button_clicked', {
+  button_name: 'signup',
+  page: 'homepage',
+  user_type: 'visitor'
+});
+```
 
-Open [http://localhost:5173](http://localhost:5173) (or your custom port) in your browser to see the application running.
+### Identify a User
+
+Identify users when they log in or sign up to connect their actions across sessions.
+
+```ts title="index.ts"
+journium.identify('user_12345', {
+  name: 'John Doe',
+  email: 'john@example.com',
+  plan: 'premium'
+});
+```
+
+### Reset User Identity
+
+Reset user identity when they log out to ensure privacy and accurate tracking.
+
+```ts title="index.ts"
+journium.reset();
+```
 
 ### Send Events to Journium
 
@@ -169,7 +104,8 @@ Then view your collected events at [Developers | Events](https://dashboard.journ
 ### Generate Your First Insight
 
 <Callout type="info">
-When you create an app in Journium, a default [Insight Tracker](/docs/react/concepts/insight_tracker) is automatically created. This tracker helps you test data ingestion and insight generation.
+When you create an app in Journium, a default [Insight Tracker](/docs/react/concepts/insight_tracker) is automatically created. 
+This tracker helps you test data ingestion and insight generation.
 </Callout>
 
 1. Go to your [Developers | Insight Trackers](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/insight-trackers) page
@@ -189,10 +125,9 @@ When you create an app in Journium, a default [Insight Tracker](/docs/react/conc
 
 <Accordions type="single">
   <Accordion title="Events not appearing in dashboard?">
-  - Verify your API key starts with `pk_` and is correctly set in `.env`
+  - Verify your API key starts with `pk_` and is correctly set in your code
   - Check browser console for errors (F12 → Console)
   - Ensure you're interacting with your **local app** (not the dashboard)
-  - Restart the dev server after changing `.env` file
   </Accordion>
 
   <Accordion title="Build errors?">
@@ -206,33 +141,15 @@ When you create an app in Journium, a default [Insight Tracker](/docs/react/conc
     ```
   </Accordion>
 
-  <Accordion title="Port already in use?">
-  - Use a different port:
-    ```bash
-    npm run dev -- --port 3000
-    ```
-  - Or stop the process using the port:
-    ```bash
-    # macOS/Linux
-    lsof -ti:5173 | xargs kill -9
-    ```
-  </Accordion>
-
-  <Accordion title=".env file not loading?">
-  - Ensure the file is named exactly `.env` (not `.env.txt`)
-  - Restart the development server after creating/modifying `.env`
-  - Check file location: it must be in the project root, not in `src/`
-  - For Vite projects, environment variables must be prefixed with `VITE_`
-  </Accordion>
 </Accordions>
 
 ## What's next?
 
 <Cards>
-  <Card title="Custom Events" href="/docs/react/concepts/events">
+  <Card title="Custom Events" href="/docs/js/concepts/events">
     Learn how to send your own custom events to track user behavior.
   </Card>
-  <Card title="Insight Trackers" href="/docs/react/concepts/insight_tracker">
+  <Card title="Insight Trackers" href="/docs/js/concepts/insight_tracker">
     Create custom analytics and understand how insights are generated.
   </Card>
 </Cards>
