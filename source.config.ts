@@ -1,10 +1,11 @@
-import { defineDocs, defineConfig } from 'fumadocs-mdx/config';
+import { defineDocs, defineConfig, defineCollections, frontmatterSchema } from 'fumadocs-mdx/config';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
 import lastModified from 'fumadocs-mdx/plugins/last-modified';
+import { z } from 'zod';
 
 export const docs = defineDocs({
   dir: 'content/docs',
@@ -13,6 +14,16 @@ export const docs = defineDocs({
       includeProcessedMarkdown: true,
     },
   },
+});
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: 'content/blog',
+  schema: frontmatterSchema.extend({
+    author: z.string(),
+    date: z.iso.date().or(z.date()),
+  }),
+  async: true,
 });
 
 export default defineConfig({

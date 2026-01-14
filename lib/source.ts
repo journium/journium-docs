@@ -1,6 +1,7 @@
-import { docs } from 'fumadocs-mdx:collections/server';
-import { InferPageType, loader } from 'fumadocs-core/source';
+import { blog as blogPosts, docs } from 'fumadocs-mdx:collections/server';
+import { InferPageType, InferMetaType, loader } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
+import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 
 export const source = loader({
   baseUrl: '/docs',
@@ -15,3 +16,10 @@ export function getPageImage(page: InferPageType<typeof source>) {
     url: `/og/docs/${segments.join('/')}`,
   };
 }
+
+export const blog = loader(toFumadocsSource(blogPosts, []), {
+  baseUrl: '/blog',
+});
+
+export type Page = InferPageType<typeof source>;
+export type Meta = InferMetaType<typeof source>;
