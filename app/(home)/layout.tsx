@@ -1,5 +1,5 @@
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
-import { baseOptions, linkItems } from '@/lib/layout.shared';
+import { blogBaseOptions, linkItems } from '@/lib/layout.shared';
 import {
   NavbarMenu,
   NavbarMenuContent,
@@ -9,12 +9,12 @@ import {
 import Link from 'fumadocs-core/link';
 import Image from 'next/image';
 import Preview from '@/public/banner.png';
-import { Book, ComponentIcon, Pencil, PlusIcon, Server } from 'lucide-react';
+import { Book, ComponentIcon, Pencil, PlusIcon, CircleQuestionMark, Server } from 'lucide-react';
 
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <HomeLayout
-      {...baseOptions()}
+      {...blogBaseOptions()}
       links={[
         {
           type: 'menu',
@@ -27,9 +27,9 @@ export default function Layout({ children }: LayoutProps<'/'>) {
               icon: <Book />,
             },
             {
-              text: 'Components',
-              url: '/docs/ui/components',
-              icon: <ComponentIcon />,
+              text: 'What is Journium?',
+              url: '/docs/what-is-journium',
+              icon: <CircleQuestionMark />,
             },
           ],
         },
@@ -99,7 +99,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
         },
         ...linkItems,
       ]}
-      className="dark:bg-neutral-950 dark:[--color-fd-background:var(--color-neutral-950)] [--color-fd-primary:var(--color-brand)]"
+      className="[--color-fd-primary:var(--color-brand)]"
     >
       {children}
     </HomeLayout>
