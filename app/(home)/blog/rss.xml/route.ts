@@ -4,18 +4,18 @@ import { NextResponse } from 'next/server';
 
 export const revalidate = false;
 
-const baseUrl = 'https://fumadocs.dev';
+const baseUrl = 'https://journium.app';
 
 export function GET() {
   const feed = new Feed({
-    title: 'Fumadocs Blog',
+    title: 'Journium Blog',
     id: `${baseUrl}/blog`,
     link: `${baseUrl}/blog`,
     language: 'en',
 
-    image: `${baseUrl}/banner.png`,
-    favicon: `${baseUrl}/icon.png`,
-    copyright: 'All rights reserved 2025, Fuma Nama',
+    image: `${baseUrl}/images/journium_og_web_v2.png`,
+    favicon: `${baseUrl}/images/favicon-dark.png`,
+    copyright: 'All rights reserved 2026, Journium',
   });
 
   for (const page of blog.getPages().sort((a, b) => {
