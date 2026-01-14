@@ -55,42 +55,23 @@ export default function Layout({ children }: LayoutProps<'/'>) {
                   </div>
                   <p className="font-medium">Getting Started</p>
                   <p className="text-fd-muted-foreground text-sm">
-                    Learn to use Fumadocs on your docs site.
+                    Learn to use Journium with your applications.
                   </p>
                 </NavbarMenuLink>
 
-                <NavbarMenuLink href="/docs/ui/components" className="lg:col-start-2">
+                <NavbarMenuLink href="/docs/what-is-journium" className="lg:col-start-2">
                   <ComponentIcon className="bg-fd-primary text-fd-primary-foreground p-1 mb-2 rounded-md" />
-                  <p className="font-medium">Components</p>
+                  <p className="font-medium">What is Journium?</p>
                   <p className="text-fd-muted-foreground text-sm">
-                    Add interactive experience to your docs.
+                    Learn about Journium and how it works.
                   </p>
                 </NavbarMenuLink>
 
-                <NavbarMenuLink href="/docs/openapi" className="lg:col-start-2">
+                <NavbarMenuLink href="/docs/concepts" className="lg:col-start-2">
                   <Server className="bg-fd-primary text-fd-primary-foreground p-1 mb-2 rounded-md" />
-                  <p className="font-medium">OpenAPI</p>
+                  <p className="font-medium">Concepts</p>
                   <p className="text-fd-muted-foreground text-sm">
-                    Generate interactive playgrounds and docs for your OpenAPI schema.
-                  </p>
-                </NavbarMenuLink>
-
-                <NavbarMenuLink href="/docs/markdown" className="lg:col-start-3 lg:row-start-1">
-                  <Pencil className="bg-fd-primary text-fd-primary-foreground p-1 mb-2 rounded-md" />
-                  <p className="font-medium">Markdown</p>
-                  <p className="text-fd-muted-foreground text-sm">
-                    Learn the writing format/syntax of Fumadocs.
-                  </p>
-                </NavbarMenuLink>
-
-                <NavbarMenuLink
-                  href="/docs/manual-installation"
-                  className="lg:col-start-3 lg:row-start-2"
-                >
-                  <PlusIcon className="bg-fd-primary text-fd-primary-foreground p-1 mb-2 rounded-md" />
-                  <p className="font-medium">Manual Installation</p>
-                  <p className="text-fd-muted-foreground text-sm">
-                    Setup Fumadocs for your existing Next.js app.
+                    Learn about the core concepts of Journium.
                   </p>
                 </NavbarMenuLink>
               </NavbarMenuContent>
