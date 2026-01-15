@@ -1,4 +1,4 @@
-import { source, getBlogPageImage, blog } from '@/lib/source';
+import { blog, getBlogPageImage } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import { generate as MetadataImage, getImageResponseOptions } from '../../generate';
 import { ImageResponse } from '@takumi-rs/image-response';
@@ -8,7 +8,7 @@ export const revalidate = false;
 
 export async function GET(_req: Request, { params }: RouteContext<'/og/blog/[...slug]'>) {
   const { slug } = await params;
-  const page = source.getPage(slug.slice(0, -1));
+  const page = blog.getPage(slug.slice(0, -1));
   if (!page) notFound();
 
   return new ImageResponse(
