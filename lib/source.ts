@@ -9,11 +9,19 @@ export const source = loader({
   plugins: [lucideIconsPlugin()],
 });
 
-export function getPageImage(page: InferPageType<typeof source>) {
+export function getDocsPageImage(page: InferPageType<typeof source>) {
   const segments = [...page.slugs, 'image.png'];
   return {
     segments,
     url: `/og/docs/${segments.join('/')}`,
+  };
+}
+
+export function getBlogPageImage(page: InferPageType<typeof blog>) {
+  const segments = [...page.slugs, 'image.png'];
+  return {
+    segments,
+    url: `/og/blog/${segments.join('/')}`,
   };
 }
 

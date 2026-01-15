@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
-import { blog } from '@/lib/source';
+import { blog, getBlogPageImage } from '@/lib/source';
 import { createMetadata } from '@/lib/metadata';
 import { buttonVariants } from '@/components/ui/button';
 import { ShareButton } from '@/app/(home)/blog/[slug]/page.client';
@@ -69,6 +69,9 @@ export async function generateMetadata(props: PageProps<'/blog/[slug]'>): Promis
   return createMetadata({
     title: page.data.title,
     description: page.data.description ?? 'The library for building documentation sites',
+    openGraph: {
+      images: getBlogPageImage(page).url,
+    },
   });
 }
 

@@ -7,25 +7,25 @@ export function createMetadata(override: Metadata): Metadata {
     openGraph: {
       title: override.title ?? undefined,
       description: override.description ?? undefined,
-      url: 'https://fumadocs.dev',
-      images: '/banner.png',
-      siteName: 'Fumadocs',
+      url: 'https://journium.app',
+      images: '/images/journium_og_web_v2.png',
+      siteName: 'Journium',
       ...override.openGraph,
     },
     twitter: {
       card: 'summary_large_image',
-      creator: '@fuma_nama',
+      creator: '@journium',
       title: override.title ?? undefined,
       description: override.description ?? undefined,
-      images: '/banner.png',
+      images: '/images/journium_og_web_v2.png',
       ...override.twitter,
     },
     alternates: {
       types: {
         'application/rss+xml': [
           {
-            title: 'Fumadocs Blog',
-            url: 'https://fumadocs.dev/blog/rss.xml',
+            title: 'Journium Blog',
+            url: 'https://journium.app/blog/rss.xml',
           },
         ],
       },
