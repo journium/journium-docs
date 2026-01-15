@@ -28,6 +28,18 @@ export async function getImageResponseOptions(): Promise<ImageResponseOptions> {
 }
 
 export function generate({ title, description }: GenerateProps) {
+  // Truncate title to 18 characters max and add ellipsis if needed
+  const MAX_TITLE_LENGTH = 18;
+  const truncatedTitle = title && typeof title === 'string' && title.length > MAX_TITLE_LENGTH
+    ? title.substring(0, MAX_TITLE_LENGTH).trim() + '...'
+    : title;
+
+  // Truncate description to 133 characters max and add ellipsis if needed
+  const MAX_DESCRIPTION_LENGTH = 133;
+  const truncatedDescription = description && typeof description === 'string' && description.length > MAX_DESCRIPTION_LENGTH
+    ? description.substring(0, MAX_DESCRIPTION_LENGTH).trim() + '...'
+    : description;
+
   const logo = (
     <svg width="600" height="148" viewBox="0 0 3250 800" xmlns="http://www.w3.org/2000/svg">
       <g>
@@ -76,7 +88,7 @@ export function generate({ title, description }: GenerateProps) {
             fontSize: '152px',
           }}
         >
-          {title}
+          {truncatedTitle}
         </span>
         <p
           style={{
@@ -84,7 +96,7 @@ export function generate({ title, description }: GenerateProps) {
             color: 'rgba(240,240,240,0.7)',
           }}
         >
-          {description}
+          {truncatedDescription}
         </p>
         <div
           style={{
