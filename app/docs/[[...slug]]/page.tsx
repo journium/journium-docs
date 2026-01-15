@@ -1,4 +1,4 @@
-import { source, getPageImage } from '@/lib/source';
+import { source, getDocsPageImage } from '@/lib/source';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle , PageLastUpdate} from 'fumadocs-ui/layouts/notebook/page';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
@@ -120,7 +120,7 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
     title: page.data.title,
     description: page.data.description,
     openGraph: {
-      images: getPageImage(page).url,
+      images: getDocsPageImage(page).url,
     },
   };
 }
