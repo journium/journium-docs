@@ -15,7 +15,7 @@ Yet despite this investment, most teams still can't answer basic questions:
 * *What changed in user behavior last week?*
 * *Which actions predict retention?*
 
-The problem isn't a lack of data—it's that **raw data is the wrong abstraction**.
+The problem isn't a lack of data. It's that **raw data is the wrong abstraction**.
 
 User behavior is a higher-level concept that captures what raw events cannot: **intent, patterns, and meaning**. It's the difference between collecting information and understanding it.
 
@@ -45,7 +45,7 @@ The fundamental issue? Raw data tells you *what happened*, but rarely *why it ha
 
 ## Why Behavior Is a Superior Abstraction
 
-User behavior isn't a single event—it's a **pattern of intent expressed across multiple actions over time**.
+User behavior isn't a single event. It's a **pattern of intent expressed across multiple actions over time**.
 
 Consider these behavioral signals:
 
@@ -54,13 +54,13 @@ Consider these behavioral signals:
 * "User adopts feature A but never reaches feature B"
 * "User engagement depth decays week over week"
 
-Take the checkout abandonment example. A data-first approach shows you metrics: "47% cart abandonment rate" and "avg. time on pricing page: 23 seconds." But you still don't know if users are comparing options, confused by tiers, or hitting technical issues. The behavior-first approach detects the *pattern*—repeated visits to pricing followed by abandonment—and surfaces it as a cohort-level insight worth investigating.
+Take the checkout abandonment example. A data-first approach shows you metrics: "47% cart abandonment rate" and "avg. time on pricing page: 23 seconds." But you still don't know if users are comparing options, confused by tiers, or hitting technical issues. The behavior-first approach detects the *pattern* (repeated visits to pricing followed by abandonment) and surfaces it as a cohort-level insight worth investigating.
 
 None of these behaviors can be captured by a single metric or dashboard chart. Each requires understanding **sequences, timing, and context**.
 
 As an abstraction, behavior **compresses** multiple events into meaning while **preserving** intent and filtering noise. It **reduces** dimensionality, enabling faster reasoning and decision-making at the right conceptual level.
 
-It's the same principle behind high-level programming languages. We don't write assembly code because operating on primitives is inefficient. The same logic applies to analytics—raw events are the assembly language of user understanding.
+It's the same principle behind high-level programming languages. We don't write assembly code because operating on primitives is inefficient. The same logic applies to analytics: raw events are the assembly language of user understanding.
 
 ---
 
@@ -68,7 +68,7 @@ It's the same principle behind high-level programming languages. We don't write 
 
 When teams try to infer behavior directly from raw data, they build complex queries and fragile funnels, maintain dozens of dashboards, and re-interpret charts every time context shifts. Every insight requires human pattern recognition.
 
-This creates four compounding problems. **Latency** becomes chronic—insights arrive after the behavior has already changed, so you're always looking backward. **Cost** scales linearly, with both computational expenses (warehouse queries) and human expenses (analyst time) growing with every question asked. **Reliability** suffers as manual interpretation introduces confirmation bias and teams see what they expect to see rather than what's actually happening. **Scalability** hits a wall because each new question requires new analysis, with no accumulated knowledge or reusable insight infrastructure.
+This creates four compounding problems. **Latency** becomes chronic: insights arrive after the behavior has already changed, so you're always looking backward. **Cost** scales linearly, with both computational expenses (warehouse queries) and human expenses (analyst time) growing with every question asked. **Reliability** suffers as manual interpretation introduces confirmation bias and teams see what they expect to see rather than what's actually happening. **Scalability** hits a wall because each new question requires new analysis, with no accumulated knowledge or reusable insight infrastructure.
 
 The result? Teams operate in reactive mode, responding to problems rather than anticipating them.
 
@@ -80,13 +80,13 @@ A behavior-first approach inverts the model:
 
 > **Operate on behavior signals by default. Drill into raw data only when deeper inspection is needed.**
 
-This changes the fundamental question teams ask—and with it, the entire analytics architecture:
+This changes the fundamental question teams ask, and with it, the entire analytics architecture:
 
 | Dimension | Data-First | Behavior-First |
 |-----------|-----------|----------------|
 | **Primary question** | "What queries should we run?" | "What behaviors matter?" |
 | **Operating layer** | Raw events and metrics | Behavioral patterns |
-| **Analysis mode** | Reactive—check dashboards | Proactive—system monitors |
+| **Analysis mode** | Reactive: check dashboards | Proactive: system monitors |
 | **Knowledge model** | Ad-hoc interpretation | Codified definitions |
 | **Scaling constraint** | Analyst bandwidth | Compute resources |
 
@@ -108,7 +108,7 @@ Third, **knowledge compounds** over time. Each behavior definition becomes insti
 
 Finally, **time to insight collapses**. No waiting for dashboards to load or analysts to interpret charts. Behavioral changes trigger alerts automatically.
 
-The raw data layer still exists—but as infrastructure, not interface. This is the architectural pattern that scales.
+The raw data layer still exists, but as infrastructure, not interface. This is the architectural pattern that scales.
 
 ---
 
@@ -116,7 +116,7 @@ The raw data layer still exists—but as infrastructure, not interface. This is 
 
 This is why we built Journium on a behavior-first architecture.
 
-Traditional analytics forces teams to build dashboards, monitor charts, and manually interpret metrics. It's a pull model—you must constantly check for changes.
+Traditional analytics forces teams to build dashboards, monitor charts, and manually interpret metrics. It's a pull model: you must constantly check for changes.
 
 Journium inverts this: **define behavioral insights as code, then let the system watch continuously**.
 
@@ -136,7 +136,7 @@ Behavior-first analytics flips the responsibility:
 
 > **The system monitors behavior continuously. Humans receive alerts only when meaningful changes occur.**
 
-This is the shift from **observability** to **intelligence**—from making data *available* to making decisions *ready*.
+This is the shift from **observability** to **intelligence**: from making data *available* to making decisions *ready*.
 
 ---
 
@@ -154,7 +154,7 @@ Behavior is the default lens. Data is the foundation when you need to go deeper.
 
 The analytics stack of the next decade must solve for complexity and scale simultaneously. As products grow and teams stay lean, systems must **reduce cognitive load** on decision-makers, **surface intent** while filtering noise, **encode institutional knowledge** as reusable definitions, and **operate continuously** rather than reactively.
 
-User behavior—not raw data—is the abstraction that makes this economically viable.
+User behavior, not raw data, is the abstraction that makes this economically viable.
 
 Data powers the infrastructure. Behavior powers decisions.
 
