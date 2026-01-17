@@ -1,0 +1,130 @@
+---
+title: Why Most Analytics Systems Don't Produce Insight
+description: Modern analytics stacks are technically impressive but structurally misaligned with decision-making. 
+             This post examines why dashboards, warehouses, and metrics fail to generate insights 
+             and what a better system looks like.
+date: 2026-01-17
+author: Arun Patra
+---
+
+
+Most analytics systems today are *working as designed*.
+
+Events are collected reliably. Pipelines run on schedule. Warehouses scale. 
+Dashboards render in milliseconds. Queries are fast. Data is accurate.
+
+And yet, many teams still struggle to answer the questions that matter most for growth.
+
+This isn't a tooling failure.
+It's a **systems design failure**.
+
+---
+
+## Analytics Optimizes for Throughput, Not Understanding
+
+The modern analytics stack is optimized around measurable outputs:
+events ingested, tables modeled, dashboards built, queries executed.
+
+These are all tractable engineering problems.
+
+Insight, however, is not a measurable output. It's an emergent property of interpretation, timing, and context. 
+Most analytics systems treat insight as something that will "happen later", outside the system.
+
+This creates a structural gap.
+
+Data flows automatically. Insight does not.
+
+---
+
+## Dashboards Encode Answers, Not Questions
+
+Dashboards are usually built to answer questions someone *already thought to ask*.
+
+* "How many users converted?"
+* "What is DAU this week?"
+* "Where is the funnel leaking?"
+
+They work well for known unknowns. They are far less effective for unknown unknowns.
+
+When behavior shifts in subtle ways, dashboards don't raise their hand. Someone has to notice. Someone has to be looking at the right chart, at the right time, with the right mental model.
+
+At scale, this assumption breaks.
+
+---
+
+## Human Pattern Detection Does Not Scale Linearly
+
+Most analytics workflows rely on humans to:
+scan charts, compare periods, notice anomalies, infer causality, and decide what matters.
+
+This works when the system is small and the number of signals is limited.
+
+As products grow, the combinatorial space of possible patterns explodes. No team can manually monitor all 
+relevant journeys, cohorts, and interactions.
+
+The result is predictable:
+important signals are noticed late, obvious ones are over-analyzed, and subtle shifts go undetected until 
+they turn into business problems.
+
+---
+
+## The Latency of Insight Is the Real Cost
+
+Analytics costs are usually discussed in terms of infrastructure and headcount.
+
+The more expensive cost is **latency**.
+
+By the time an insight is surfaced, discussed, and acted upon, the underlying behavior may already have changed. 
+Teams end up optimizing for the past while believing they are operating in the present.
+
+This creates a false sense of control.
+
+---
+
+## Why "More AI" Doesn't Fix This
+
+Adding AI on top of dashboards doesn't solve the core issue.
+
+If the system still treats insight as an afterthought, AI simply accelerates the production of 
+interpretations - without guaranteeing relevance, timing, or actionability.
+
+The problem isn't that humans are bad at analysis.
+It's that the system is not designed to *care* about insight.
+
+---
+
+## What a Better Analytics System Optimizes For
+
+A system that reliably produces insight optimizes for different primitives:
+
+* detecting meaningful change, not reporting stable metrics
+* operating continuously, not periodically
+* encoding what matters, not exposing everything
+* reducing human scanning, not increasing it
+
+This requires shifting analytics from a pull-based model ("check dashboards") 
+to a push-based one ("notify when something meaningful changes").
+
+It also requires making insight definitions explicit, rather than implicit in charts and queries.
+
+---
+
+## Where Behavior Fits In (Briefly)
+
+Behavior matters here not as a philosophical concept, but as a practical one.
+
+Patterns of behavior change more slowly than raw events and more meaningfully than individual metrics. 
+They provide a stable layer for monitoring without constant re-interpretation.
+
+Used correctly, they allow systems to detect when something *material* has shifted - without humans having to watch everything.
+
+---
+
+## Closing Thought
+
+Most analytics stacks today are successful engineering projects that fail as decision systems.
+
+They collect data efficiently but externalize the hardest part: knowing when something important has changed.
+
+Until analytics systems are designed with insight as a first-class outcome - not a hoped-for side effect,  
+teams will keep building impressive infrastructure and wondering why clarity remains elusive.
