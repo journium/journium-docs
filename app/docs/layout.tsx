@@ -24,6 +24,11 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
           const isReact = meta.path?.includes('react') || false;
           const isJs = meta.path?.includes('js') || false;
           const Icon = isNextJs ? NextJsIcon : isReact ? ReactIcon : isJs ? JsIcon : TerminalIcon;
+
+          if (isNextJs && option.urls) {
+            // Keep the dropdown visible on /docs by mapping it to a tab.
+            option.urls.add('/docs');
+          }
           
           // Extract section from path (e.g., 'nextjs' from '/docs/nextjs')
           const getSection = (path: string | undefined) => {
