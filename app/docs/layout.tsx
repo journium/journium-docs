@@ -14,6 +14,8 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
     <DocsLayout {...baseOptions()}
     tree={source.getPageTree()} 
     sidebar={{
+      defaultOpenLevel: 1,
+      //collapsible: true,
       tabs: {
         transform(option, node) {
           const meta = source.getNodeMeta(node);
@@ -61,24 +63,23 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
     // sidebar={{
     //   tabs: [
     //     {
-    //       title: 'Javascript',
-    //       description: 'Javascript documentation',
-    //       // active for `/docs/components` and sub routes like `/docs/components/button`
-    //       url: '/docs/js',
-    //       // optionally, you can specify a set of urls which activates the item
-    //       //urls: new Set(['/docs/javascript/react', '/docs/javascript/nextjs']),
-    //     },
-    //     {
     //       title: 'Next.js',
     //       description: 'Next.js documentation',
+    //       // active for `/docs/components` and sub routes like `/docs/components/button`
     //       url: '/docs/nextjs',
-    //       //urls: new Set(['/docs/nextjs/react', '/docs/nextjs/nextjs']),
+    //       // optionally, you can specify a set of urls which activates the item
+    //       urls: new Set(['/docs/nextjs', '/docs']),
     //     },
     //     {
     //       title: 'React',
     //       description: 'React documentation',
     //       url: '/docs/react',
     //       //urls: new Set(['/docs/react/react', '/docs/react/nextjs']),
+    //     },
+    //     {
+    //       title: 'JavaScript',
+    //       description: 'JavaScript documentation',
+    //       url: '/docs/js',
     //     },
     //   ],
     //     }}
