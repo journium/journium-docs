@@ -4,7 +4,10 @@ description: This tutorial demonstrates how to integrate Journium with your Java
 icon: Rocket
 ---
 
-## Setup
+import { ShopifyIcon } from '@/components/icons/shopify';
+import { WordPressIcon } from '@/components/icons/wordpress';
+
+## Installation
 
 <Callout type="info">
   
@@ -20,23 +23,65 @@ icon: Rocket
   
 </Callout>
 
+Choose the installation method that best fits your project:
+
+<Tabs groupId="js-installation" items={['Script Tag (CDN)', 'Package Manager']} defaultIndex={0} persist>
+  <Tab value="Script Tag (CDN)">
+    **Ideal for websites without build tools.**
+
+    ```html title="index.html"
+    <script>
+    !function(j,o,u,r,n,i,u,m){
+        if(!o.__JV){
+            window.journium=o;
+            o._q=[];
+            o._i=null;
+            o.init=function(c,n){o._i=[c,n]};
+            var methods="track identify reset capturePageview startAutocapture stopAutocapture flush getEffectiveOptions onOptionsChange destroy".split(" ");
+            for(var k=0;k<methods.length;k++){
+                !function(method){
+                    o[method]=function(){o._q.push([method].concat(Array.prototype.slice.call(arguments)));return o}
+                }(methods[k])
+            }
+            o.__JV=1;
+            (m=j.createElement("script")).type="text/javascript";
+            m.async=!0;
+            m.src="https://cdn.jsdelivr.net/npm/@journium/js@1/dist/journium.min.js";
+            m.onerror=function(){console.warn("Journium: Failed to load SDK from CDN")};
+            (i=j.getElementsByTagName("script")[0]).parentNode.insertBefore(m,i);
+        }
+    }(document,window.journium||[]);
+    </script>
+    ```
+
+    Perfect for:
+    - Static HTML websites
+    - Shopify stores
+    - WordPress sites
+    - No-code platforms
+
+    <Callout type="info">
+    For detailed CDN usage including e-commerce tracking examples and advanced configurations, see the [CDN Usage Guide](/docs/js/cdn-usage).
+    </Callout>
+  </Tab>
+  <Tab value="Package Manager">
+    **Recommended for modern web applications with build tools.**
+
+    ```bash title="Terminal"
+    npm install @journium/js
+    ```
+
+    Perfect for applications using:
+    - Webpack, Vite, or other bundlers
+    - TypeScript projects
+    - Modern JavaScript frameworks
+  </Tab>
+</Tabs>
 
 <section id="setup-section">
 <div className="fd-steps [&_h3]:fd-step">
 
-
-### Install `@journium/js`
-
-The [Journium JavaScript SDK](/docs/js/hooks) gives you access to pre-built hooks and components to help you generate events 
-in your React application and get insights from your data.
-
-Run the following command to install the SDK:
-
-```npm title="Terminal"
-npm i @journium/js
-```
-
-### Set your Journium Publishable Key 
+### Set your Journium Publishable Key
 
 1. **Sign up for a Journium account** for free at [journium.app/signup](https://journium.app/signup)
 
@@ -53,45 +98,101 @@ npm i @journium/js
 
 Initialize the Journium SDK with your publishable key to start tracking events.
 
-```ts title="index.ts"
-import { init } from '@journium/js';
+<Tabs groupId="js-installation" items={['Script Tag (CDN)', 'Package Manager']} defaultIndex={0} persist>
+  <Tab value="Script Tag (CDN)">
+    ```html title="index.html"
+    <script>
+    /* Journium snippet from above */
+    
+    journium.init({ 
+      publishableKey: 'YOUR_PUBLISHABLE_KEY'
+    });
+    </script>
+    ```
+  </Tab>
+  <Tab value="Package Manager">
+    ```ts title="index.ts"
+    import { init } from '@journium/js';
 
-const journium = init({
-  publishableKey: 'your-journium-publishable-key'
-});
-```
+    const journium = init({
+      publishableKey: 'your-journium-publishable-key'
+    });
+    ```
+  </Tab>
+</Tabs>
 
 ### Track a Custom Event
 
 Track user actions and business events with custom properties.
 
-```ts title="index.ts"
-journium.track('button_clicked', {
-  button_name: 'signup',
-  page: 'homepage',
-  user_type: 'visitor'
-});
-```
+<Tabs groupId="js-installation" items={['Script Tag (CDN)', 'Package Manager']} defaultIndex={0} persist>
+  <Tab value="Script Tag (CDN)">
+    ```html title="index.html"
+    <script>
+    journium.track('button_clicked', {
+      button_name: 'signup',
+      page: 'homepage',
+      user_type: 'visitor'
+    });
+    </script>
+    ```
+  </Tab>
+  <Tab value="Package Manager">
+    ```ts title="index.ts"
+    journium.track('button_clicked', {
+      button_name: 'signup',
+      page: 'homepage',
+      user_type: 'visitor'
+    });
+    ```
+  </Tab>
+</Tabs>
 
 ### Identify a User
 
 Identify users when they log in or sign up to connect their actions across sessions.
 
-```ts title="index.ts"
-journium.identify('user_12345', {
-  name: 'John Doe',
-  email: 'john@example.com',
-  plan: 'premium'
-});
-```
+<Tabs groupId="js-installation" items={['Script Tag (CDN)', 'Package Manager']} defaultIndex={0} persist>
+  <Tab value="Script Tag (CDN)">
+    ```html title="index.html"
+    <script>
+    journium.identify('user_12345', {
+      name: 'John Doe',
+      email: 'john@example.com',
+      plan: 'premium'
+    });
+    </script>
+    ```
+  </Tab>
+  <Tab value="Package Manager">
+    ```ts title="index.ts"
+    journium.identify('user_12345', {
+      name: 'John Doe',
+      email: 'john@example.com',
+      plan: 'premium'
+    });
+    ```
+  </Tab>
+</Tabs>
 
 ### Reset User Identity
 
 Reset user identity when they log out to ensure privacy and accurate tracking.
 
-```ts title="index.ts"
-journium.reset();
-```
+<Tabs groupId="js-installation" items={['Script Tag (CDN)', 'Package Manager']} defaultIndex={0} persist>
+  <Tab value="Script Tag (CDN)">
+    ```html title="index.html"
+    <script>
+    journium.reset();
+    </script>
+    ```
+  </Tab>
+  <Tab value="Package Manager">
+    ```ts title="index.ts"
+    journium.reset();
+    ```
+  </Tab>
+</Tabs>
 
 ### Send Events to Journium
 
@@ -142,6 +243,39 @@ This tracker helps you test data ingestion and insight generation.
   </Accordion>
 
 </Accordions>
+
+## Platform-Specific Guides
+
+<Cards>
+  <Card 
+    title="Shopify Integration" 
+    icon={<ShopifyIcon className="w-5 h-5" />}
+    href="/docs/js/shopify-integration"
+  >
+    Track product views, cart events, and purchases on your Shopify store
+  </Card>
+  <Card 
+    title="WordPress Integration" 
+    icon={<WordPressIcon className="w-5 h-5" />}
+    href="/docs/js/wordpress-integration"
+  >
+    Add analytics to your WordPress site and track blog engagement
+  </Card>
+</Cards>
+
+## API Documentation
+
+<Cards>
+  <Card title="Configuration Options" href="/docs/js/configuration" icon="Settings">
+    Complete guide to all configuration options and settings
+  </Card>
+  <Card title="API Methods" href="/docs/js/api-methods" icon="Code">
+    All methods, parameters, and usage examples
+  </Card>
+  <Card title="TypeScript Types" href="/docs/js/typescript-types" icon="FileCode">
+    Complete type definitions for TypeScript projects
+  </Card>
+</Cards>
 
 ## What's next?
 

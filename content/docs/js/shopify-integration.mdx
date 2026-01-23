@@ -1,0 +1,503 @@
+---
+title: Shopify Analytics Integration Guide
+description: Complete guide to integrate Journium analytics with your Shopify store. Track product views, cart events, purchases, and customer behavior on Shopify without coding.
+keywords: shopify analytics, shopify tracking, shopify product analytics, shopify conversion tracking, shopify customer tracking, shopify event tracking, shopify store analytics
+icon: Store
+---
+
+# Shopify Analytics Integration
+
+Integrate Journium analytics with your Shopify store to track product views, cart events, purchases, and customer behavior.
+
+## Installation
+
+### Step 1: Get Your Journium Publishable Key
+
+1. Create a Shopify application in your Journium Dashboard
+2. Copy your Publishable Key from the API Keys section
+
+### Step 2: Add Journium to Your Shopify Theme
+
+1. **Log in to your Shopify Admin**
+2. Go to **Online Store → Themes**
+3. Click **Actions → Edit code** on your active theme
+4. Open **Layout → theme.liquid**
+5. **Add this code before `</head>`**:
+
+```html
+<!-- Journium Analytics for Shopify -->
+<script>
+!function(j,o,u,r,n,i,u,m){
+    if(!o.__JV){
+        window.journium=o;
+        o._q=[];
+        o._i=null;
+        o.init=function(c,n){o._i=[c,n]};
+        var methods="track identify reset capturePageview startAutocapture stopAutocapture flush getEffectiveOptions onOptionsChange destroy".split(" ");
+        for(var k=0;k<methods.length;k++){
+            !function(method){
+                o[method]=function(){o._q.push([method].concat(Array.prototype.slice.call(arguments)));return o}
+            }(methods[k])
+        }
+        o.__JV=1;
+        (m=j.createElement("script")).type="text/javascript";
+        m.async=!0;
+        m.src="https://cdn.jsdelivr.net/npm/@journium/js@1/dist/journium.min.js";
+        m.onerror=function(){console.warn("Journium: Failed to load SDK from CDN")};
+        (i=j.getElementsByTagName("script")[0]).parentNode.insertBefore(m,i);
+    }
+}(document,window.journium||[]);
+
+// Initialize Journium - Replace with your publishable key
+journium.init({ 
+    publishableKey: 'YOUR_SHOPIFY_PUBLISHABLE_KEY',
+    options: {
+        autocapture: true,
+        autoTrackPageviews: true
+    }
+});
+
+// Identify logged-in customers
+{% if customer %}
+journium.identify('{{ customer.id }}', {
+    email: '{{ customer.email }}',
+    first_name: '{{ customer.first_name }}',
+    last_name: '{{ customer.last_name }}',
+    orders_count: {{ customer.orders_count }},
+    total_spent: {{ customer.total_spent | money_without_currency }},
+    tags: {{ customer.tags | json }}
+});
+{% endif %}
+</script>
+```
+
+6. **Click Save**
+
+### Step 3: Track E-commerce Events
+
+Add tracking for key shopping events by adding code to specific template files.
+
+## Product View Tracking
+
+Track when customers view products to understand which products generate interest.
+
+**File:** `Templates → product.liquid` (or in your product template section)
+
+```html
+<script>
+{% if product %}
+journium.track('product_viewed', {
+    product_id: {{ product.id }},
+    product_title: {{ product.title | json }},
+    product_type: {{ product.type | json }},
+    vendor: {{ product.vendor | json }},
+    price: {{ product.price | money_without_currency }},
+    compare_at_price: {{ product.compare_at_price | money_without_currency }},
+    available: {{ product.available }},
+    variant_id: {{ product.selected_or_first_available_variant.id }},
+    variant_title: {{ product.selected_or_first_available_variant.title | json }},
+    image_url: {{ product.featured_image | img_url: 'large' | json }},
+    url: {{ product.url | json }},
+    tags: {{ product.tags | json }},
+    collections: [
+        {% for collection in product.collections %}
+        {{ collection.title | json }}{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+    ]
+});
+{% endif %}
+</script>
+```
+
+## Collection View Tracking
+
+Track collection page views to see which categories interest customers.
+
+**File:** `Templates → collection.liquid`
+
+```html
+<script>
+{% if collection %}
+journium.track('collection_viewed', {
+    collection_id: {{ collection.id }},
+    collection_title: {{ collection.title | json }},
+    collection_handle: {{ collection.handle | json }},
+    product_count: {{ collection.products.size }},
+    all_products_count: {{ collection.all_products_count }},
+    image_url: {{ collection.image | img_url: 'large' | json }}
+});
+{% endif %}
+</script>
+```
+
+## Add to Cart Tracking
+
+Track when products are added to cart - critical for conversion analysis.
+
+**Option 1: Using Theme Customization (Recommended)**
+
+1. Go to **Online Store → Themes → Customize**
+2. Open **Theme settings → Custom CSS** (or equivalent)
+3. Use browser console to find your add-to-cart button selector
+4. Add this to **Layout → theme.liquid** before `</body>`:
+
+```html
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Track add to cart - adjust selector for your theme
+    const addToCartButtons = document.querySelectorAll('[name="add"], .product-form__submit, button[type="submit"][name="add"]');
+    
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const form = this.closest('form');
+            if (!form) return;
+            
+            // Get variant ID
+            const variantInput = form.querySelector('[name="id"]');
+            const variantId = variantInput ? variantInput.value : null;
+            
+            // Get quantity
+            const quantityInput = form.querySelector('[name="quantity"]');
+            const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+            
+            {% if product %}
+            journium.track('product_added_to_cart', {
+                product_id: {{ product.id }},
+                product_title: {{ product.title | json }},
+                variant_id: variantId,
+                quantity: quantity,
+                price: {{ product.price | money_without_currency }},
+                currency: {{ shop.currency | json }}
+            });
+            {% endif %}
+        });
+    });
+});
+</script>
+```
+
+**Option 2: Using AJAX Cart Events**
+
+If your theme uses AJAX cart (most modern themes), add this:
+
+```html
+<script>
+// Listen for Shopify AJAX cart events
+document.addEventListener('DOMContentLoaded', function() {
+    // Hook into fetch to intercept cart/add.js calls
+    const originalFetch = window.fetch;
+    window.fetch = function(...args) {
+        const [url, options] = args;
+        
+        if (url && url.includes('/cart/add')) {
+            return originalFetch.apply(this, args).then(response => {
+                if (response.ok) {
+                    response.clone().json().then(data => {
+                        journium.track('product_added_to_cart', {
+                            product_id: data.product_id,
+                            variant_id: data.variant_id,
+                            quantity: data.quantity,
+                            price: data.price / 100, // Shopify returns price in cents
+                            product_title: data.product_title,
+                            variant_title: data.variant_title
+                        });
+                    });
+                }
+                return response;
+            });
+        }
+        
+        return originalFetch.apply(this, args);
+    };
+});
+</script>
+```
+
+## Checkout Started Tracking
+
+Track when customers begin the checkout process.
+
+**File:** `Layout → theme.liquid` (add before `</body>`)
+
+```html
+{% if template == 'cart' %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkoutButtons = document.querySelectorAll('button[name="checkout"], .cart__checkout-button, [href*="/checkout"]');
+    
+    checkoutButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            journium.track('checkout_started', {
+                cart_total: {{ cart.total_price | money_without_currency }},
+                item_count: {{ cart.item_count }},
+                currency: {{ shop.currency | json }},
+                items: [
+                    {% for item in cart.items %}
+                    {
+                        product_id: {{ item.product_id }},
+                        variant_id: {{ item.variant_id }},
+                        title: {{ item.product.title | json }},
+                        variant_title: {{ item.variant.title | json }},
+                        quantity: {{ item.quantity }},
+                        price: {{ item.final_price | money_without_currency }}
+                    }{% unless forloop.last %},{% endunless %}
+                    {% endfor %}
+                ]
+            });
+        });
+    });
+});
+</script>
+{% endif %}
+```
+
+## Purchase Tracking
+
+Track completed purchases to measure conversion and revenue.
+
+**File:** Create a new snippet: `Snippets → journium-order-tracking.liquid`
+
+```liquid
+{% if checkout.order_id %}
+<script>
+journium.track('order_completed', {
+    order_id: {{ checkout.order_id | json }},
+    order_number: {{ checkout.order_number | json }},
+    total: {{ checkout.total_price | money_without_currency }},
+    subtotal: {{ checkout.subtotal_price | money_without_currency }},
+    shipping: {{ checkout.shipping_price | money_without_currency }},
+    tax: {{ checkout.tax_price | money_without_currency }},
+    discount: {{ checkout.discount_applications | map: 'total_allocated_amount' | sum | money_without_currency }},
+    currency: {{ checkout.currency | json }},
+    items: [
+        {% for line_item in checkout.line_items %}
+        {
+            product_id: {{ line_item.product_id }},
+            variant_id: {{ line_item.variant_id }},
+            title: {{ line_item.title | json }},
+            quantity: {{ line_item.quantity }},
+            price: {{ line_item.final_price | money_without_currency }},
+            sku: {{ line_item.sku | json }}
+        }{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+    ],
+    customer: {
+        id: {{ checkout.customer.id }},
+        email: {{ checkout.email | json }},
+        first_name: {{ checkout.shipping_address.first_name | json }},
+        last_name: {{ checkout.shipping_address.last_name | json }}
+    }
+});
+</script>
+{% endif %}
+```
+
+**Then include it in:** `Settings → Checkout → Order status page` (Additional scripts section)
+
+```liquid
+{% render 'journium-order-tracking' %}
+```
+
+## Search Tracking
+
+Track what customers are searching for in your store.
+
+**File:** `Templates → search.liquid`
+
+```html
+<script>
+{% if search.performed %}
+journium.track('products_searched', {
+    query: {{ search.terms | json }},
+    results_count: {{ search.results_count }},
+    product_results: {{ search.results.size }}
+});
+{% endif %}
+</script>
+```
+
+## Advanced: Track Custom Events
+
+### Track Newsletter Signups
+
+```html
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const newsletterForms = document.querySelectorAll('form[action*="/contact"]');
+    
+    newsletterForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const emailInput = form.querySelector('input[type="email"]');
+            if (emailInput) {
+                journium.track('newsletter_signup', {
+                    email: emailInput.value,
+                    source: 'footer' // or wherever the form is
+                });
+            }
+        });
+    });
+});
+</script>
+```
+
+### Track Wishlist/Favorites (if your theme supports it)
+
+```html
+<script>
+document.addEventListener('click', function(e) {
+    // Adjust selector based on your theme
+    if (e.target.matches('.wishlist-button, [data-wishlist]')) {
+        journium.track('product_added_to_wishlist', {
+            product_id: e.target.dataset.productId,
+            product_title: e.target.dataset.productTitle
+        });
+    }
+});
+</script>
+```
+
+## Testing Your Integration
+
+### 1. Test in Browser Console
+
+Open your Shopify store and press F12 to open Developer Tools:
+
+```javascript
+// Check if Journium is loaded
+console.log(window.journium);
+
+// Test tracking manually
+journium.track('test_event', { test: true });
+
+// Check current configuration
+console.log(journium.getEffectiveOptions());
+```
+
+### 2. Verify in Journium Dashboard
+
+1. Go to your [Journium Dashboard](https://dashboard.journium.app)
+2. Navigate to **Developers → Events**
+3. You should see events appearing within seconds
+
+### 3. Test Key Flows
+
+- ✅ View a product page (check for "Product Viewed" event)
+- ✅ Add item to cart (check for "Product Added to Cart" event)
+- ✅ View cart page (check for "Checkout Started" when clicking checkout)
+- ✅ Complete a test purchase (check for "Order Completed" event)
+
+## Shopify-Specific Considerations
+
+### 1. Liquid Variables
+
+Shopify uses Liquid templating. Key variables you can use:
+
+- `{{ customer }}` - Current logged-in customer
+- `{{ product }}` - Current product (on product pages)
+- `{{ collection }}` - Current collection (on collection pages)
+- `{{ cart }}` - Shopping cart data
+- `{{ shop }}` - Store information
+- `{{ template }}` - Current template name
+
+### 2. Theme Compatibility
+
+This integration works with all Shopify themes:
+- ✅ Dawn (Shopify's default theme)
+- ✅ Debut (legacy default)
+- ✅ Brooklyn, Narrative, Supply
+- ✅ Custom themes
+- ✅ Third-party premium themes
+
+### 3. Shopify Plus Features
+
+If you're on Shopify Plus, you can:
+- Add tracking to checkout.liquid for more detailed checkout tracking
+- Use Scripts API for advanced cart tracking
+- Create custom apps with more sophisticated integrations
+
+### 4. GDPR Compliance
+
+For European customers, ensure compliance:
+
+```html
+<script>
+// Only initialize Journium after consent
+if (window.Shopify && window.Shopify.customerPrivacy) {
+    window.Shopify.loadFeatures([{
+        name: 'consent-tracking-api',
+        version: '0.1'
+    }], function(error) {
+        if (error) {
+            console.error('Error loading consent tracking:', error);
+            return;
+        }
+        
+        // Check if analytics consent is granted
+        const consent = window.Shopify.customerPrivacy.currentVisitorConsent();
+        if (consent && consent.analytics) {
+            // Initialize Journium
+            journium.init({ publishableKey: 'YOUR_KEY' });
+        }
+    });
+}
+</script>
+```
+
+## Performance Optimization
+
+### 1. Async Loading
+
+The snippet loads asynchronously by default (`m.async=!0`), so it won't block page rendering.
+
+### 2. Event Batching
+
+Configure batching to reduce server requests:
+
+```javascript
+journium.init({ 
+    publishableKey: 'YOUR_KEY',
+    options: {
+        flushAt: 20,        // Send after 20 events
+        flushInterval: 10000 // Or every 10 seconds
+    }
+});
+```
+
+### 3. Minimize Liquid Processing
+
+For high-traffic stores, consider caching product data client-side instead of using Liquid for every event.
+
+## Troubleshooting
+
+### Events Not Showing Up?
+
+1. **Check browser console** for errors (F12 → Console)
+2. **Verify publishable key** starts with `pk_`
+3. **Check network tab** (F12 → Network) for requests to `events.journium.app`
+4. **Disable ad blockers** temporarily for testing
+
+### Liquid Errors?
+
+1. **Validate JSON syntax** - Liquid output must be valid JSON
+2. **Use `| json` filter** for text values: `{{ product.title | json }}`
+3. **Test in theme editor** preview before publishing
+
+### Add to Cart Not Tracking?
+
+1. **Inspect your add to cart button** - selector may be different
+2. **Check if using AJAX cart** - may need different implementation
+3. **Look for JavaScript errors** in console
+
+## Next Steps
+
+<Cards>
+  <Card title="Create Insight Trackers" href="/docs/js/concepts/insight_tracker">
+    Set up custom analytics for your Shopify store
+  </Card>
+  <Card title="View Your Insights" href="/docs/js/concepts/insights">
+    Understand your customer behavior data
+  </Card>
+  <Card title="Configuration Options" href="/docs/js/configuration">
+    Customize tracking behavior and options
+  </Card>
+</Cards>

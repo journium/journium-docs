@@ -1,0 +1,263 @@
+---
+title: Next.js Configuration
+description: Configure Journium Next.js SDK with Provider component, automatic route tracking, and underlying JavaScript SDK options.
+---
+
+# Next.js Configuration
+
+The Journium Next.js SDK extends the [React SDK](/docs/react) with Next.js-specific optimizations including automatic route change tracking for both App Router and Pages Router.
+
+## Next.js-Specific Setup
+
+### Provider Configuration
+
+<Tabs groupId="nextjs-framework" items={['App Router', 'Pages Router']} persist defaultIndex={0}>
+  <Tab value="App Router">
+    ```tsx title="app/layout.tsx"
+    import { NextJourniumProvider } from '@journium/nextjs';
+
+    const journiumConfig = {
+      publishableKey: process.env.NEXT_PUBLIC_JOURNIUM_PUBLISHABLE_KEY!,
+      options: {
+        debug: process.env.NODE_ENV === 'development',
+        autoTrackPageviews: true, // Auto-tracks route changes
+        autocapture: true
+      }
+    };
+
+    export default function RootLayout({
+      children,
+    }: {
+      children: React.ReactNode;
+    }) {
+      return (
+        <html lang="en">
+          <body>
+            <NextJourniumProvider config={journiumConfig}>
+              {children}
+            </NextJourniumProvider>
+          </body>
+        </html>
+      );
+    }
+    ```
+  </Tab>
+  <Tab value="Pages Router">
+    ```tsx title="pages/_app.tsx"
+    import type { AppProps } from 'next/app';
+    import { NextJourniumProvider } from '@journium/nextjs';
+
+    const journiumConfig = {
+      publishableKey: process.env.NEXT_PUBLIC_JOURNIUM_PUBLISHABLE_KEY!,
+      options: {
+        debug: process.env.NODE_ENV === 'development',
+        autoTrackPageviews: true, // Auto-tracks route changes
+        autocapture: true
+      }
+    };
+
+    export default function App({ Component, pageProps }: AppProps) {
+      return (
+        <NextJourniumProvider config={journiumConfig}>
+          <Component {...pageProps} />
+        </NextJourniumProvider>
+      );
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Configuration Options
+
+The `config` prop accepts a `JourniumConfig` object with the same options as the JavaScript SDK.
+
+For detailed information about all available configuration options, see the [JavaScript SDK Configuration Guide](/docs/js/configuration).
+
+**Next.js-specific considerations:**
+- `autoTrackPageviews` - Set to `true` to automatically track Next.js route changes (recommended)
+- Environment variables should use `NEXT_PUBLIC_` prefix for client-side access
+- Configuration is SSR-compatible
+
+## Next.js Components
+
+### `<NextJourniumProvider>`
+
+Provider component with Next.js optimizations and automatic route tracking.
+
+**Props:**
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `config` | `JourniumConfig` | Yes | Configuration object |
+| `config.publishableKey` | `string` | Yes | Your publishable key |
+| `config.apiHost` | `string` | No | Custom API endpoint |
+| `config.options` | `JourniumLocalOptions` | No | Configuration options |
+| `children` | `ReactNode` | Yes | React children to wrap |
+
+**Next.js Features:**
+- ✅ Automatic route change detection (App Router and Pages Router)
+- ✅ SSR-compatible initialization
+- ✅ Works with `next/navigation` and `next/router`
+- ✅ Optimized for serverless deployments
+
+## Automatic Route Tracking
+
+The Next.js provider automatically tracks route changes in both App Router and Pages Router:
+
+```tsx
+// Automatically tracked:
+router.push('/products/123');
+router.replace('/checkout');
+<Link href="/about">About</Link>
+```
+
+**Disable automatic tracking:**
+
+```tsx
+<NextJourniumProvider 
+  config={{
+    publishableKey: 'pk_...',
+    options: {
+      autoTrackPageviews: false  // Disable automatic tracking
+    }
+  }}
+>
+```
+
+Then manually track pageviews:
+
+```tsx
+'use client';
+
+import { useTrackPageview } from '@journium/nextjs';
+import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+
+export function PageTracker() {
+  const pathname = usePathname();
+  const trackPageview = useTrackPageview();
+  
+  useEffect(() => {
+    trackPageview({ pathname });
+  }, [pathname, trackPageview]);
+  
+  return null;
+}
+```
+
+## React Hooks
+
+The Next.js SDK includes all React hooks. See the [React Hooks documentation](/docs/react/hooks) for details:
+
+- `useTrackEvent()` - Track custom events
+- `useIdentify()` - Identify users
+- `useReset()` - Reset user identity
+- `useTrackPageview()` - Manual pageview tracking
+- `useAutoTrackPageview()` - Automatic pageview tracking
+- `useAutocapture()` - Control autocapture
+- `useJournium()` - Access analytics instance
+
+## Server-Side Rendering (SSR)
+
+The SDK is SSR-compatible and will not cause hydration issues:
+
+```tsx
+// ✅ Safe in Next.js
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <NextJourniumProvider config={{ publishableKey: 'pk_...' }}>
+          {children}
+        </NextJourniumProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+The analytics instance is only initialized on the client side.
+
+## Environment Variables
+
+### App Router / Pages Router
+
+```bash title=".env.local"
+NEXT_PUBLIC_JOURNIUM_PUBLISHABLE_KEY=pk_your_key_here
+```
+
+```tsx
+const config = {
+  publishableKey: process.env.NEXT_PUBLIC_JOURNIUM_PUBLISHABLE_KEY!
+};
+```
+
+### Different Keys per Environment
+
+```bash title=".env.local"
+# Development
+NEXT_PUBLIC_JOURNIUM_PUBLISHABLE_KEY=pk_test_...
+
+# .env.production
+NEXT_PUBLIC_JOURNIUM_PUBLISHABLE_KEY=pk_live_...
+```
+
+## TypeScript Support
+
+The Next.js SDK is fully typed with the same types as the JavaScript SDK.
+
+For complete type definitions, see the [JavaScript SDK TypeScript Types](/docs/js/typescript-types) documentation.
+
+```typescript
+import { 
+  type JourniumConfig, 
+  type JourniumLocalOptions,
+  type AutocaptureOptions 
+} from '@journium/nextjs';
+```
+
+## API Reference
+
+For detailed API method reference, see the [JavaScript SDK API Methods](/docs/js/api-methods).
+
+The Next.js SDK provides the same methods through React hooks:
+
+| Hook | Underlying Method | Documentation |
+|------|-------------------|---------------|
+| `useTrackEvent()` | `analytics.track()` | [API Ref](/docs/js/api-methods#track) |
+| `useIdentify()` | `analytics.identify()` | [API Ref](/docs/js/api-methods#identify) |
+| `useReset()` | `analytics.reset()` | [API Ref](/docs/js/api-methods#reset) |
+
+## Deployment Considerations
+
+### Vercel
+
+Works out of the box. Environment variables are automatically available with `NEXT_PUBLIC_` prefix.
+
+### Self-Hosted
+
+Ensure environment variables are configured:
+
+```bash title=".env.production"
+NEXT_PUBLIC_JOURNIUM_PUBLISHABLE_KEY=pk_live_...
+```
+
+Then build normally:
+
+```bash
+npm run build
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="React Hooks" href="/docs/react/hooks">
+    Learn about all available hooks for Next.js
+  </Card>
+  <Card title="Configuration Options" href="/docs/js/configuration">
+    See all configuration options in detail
+  </Card>
+  <Card title="API Methods" href="/docs/js/api-methods">
+    Complete API method reference
+  </Card>
+</Cards>

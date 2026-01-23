@@ -1,0 +1,148 @@
+---
+title: CDN / Script Tag Usage
+description: Learn how to use Journium with script tags for static HTML websites, landing pages, and no-build environments. Simple copy-paste integration.
+keywords: cdn javascript analytics, script tag analytics, html analytics tracking, no-build analytics, static website tracking
+icon: Globe
+---
+
+import { ShopifyIcon } from '@/components/icons/shopify';
+import { WordPressIcon } from '@/components/icons/wordpress';
+
+## Overview
+
+Add Journium analytics to any website using a simple `<script>` tag - no build tools or package managers required. Perfect for static HTML sites, landing pages, and quick prototypes.
+
+## Platform-Specific Guides
+
+<Callout type="info">
+**Looking for platform integration?** We have detailed guides with platform-specific code examples:
+</Callout>
+
+<Cards>
+  <Card 
+    title="Shopify Integration" 
+    icon={<ShopifyIcon className="w-5 h-5" />}
+    href="/docs/js/shopify-integration"
+  >
+    Complete Shopify guide with Liquid templates, cart tracking, and purchase events
+  </Card>
+  <Card 
+    title="WordPress Integration" 
+    icon={<WordPressIcon className="w-5 h-5" />}
+    href="/docs/js/wordpress-integration"
+  >
+    Full WordPress integration with PHP, WooCommerce, and plugin compatibility
+  </Card>
+</Cards>
+
+## When to Use CDN
+
+The CDN approach is ideal for:
+
+- ✅ **Static HTML websites** - No build process needed
+- ✅ **Landing pages** - Quick integration
+- ✅ **Marketing sites** - Minimal setup
+- ✅ **Prototypes** - Fast testing
+- ✅ **No-code platforms** - Webflow, Carrd, Framer
+- ✅ **Legacy sites** - Existing websites without modern tooling
+
+## Quick Start
+
+### Step 1: Add the Snippet
+
+Add this snippet to your HTML `<head>` section or before `</body>`:
+
+```html
+<script>
+!function(j,o,u,r,n,i,u,m){
+    if(!o.__JV){
+        window.journium=o;
+        o._q=[];
+        o._i=null;
+        o.init=function(c,n){o._i=[c,n]};
+        var methods="track identify reset capturePageview startAutocapture stopAutocapture flush getEffectiveOptions onOptionsChange destroy".split(" ");
+        for(var k=0;k<methods.length;k++){
+            !function(method){
+                o[method]=function(){o._q.push([method].concat(Array.prototype.slice.call(arguments)));return o}
+            }(methods[k])
+        }
+        o.__JV=1;
+        (m=j.createElement("script")).type="text/javascript";
+        m.async=!0;
+        m.src="https://cdn.jsdelivr.net/npm/@journium/js@1/dist/journium.min.js";
+        m.onerror=function(){console.warn("Journium: Failed to load SDK from CDN")};
+        (i=j.getElementsByTagName("script")[0]).parentNode.insertBefore(m,i);
+    }
+}(document,window.journium||[]);
+
+journium.init({ 
+    publishableKey: 'YOUR_PUBLISHABLE_KEY'
+});
+</script>
+```
+
+### Step 2: Track Events
+
+Once initialized, use the global `journium` object to track events:
+
+```html
+<script>
+// Track custom events
+journium.track('product_viewed', { product_id: '123456789' });
+
+// Identify users
+journium.identify('user123', { 
+    email: 'user@example.com',
+    plan: 'pro' 
+});
+
+// Reset on logout
+journium.reset();
+</script>
+```
+
+## Static HTML Example
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Website</title>
+    <script>
+    <!-- Journium snippet here -->
+    
+    journium.init({ 
+        publishableKey: 'pk_your_key'
+    });
+    </script>
+</head>
+<body>
+    <button onclick="handleSignup()">Sign Up</button>
+    
+    <script>
+    function handleSignup() {
+        journium.track('signup_button_clicked', {
+            page: window.location.pathname
+        });
+        // Your signup logic here
+    }
+    </script>
+</body>
+</html>
+```
+## Next Steps
+
+<Cards>
+  <Card title="Configuration Options" href="/docs/js/configuration">
+    Explore all configuration options and settings
+  </Card>
+  <Card title="API Methods" href="/docs/js/api-methods">
+    Complete API method documentation
+  </Card>
+  <Card title="Shopify Integration" href="/docs/js/shopify-integration">
+    Detailed Shopify store integration guide
+  </Card>
+  <Card title="WordPress Integration" href="/docs/js/wordpress-integration">
+    Complete WordPress site integration guide
+  </Card>
+</Cards>

@@ -1,0 +1,190 @@
+---
+title: React Configuration
+description: Configure Journium React SDK with Provider component, hooks, and underlying JavaScript SDK options.
+---
+
+# React Configuration
+
+The Journium React SDK wraps the core [JavaScript SDK](/docs/js) and provides React-specific components and hooks.
+
+## React-Specific Setup
+
+### Provider Configuration
+
+Wrap your app with `<JourniumProvider>` to initialize Journium:
+
+<Tabs groupId="react-framework" items={['Vite projects', 'React/(CRA) projects']} persist>
+  <Tab value="Vite projects">
+    ```tsx title="main.tsx"
+    import React from 'react';
+    import { JourniumProvider } from '@journium/react';
+    import App from './App';
+
+    function Root() {
+      return (
+        <JourniumProvider
+          config={{
+            publishableKey: import.meta.env.VITE_JOURNIUM_PUBLISHABLE_KEY!,
+            options: {
+              debug: import.meta.env.VITE_JOURNIUM_DEBUG === 'true',
+              autoTrackPageviews: true,
+              autocapture: true
+            }
+          }}
+        >
+          <App />
+        </JourniumProvider>
+      );
+    }
+
+    export default Root;
+    ```
+  </Tab>
+  <Tab value="React/(CRA) projects">
+    ```tsx title="index.tsx"
+    import React from 'react';
+    import ReactDOM from 'react-dom/client';
+    import { JourniumProvider } from '@journium/react';
+    import App from './App';
+
+    const root = ReactDOM.createRoot(document.getElementById('root')!);
+
+    root.render(
+      <JourniumProvider
+        config={{
+          publishableKey: process.env.REACT_APP_JOURNIUM_PUBLISHABLE_KEY!,
+          options: {
+            debug: process.env.NODE_ENV === 'development',
+            autoTrackPageviews: true,
+            autocapture: true
+          }
+        }}
+      >
+        <App />
+      </JourniumProvider>
+    );
+    ```
+  </Tab>
+</Tabs>
+
+## Configuration Options
+
+The `config` prop accepts a `JourniumConfig` object with the following properties:
+
+- `publishableKey` (required): Your Journium publishable key
+- `apiHost` (optional): Custom API endpoint
+- `options` (optional): Configuration options object
+
+For detailed information about all available configuration options, see the [JavaScript SDK Configuration Guide](/docs/js/configuration).
+
+**Common options:**
+- `debug` - Enable debug logging
+- `flushAt` - Number of events before auto-flush
+- `flushInterval` - Flush interval in milliseconds
+- `sessionTimeout` - Session timeout duration
+- `autoTrackPageviews` - Automatically track page views
+- `autocapture` - Configure automatic event capture
+
+## React Components
+
+### `<JourniumProvider>`
+
+Provider component that initializes Journium analytics throughout your React application.
+
+**Props:**
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `config` | `JourniumConfig` | Yes | Configuration object |
+| `config.publishableKey` | `string` | Yes | Your publishable key |
+| `config.apiHost` | `string` | No | Custom API endpoint |
+| `config.options` | `JourniumLocalOptions` | No | Configuration options |
+| `children` | `ReactNode` | Yes | React children to wrap |
+
+**Example:**
+
+```tsx
+<JourniumProvider config={{ publishableKey: 'pk_...' }}>
+  <App />
+</JourniumProvider>
+```
+
+## React Hooks
+
+The SDK provides React hooks for tracking events and managing user identity. See the [Hooks documentation](/docs/react/hooks) for detailed information:
+
+- [`useTrackEvent()`](/docs/react/hooks/use-track-event) - Track custom events
+- [`useIdentify()`](/docs/react/hooks/use-identify) - Identify users
+- [`useReset()`](/docs/react/hooks/use-reset) - Reset user identity
+- [`useTrackPageview()`](/docs/react/hooks) - Manual pageview tracking
+- [`useAutoTrackPageview()`](/docs/react/hooks) - Automatic pageview tracking
+- [`useAutocapture()`](/docs/react/hooks) - Control autocapture
+- [`useJournium()`](/docs/react/hooks) - Access analytics instance
+
+## Context API
+
+Access the Journium context for advanced use cases:
+
+```tsx
+import { useJournium } from '@journium/react';
+
+function MyComponent() {
+  const { analytics, config, effectiveOptions } = useJournium();
+  
+  // Access analytics instance directly
+  const options = analytics?.getEffectiveOptions();
+  
+  return <div>Debug: {effectiveOptions?.debug ? 'On' : 'Off'}</div>;
+}
+```
+
+**Context Value:**
+
+```typescript
+interface JourniumContextValue {
+  analytics: JourniumAnalytics | null;
+  config: JourniumConfig | null;
+  effectiveOptions: JourniumLocalOptions | null;
+}
+```
+
+## TypeScript Support
+
+The React SDK is fully typed. For complete type definitions, see the [JavaScript SDK TypeScript Types](/docs/js/typescript-types) documentation.
+
+All types are exported from `@journium/react`:
+
+```typescript
+import { 
+  type JourniumConfig, 
+  type JourniumLocalOptions,
+  type AutocaptureOptions 
+} from '@journium/react';
+```
+
+## API Reference
+
+For detailed API method reference (track, identify, reset, etc.), see the [JavaScript SDK API Methods](/docs/js/api-methods).
+
+The React hooks provide a convenient wrapper around these methods:
+
+| Hook | Underlying Method |
+|------|-------------------|
+| `useTrackEvent()` | `analytics.track()` |
+| `useIdentify()` | `analytics.identify()` |
+| `useReset()` | `analytics.reset()` |
+| `useTrackPageview()` | `analytics.capturePageview()` |
+
+## Next Steps
+
+<Cards>
+  <Card title="React Hooks" href="/docs/react/hooks">
+    Learn about all available React hooks
+  </Card>
+  <Card title="Configuration Options" href="/docs/js/configuration">
+    See all configuration options in detail
+  </Card>
+  <Card title="API Methods" href="/docs/js/api-methods">
+    Complete API method reference
+  </Card>
+</Cards>
