@@ -1,0 +1,759 @@
+---
+title: WordPress Analytics Integration Guide
+description: Complete guide to integrate Journium analytics with your WordPress site. Track page views, user behavior, blog engagement, and conversions on WordPress without plugins.
+keywords: wordpress analytics, wordpress tracking, wordpress user tracking, wordpress blog analytics, wordpress visitor tracking, wordpress event tracking, wordpress site analytics, wordpress conversion tracking
+icon: FileText
+---
+
+# WordPress Analytics Integration
+
+Integrate Journium analytics with your WordPress site to track page views, user behavior, content engagement, and conversions.
+
+## Installation
+
+### Method 1: Add to Theme (Recommended)
+
+This method adds Journium tracking site-wide through your theme.
+
+#### Step 1: Get Your Journium Publishable Key
+
+1. Create a WordPress application in your Journium Dashboard
+2. Copy your Publishable Key from the API Keys section
+
+#### Step 2: Add Tracking Code to functions.php
+
+1. Go to **Appearance → Theme File Editor**
+2. Select **functions.php** from the right sidebar
+3. Add this code at the end of the file:
+
+```php
+<?php
+/**
+ * Journium Analytics Integration for WordPress
+ */
+function add_journium_tracking() {
+    // Get your publishable key from Journium Dashboard
+    $journium_key = 'YOUR_WORDPRESS_PUBLISHABLE_KEY';
+    ?>
+    <!-- Journium Analytics for WordPress -->
+    <script>
+    !function(j,o,u,r,n,i,u,m){
+        if(!o.__JV){
+            window.journium=o;
+            o._q=[];
+            o._i=null;
+            o.init=function(c,n){o._i=[c,n]};
+            var methods="track identify reset capturePageview startAutocapture stopAutocapture flush getEffectiveOptions onOptionsChange destroy".split(" ");
+            for(var k=0;k<methods.length;k++){
+                !function(method){
+                    o[method]=function(){o._q.push([method].concat(Array.prototype.slice.call(arguments)));return o}
+                }(methods[k])
+            }
+            o.__JV=1;
+            (m=j.createElement("script")).type="text/javascript";
+            m.async=!0;
+            m.src="https://cdn.jsdelivr.net/npm/@journium/js@1/dist/journium.min.js";
+            m.onerror=function(){console.warn("Journium: Failed to load SDK from CDN")};
+            (i=j.getElementsByTagName("script")[0]).parentNode.insertBefore(m,i);
+        }
+    }(document,window.journium||[]);
+    
+    journium.init({ 
+        publishableKey: '<?php echo esc_js($journium_key); ?>',
+        options: {
+            autocapture: true,
+            autoTrackPageviews: true,
+            debug: <?php echo WP_DEBUG ? 'true' : 'false'; ?>
+        }
+    });
+    
+    <?php if (is_user_logged_in()): 
+        $current_user = wp_get_current_user();
+    ?>
+    // Identify logged-in users
+    journium.identify('<?php echo esc_js($current_user->ID); ?>', {
+        username: '<?php echo esc_js($current_user->user_login); ?>',
+        email: '<?php echo esc_js($current_user->user_email); ?>',
+        display_name: '<?php echo esc_js($current_user->display_name); ?>',
+        role: '<?php echo esc_js(implode(', ', $current_user->roles)); ?>',
+        registered: '<?php echo esc_js($current_user->user_registered); ?>'
+    });
+    <?php endif; ?>
+    </script>
+    <?php
+}
+add_action('wp_head', 'add_journium_tracking');
+?>
+```
+
+4. **Click "Update File"**
+
+### Method 2: Add to Header/Footer (Alternative)
+
+For themes with custom header/footer areas:
+
+1. Go to **Appearance → Customize → Additional CSS** or header/footer sections
+2. Add the JavaScript snippet (without PHP tags) directly
+
+### Method 3: Using a Code Snippet Plugin (Easiest)
+
+If you prefer not to edit theme files:
+
+1. Install the **"Code Snippets"** or **"Insert Headers and Footers"** plugin
+2. Add the JavaScript snippet to the header section
+3. Save and activate
+
+## Content Tracking
+
+### Track Blog Post Views
+
+Automatically track detailed blog post engagement:
+
+```php
+<?php
+/**
+ * Track blog post views with detailed metadata
+ */
+function track_journium_post_view() {
+    if (is_single() && get_post_type() == 'post') {
+        $post_id = get_the_ID();
+        $categories = array_map(function($cat) { 
+            return $cat->name; 
+        }, get_the_category());
+        $tags = array_map(function($tag) { 
+            return $tag->name; 
+        }, get_the_tags() ?: []);
+        ?>
+        <script>
+        journium.track('blog_post_viewed', {
+            post_id: <?php echo json_encode($post_id); ?>,
+            post_title: <?php echo json_encode(get_the_title()); ?>,
+            post_author: <?php echo json_encode(get_the_author()); ?>,
+            post_author_id: <?php echo json_encode(get_the_author_meta('ID')); ?>,
+            post_date: <?php echo json_encode(get_the_date('c')); ?>,
+            post_modified: <?php echo json_encode(get_the_modified_date('c')); ?>,
+            categories: <?php echo json_encode($categories); ?>,
+            tags: <?php echo json_encode($tags); ?>,
+            word_count: <?php echo json_encode(str_word_count(strip_tags(get_the_content()))); ?>,
+            comment_count: <?php echo json_encode(get_comments_number()); ?>,
+            url: <?php echo json_encode(get_permalink()); ?>
+        });
+        </script>
+        <?php
+    }
+}
+add_action('wp_footer', 'track_journium_post_view');
+?>
+```
+
+### Track Page Views
+
+Track static page views with metadata:
+
+```php
+<?php
+function track_journium_page_view() {
+    if (is_page()) {
+        ?>
+        <script>
+        journium.track('page_viewed', {
+            page_id: <?php echo json_encode(get_the_ID()); ?>,
+            page_title: <?php echo json_encode(get_the_title()); ?>,
+            page_template: <?php echo json_encode(get_page_template_slug()); ?>,
+            parent_page: <?php echo json_encode(get_the_title(wp_get_post_parent_id())); ?>,
+            url: <?php echo json_encode(get_permalink()); ?>
+        });
+        </script>
+        <?php
+    }
+}
+add_action('wp_footer', 'track_journium_page_view');
+?>
+```
+
+### Track Category/Archive Views
+
+See which categories interest your readers:
+
+```php
+<?php
+function track_journium_category_view() {
+    if (is_category() || is_archive()) {
+        $term = get_queried_object();
+        ?>
+        <script>
+        journium.track('archive_viewed', {
+            type: '<?php echo esc_js(is_category() ? 'category' : 'archive'); ?>',
+            name: <?php echo json_encode($term->name ?? 'Unknown'); ?>,
+            slug: <?php echo json_encode($term->slug ?? ''); ?>,
+            post_count: <?php echo json_encode($term->count ?? 0); ?>,
+            url: <?php echo json_encode(get_term_link($term)); ?>
+        });
+        </script>
+        <?php
+    }
+}
+add_action('wp_footer', 'track_journium_category_view');
+?>
+```
+
+## User Interaction Tracking
+
+### Track Comment Submissions
+
+Monitor engagement through comments:
+
+```php
+<?php
+/**
+ * Track when users submit comments
+ */
+function track_journium_comment_submission($comment_id, $comment_approved) {
+    $comment = get_comment($comment_id);
+    ?>
+    <script>
+    if (typeof journium !== 'undefined') {
+        journium.track('comment_submitted', {
+            post_id: <?php echo json_encode($comment->comment_post_ID); ?>,
+            post_title: <?php echo json_encode(get_the_title($comment->comment_post_ID)); ?>,
+            comment_id: <?php echo json_encode($comment_id); ?>,
+            approved: <?php echo json_encode($comment_approved == 1); ?>,
+            author: <?php echo json_encode($comment->comment_author); ?>,
+            author_email: <?php echo json_encode($comment->comment_author_email); ?>
+        });
+    }
+    </script>
+    <?php
+}
+add_action('comment_post', 'track_journium_comment_submission', 10, 2);
+?>
+```
+
+### Track Form Submissions (Contact Form 7)
+
+If you use Contact Form 7:
+
+```php
+<?php
+/**
+ * Track Contact Form 7 submissions
+ */
+function track_journium_cf7_submission($contact_form) {
+    ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('wpcf7mailsent', function(event) {
+            journium.track('contact_form_submitted', {
+                form_id: event.detail.contactFormId,
+                form_title: <?php echo json_encode($contact_form->title()); ?>,
+                page_url: window.location.href
+            });
+        }, false);
+    });
+    </script>
+    <?php
+}
+add_action('wp_footer', 'track_journium_cf7_submission');
+?>
+```
+
+### Track Search Queries
+
+See what visitors are searching for:
+
+```php
+<?php
+function track_journium_search() {
+    if (is_search()) {
+        $search_query = get_search_query();
+        $result_count = $GLOBALS['wp_query']->found_posts;
+        ?>
+        <script>
+        journium.track('site_searched', {
+            query: <?php echo json_encode($search_query); ?>,
+            results_count: <?php echo json_encode($result_count); ?>,
+            has_results: <?php echo json_encode($result_count > 0); ?>
+        });
+        </script>
+        <?php
+    }
+}
+add_action('wp_footer', 'track_journium_search');
+?>
+```
+
+## E-commerce Tracking (WooCommerce)
+
+If you're running a WooCommerce store on WordPress:
+
+### Track Product Views
+
+```php
+<?php
+/**
+ * Track WooCommerce product views
+ */
+function track_journium_woocommerce_product_view() {
+    if (is_product()) {
+        global $product;
+        ?>
+        <script>
+        journium.track('product_viewed', {
+            product_id: <?php echo json_encode($product->get_id()); ?>,
+            product_name: <?php echo json_encode($product->get_name()); ?>,
+            product_type: <?php echo json_encode($product->get_type()); ?>,
+            price: <?php echo json_encode($product->get_price()); ?>,
+            regular_price: <?php echo json_encode($product->get_regular_price()); ?>,
+            sale_price: <?php echo json_encode($product->get_sale_price()); ?>,
+            currency: <?php echo json_encode(get_woocommerce_currency()); ?>,
+            in_stock: <?php echo json_encode($product->is_in_stock()); ?>,
+            sku: <?php echo json_encode($product->get_sku()); ?>,
+            categories: <?php echo json_encode(array_map(function($cat) { 
+                return $cat->name; 
+            }, get_the_terms($product->get_id(), 'product_cat') ?: [])); ?>
+        });
+        </script>
+        <?php
+    }
+}
+add_action('wp_footer', 'track_journium_woocommerce_product_view');
+?>
+```
+
+### Track Add to Cart
+
+```php
+<?php
+/**
+ * Track WooCommerce add to cart
+ */
+function track_journium_woocommerce_add_to_cart($cart_item_key, $product_id, $quantity) {
+    $product = wc_get_product($product_id);
+    ?>
+    <script>
+    if (typeof journium !== 'undefined') {
+        journium.track('product_added_to_cart', {
+            product_id: <?php echo json_encode($product_id); ?>,
+            product_name: <?php echo json_encode($product->get_name()); ?>,
+            quantity: <?php echo json_encode($quantity); ?>,
+            price: <?php echo json_encode($product->get_price()); ?>,
+            currency: <?php echo json_encode(get_woocommerce_currency()); ?>
+        });
+    }
+    </script>
+    <?php
+}
+add_action('woocommerce_add_to_cart', 'track_journium_woocommerce_add_to_cart', 10, 3);
+?>
+```
+
+### Track Purchase Completion
+
+```php
+<?php
+/**
+ * Track WooCommerce order completion
+ */
+function track_journium_woocommerce_order($order_id) {
+    $order = wc_get_order($order_id);
+    
+    // Get order items
+    $items = array();
+    foreach ($order->get_items() as $item) {
+        $product = $item->get_product();
+        $items[] = array(
+            'product_id' => $item->get_product_id(),
+            'product_name' => $item->get_name(),
+            'quantity' => $item->get_quantity(),
+            'price' => $item->get_total(),
+            'sku' => $product ? $product->get_sku() : ''
+        );
+    }
+    ?>
+    <script>
+    if (typeof journium !== 'undefined') {
+        journium.track('order_completed', {
+            order_id: <?php echo json_encode($order_id); ?>,
+            order_number: <?php echo json_encode($order->get_order_number()); ?>,
+            total: <?php echo json_encode($order->get_total()); ?>,
+            subtotal: <?php echo json_encode($order->get_subtotal()); ?>,
+            shipping: <?php echo json_encode($order->get_shipping_total()); ?>,
+            tax: <?php echo json_encode($order->get_total_tax()); ?>,
+            discount: <?php echo json_encode($order->get_discount_total()); ?>,
+            currency: <?php echo json_encode($order->get_currency()); ?>,
+            payment_method: <?php echo json_encode($order->get_payment_method_title()); ?>,
+            items: <?php echo json_encode($items); ?>
+        });
+    }
+    </script>
+    <?php
+}
+add_action('woocommerce_thankyou', 'track_journium_woocommerce_order');
+?>
+```
+
+## Advanced Tracking
+
+### Track Reading Progress (Blog Posts)
+
+See how far readers scroll through your content:
+
+```javascript
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (!document.querySelector('.entry-content, .post-content')) return;
+    
+    let milestones = [25, 50, 75, 100];
+    let tracked = {};
+    
+    function calculateReadProgress() {
+        const content = document.querySelector('.entry-content, .post-content');
+        const contentTop = content.offsetTop;
+        const contentHeight = content.offsetHeight;
+        const windowHeight = window.innerHeight;
+        const scrollTop = window.scrollY;
+        
+        const progress = Math.round(
+            ((scrollTop + windowHeight - contentTop) / contentHeight) * 100
+        );
+        
+        milestones.forEach(milestone => {
+            if (progress >= milestone && !tracked[milestone]) {
+                journium.track('reading_progress', {
+                    post_title: document.title,
+                    progress: milestone,
+                    post_url: window.location.href
+                });
+                tracked[milestone] = true;
+            }
+        });
+    }
+    
+    window.addEventListener('scroll', calculateReadProgress);
+});
+</script>
+```
+
+### Track Time on Page
+
+Measure engagement duration:
+
+```javascript
+<script>
+(function() {
+    let startTime = Date.now();
+    let timeLogged = false;
+    
+    function logTimeOnPage() {
+        if (timeLogged) return;
+        
+        const timeSpent = Math.round((Date.now() - startTime) / 1000);
+        
+        journium.track('time_on_page', {
+            page_title: document.title,
+            time_seconds: timeSpent,
+            page_url: window.location.href
+        });
+        
+        timeLogged = true;
+    }
+    
+    // Log when user leaves
+    window.addEventListener('beforeunload', logTimeOnPage);
+    
+    // Also log after 30 seconds as a fallback
+    setTimeout(logTimeOnPage, 30000);
+})();
+</script>
+```
+
+### Track External Link Clicks
+
+Monitor when users click links to external sites:
+
+```javascript
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        if (!link) return;
+        
+        const href = link.href;
+        const hostname = window.location.hostname;
+        
+        // Check if external link
+        if (href && !href.includes(hostname) && (href.startsWith('http') || href.startsWith('https'))) {
+            journium.track('external_link_clicked', {
+                link_url: href,
+                link_text: link.textContent.trim().substring(0, 100),
+                from_page: window.location.href
+            });
+        }
+    });
+});
+</script>
+```
+
+### Track Downloads
+
+Monitor file downloads:
+
+```javascript
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        if (!link) return;
+        
+        const href = link.href;
+        const downloadExtensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.zip', '.mp3', '.mp4'];
+        
+        const isDownload = downloadExtensions.some(ext => href.toLowerCase().endsWith(ext));
+        
+        if (isDownload) {
+            journium.track('file_downloaded', {
+                file_url: href,
+                file_name: href.split('/').pop(),
+                file_type: href.split('.').pop(),
+                from_page: window.location.href
+            });
+        }
+    });
+});
+</script>
+```
+
+## WordPress Plugin Compatibility
+
+### Popular Plugins Tested
+
+Journium works seamlessly with:
+
+- ✅ **WooCommerce** - Full e-commerce tracking
+- ✅ **Contact Form 7** - Form submission tracking
+- ✅ **Yoast SEO** - No conflicts
+- ✅ **WPForms** - Form tracking compatible
+- ✅ **Elementor** - Page builder compatible
+- ✅ **Gutenberg** - Block editor compatible
+- ✅ **WPML** - Multilingual support
+- ✅ **Jetpack** - Works alongside Jetpack features
+
+### Tracking with Popular Page Builders
+
+#### Elementor
+
+Add custom HTML widget with JavaScript tracking code.
+
+#### Divi
+
+Use Code Module to add tracking snippets.
+
+#### Beaver Builder
+
+Use HTML module for tracking code.
+
+## Privacy & GDPR Compliance
+
+### Cookie Consent Integration
+
+Integrate with popular cookie consent plugins:
+
+```php
+<?php
+/**
+ * Initialize Journium only after cookie consent (Cookie Notice plugin)
+ */
+function journium_cookie_consent_check() {
+    ?>
+    <script>
+    // Check if Cookie Notice plugin consent is given
+    if (typeof CN_Cookies !== 'undefined') {
+        if (CN_Cookies.get('cookie_notice_accepted') === 'true') {
+            // User accepted - initialize Journium
+            journium.init({ publishableKey: 'YOUR_KEY' });
+        }
+    } else {
+        // No cookie plugin - initialize normally
+        journium.init({ publishableKey: 'YOUR_KEY' });
+    }
+    </script>
+    <?php
+}
+?>
+```
+
+### GDPR Best Practices
+
+1. **Update Privacy Policy** - Mention Journium analytics
+2. **Cookie Banner** - Include Journium in your consent
+3. **Data Retention** - Configure in Journium Dashboard
+4. **User Rights** - Support data deletion requests
+
+## Performance Optimization
+
+### 1. Conditional Loading
+
+Only load on specific pages:
+
+```php
+<?php
+function add_journium_tracking() {
+    // Only load on blog posts and pages
+    if (!is_singular(['post', 'page'])) {
+        return;
+    }
+    
+    // Your Journium tracking code here
+}
+?>
+```
+
+### 2. Async Loading
+
+The snippet loads asynchronously by default - no impact on page load.
+
+### 3. Event Batching
+
+Configure to reduce requests:
+
+```javascript
+journium.init({ 
+    publishableKey: 'YOUR_KEY',
+    options: {
+        flushAt: 20,        // Send after 20 events
+        flushInterval: 10000 // Or every 10 seconds
+    }
+});
+```
+
+## Testing Your Integration
+
+### 1. Enable Debug Mode
+
+Temporarily enable debug logging:
+
+```php
+journium.init({ 
+    publishableKey: 'YOUR_KEY',
+    options: {
+        debug: true  // Set to false in production
+    }
+});
+```
+
+### 2. Check Browser Console
+
+Open Developer Tools (F12) and check:
+
+```javascript
+// Verify Journium is loaded
+console.log(window.journium);
+
+// Test manual tracking
+journium.track('test_event', { test: true });
+
+// View configuration
+console.log(journium.getEffectiveOptions());
+```
+
+### 3. Verify in Dashboard
+
+1. Visit your WordPress site
+2. Navigate to different pages
+3. Check [Journium Dashboard → Developers → Events](https://dashboard.journium.app)
+4. Events should appear within seconds
+
+## Troubleshooting
+
+### Events Not Appearing?
+
+1. **Clear WordPress cache** (if using caching plugin)
+2. **Check browser console** for JavaScript errors
+3. **Verify publishable key** is correct
+4. **Disable ad blockers** for testing
+5. **Check network requests** (F12 → Network tab)
+
+### PHP Errors?
+
+1. **Check functions.php syntax** - missing semicolons, brackets
+2. **Use child theme** to avoid losing changes on updates
+3. **Enable WordPress debug mode** temporarily:
+   ```php
+   define('WP_DEBUG', true);
+   define('WP_DEBUG_LOG', true);
+   ```
+
+### Conflict with Other Scripts?
+
+1. **Check console for errors**
+2. **Try wrapping in DOMContentLoaded**:
+   ```javascript
+   document.addEventListener('DOMContentLoaded', function() {
+       // Your tracking code
+   });
+   ```
+
+## Best Practices
+
+### 1. Use Child Themes
+
+Always add code to a child theme's functions.php to preserve changes during theme updates.
+
+### 2. Version Control
+
+Keep track of your tracking code changes with version control.
+
+### 3. Test Before Production
+
+Test tracking on a staging site before deploying to production.
+
+### 4. Document Custom Events
+
+Keep a list of custom events you're tracking for your team.
+
+### 5. Regular Audits
+
+Periodically review tracked events and remove unused ones.
+
+## WordPress Multisite
+
+For WordPress multisite installations:
+
+```php
+<?php
+function add_journium_tracking_multisite() {
+    // Get site-specific publishable key
+    $site_id = get_current_blog_id();
+    $journium_key = get_blog_option($site_id, 'journium_key');
+    
+    if (!$journium_key) {
+        return; // No key configured for this site
+    }
+    
+    // Add tracking code with site-specific key
+    ?>
+    <script>
+    // Journium snippet with site-specific key
+    journium.init({ 
+        publishableKey: '<?php echo esc_js($journium_key); ?>'
+    });
+    </script>
+    <?php
+}
+add_action('wp_head', 'add_journium_tracking_multisite');
+?>
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Create Insight Trackers" href="/docs/js/concepts/insight_tracker">
+    Set up custom analytics for your WordPress site
+  </Card>
+  <Card title="View Your Insights" href="/docs/js/concepts/insights">
+    Understand your visitor behavior data
+  </Card>
+  <Card title="Configuration Options" href="/docs/js/configuration">
+    Customize tracking behavior and options
+  </Card>
+</Cards>

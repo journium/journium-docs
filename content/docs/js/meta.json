@@ -9,7 +9,13 @@
     "how-journium-works",
     "---[BookOpen]Guides---",
     "concepts",
-    "---[LibraryBig]SDK Reference---",
-    "advanced-configuration"
+    "---[Store]Platform Integrations---",
+    "cdn-usage",
+    "shopify-integration",
+    "wordpress-integration",
+    "---[Code]API Reference---",
+    "configuration",
+    "api-methods",
+    "typescript-types"
   ]
 }

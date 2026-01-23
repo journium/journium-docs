@@ -1,0 +1,571 @@
+---
+title: API Methods
+description: Complete API reference for Journium JavaScript SDK - all methods, parameters, return types, and usage examples for event tracking and analytics.
+keywords: journium api, javascript sdk api, track events api, analytics methods, javascript analytics api
+icon: Code
+---
+
+# API Reference
+
+Complete reference for all Journium JavaScript SDK methods and functions.
+
+## Initialization
+
+### `init(config)`
+
+Initializes and returns a new JourniumAnalytics instance.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `config` | `JourniumConfig` | Yes | Configuration object |
+| `config.publishableKey` | `string` | Yes | Your Journium publishable key |
+| `config.apiHost` | `string` | No | Custom API endpoint (default: `'https://events.journium.app'`) |
+| `config.options` | `JourniumLocalOptions` | No | Local configuration options |
+
+**Returns:** `JourniumAnalytics` - Analytics instance for tracking events
+
+**Example:**
+
+```typescript
+import { init } from '@journium/js';
+
+const journium = init({
+  publishableKey: 'pk_your_key_here',
+  apiHost: 'https://events.journium.app',
+  options: {
+    debug: true,
+    flushAt: 10,
+    flushInterval: 5000
+  }
+});
+```
+
+## Event Tracking
+
+### `track(event, properties?)`
+
+Tracks custom events with optional properties.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `event` | `string` | Yes | Event name to track |
+| `properties` | `Record<string, unknown>` | No | Event properties (key-value pairs) |
+
+**Returns:** `void`
+
+**Examples:**
+
+**Basic event:**
+```typescript
+journium.track('button_clicked');
+```
+
+**Event with properties:**
+```typescript
+journium.track('product_viewed', {
+  product_id: 'prod_123',
+  product_name: 'Running Shoes',
+  price: 89.99,
+  currency: 'USD',
+  category: 'Footwear'
+});
+```
+
+**E-commerce purchase:**
+```typescript
+journium.track('purchase_completed', {
+  order_id: 'order_789',
+  revenue: 299.97,
+  tax: 24.00,
+  shipping: 10.00,
+  items: [
+    { id: 'prod_123', name: 'Running Shoes', price: 89.99, quantity: 1 },
+    { id: 'prod_456', name: 'Sports Watch', price: 209.98, quantity: 1 }
+  ]
+});
+```
+
+**User action:**
+```typescript
+journium.track('form_submitted', {
+  form_name: 'contact_us',
+  form_location: 'footer',
+  fields_completed: 4,
+  newsletter_signup: true
+});
+```
+
+### `capturePageview(properties?)`
+
+Manually captures pageview events.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `properties` | `Record<string, unknown>` | No | Pageview properties |
+
+**Returns:** `void`
+
+**Examples:**
+
+**Basic pageview:**
+```typescript
+journium.capturePageview();
+```
+
+**Pageview with custom properties:**
+```typescript
+journium.capturePageview({
+  page_type: 'product',
+  category: 'electronics',
+  product_id: 'prod_123'
+});
+```
+
+**SPA route change:**
+```typescript
+router.on('routeChange', (route) => {
+  journium.capturePageview({
+    route: route.path,
+    previous_route: route.from,
+    page_title: document.title
+  });
+});
+```
+
+## User Identity
+
+### `identify(distinctId, attributes?)`
+
+Identifies a user and associates future events with their identity.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `distinctId` | `string` | Yes | Unique user identifier (email, user ID, etc.) |
+| `attributes` | `Record<string, unknown>` | No | User attributes (name, email, plan, etc.) |
+
+**Returns:** `void`
+
+**Examples:**
+
+**Basic identification:**
+```typescript
+journium.identify('user_12345');
+```
+
+**With user attributes:**
+```typescript
+journium.identify('user_12345', {
+  email: 'john@example.com',
+  name: 'John Doe',
+  plan: 'premium',
+  signup_date: '2024-01-15',
+  total_purchases: 5,
+  lifetime_value: 499.95
+});
+```
+
+**After login:**
+```typescript
+function handleLogin(user) {
+  journium.identify(user.id, {
+    email: user.email,
+    first_name: user.firstName,
+    last_name: user.lastName,
+    role: user.role,
+    company: user.company
+  });
+}
+```
+
+**Update user attributes:**
+```typescript
+// Identify again to update attributes
+journium.identify('user_12345', {
+  plan: 'enterprise',  // Updated plan
+  last_login: new Date().toISOString()
+});
+```
+
+### `reset()`
+
+Resets user identity, typically called on logout. Clears the current user ID and starts a new session.
+
+**Parameters:** None
+
+**Returns:** `void`
+
+**Example:**
+
+```typescript
+function handleLogout() {
+  // Track logout event
+  journium.track('user_logged_out');
+  
+  // Reset identity
+  journium.reset();
+  
+  // Redirect to login
+  window.location.href = '/login';
+}
+```
+
+```typescript
+// In a logout button handler
+document.getElementById('logout-btn').addEventListener('click', () => {
+  journium.reset();
+  // Perform logout logic
+});
+```
+
+## Autocapture Control
+
+### `startAutocapture()`
+
+Starts automatic event capture for clicks, form interactions, and pageviews.
+
+**Parameters:** None
+
+**Returns:** `void`
+
+**Note:** Autocapture behavior is configured during initialization via the `autocapture` option.
+
+**Example:**
+
+```typescript
+const journium = init({
+  publishableKey: 'pk_...',
+  options: {
+    autocapture: {
+      captureClicks: true,
+      captureFormSubmits: true
+    }
+  }
+});
+
+// Start capturing after user consent
+if (userHasConsented) {
+  journium.startAutocapture();
+}
+```
+
+### `stopAutocapture()`
+
+Stops automatic event capture.
+
+**Parameters:** None
+
+**Returns:** `void`
+
+**Example:**
+
+```typescript
+// Stop capture when user opts out
+function handleOptOut() {
+  journium.stopAutocapture();
+  journium.reset();
+}
+```
+
+```typescript
+// Temporarily disable during sensitive operations
+journium.stopAutocapture();
+// Perform sensitive operation
+performPaymentProcessing();
+journium.startAutocapture();
+```
+
+## Event Management
+
+### `flush()`
+
+Manually sends all queued events to the server immediately.
+
+**Parameters:** None
+
+**Returns:** `Promise<void>` - Promise that resolves when events are sent
+
+**Examples:**
+
+**Basic flush:**
+```typescript
+await journium.flush();
+```
+
+**Before page unload:**
+```typescript
+window.addEventListener('beforeunload', async (e) => {
+  await journium.flush();
+});
+```
+
+**After critical action:**
+```typescript
+async function handlePurchase(orderId) {
+  journium.track('purchase_completed', { order_id: orderId });
+  
+  // Ensure event is sent before redirect
+  await journium.flush();
+  
+  window.location.href = `/order-confirmation/${orderId}`;
+}
+```
+
+**With error handling:**
+```typescript
+try {
+  await journium.flush();
+  console.log('Events sent successfully');
+} catch (error) {
+  console.error('Failed to send events:', error);
+}
+```
+
+### `destroy()`
+
+Cleans up the SDK, stops all tracking, flushes remaining events, and removes event listeners.
+
+**Parameters:** None
+
+**Returns:** `void`
+
+**Examples:**
+
+**On app unmount:**
+```typescript
+// React
+useEffect(() => {
+  return () => {
+    journium.destroy();
+  };
+}, []);
+```
+
+**Manual cleanup:**
+```typescript
+function cleanupAnalytics() {
+  journium.destroy();
+  console.log('Analytics cleaned up');
+}
+```
+
+## Configuration Management
+
+### `getEffectiveOptions()`
+
+Returns the current effective configuration options (merged local and remote options).
+
+**Parameters:** None
+
+**Returns:** `JourniumLocalOptions` - Current effective configuration
+
+**Example:**
+
+```typescript
+const options = journium.getEffectiveOptions();
+console.log('Current configuration:', options);
+
+if (options.debug) {
+  console.log('Debug mode is enabled');
+}
+
+console.log(`Flush after ${options.flushAt} events`);
+console.log(`Flush every ${options.flushInterval}ms`);
+```
+
+### `onOptionsChange(callback)`
+
+Register a callback to be notified when effective options change (e.g., when remote options are fetched).
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `callback` | `(options: JourniumLocalOptions) => void` | Yes | Function to call when options change |
+
+**Returns:** `() => void` - Unsubscribe function to stop listening to changes
+
+**Examples:**
+
+**Basic usage:**
+```typescript
+const unsubscribe = journium.onOptionsChange((options) => {
+  console.log('Options updated:', options);
+});
+
+// Later, stop listening
+unsubscribe();
+```
+
+**React with state:**
+```typescript
+const [config, setConfig] = useState(null);
+
+useEffect(() => {
+  const unsubscribe = journium.onOptionsChange((options) => {
+    setConfig(options);
+    console.log('Configuration loaded:', options);
+  });
+  
+  return () => unsubscribe();
+}, []);
+```
+
+**Enable features based on remote config:**
+```typescript
+journium.onOptionsChange((options) => {
+  if (options.autocapture) {
+    enableAutocaptureUI();
+  }
+  
+  if (options.debug) {
+    showDebugPanel();
+  }
+});
+```
+
+## Complete Usage Example
+
+```typescript
+import { init } from '@journium/js';
+
+// 1. Initialize
+const journium = init({
+  publishableKey: 'pk_your_key',
+  options: {
+    debug: true,
+    autocapture: {
+      captureClicks: true,
+      captureFormSubmits: true
+    }
+  }
+});
+
+// 2. Start autocapture
+journium.startAutocapture();
+
+// 3. Track custom events
+journium.track('app_loaded', {
+  version: '1.0.0',
+  platform: 'web'
+});
+
+// 4. Identify user after login
+function onLogin(user) {
+  journium.identify(user.id, {
+    email: user.email,
+    name: user.name,
+    plan: user.plan
+  });
+  
+  journium.track('user_logged_in', {
+    login_method: 'email'
+  });
+}
+
+// 5. Track user actions
+document.getElementById('buy-button').addEventListener('click', () => {
+  journium.track('buy_button_clicked', {
+    product_id: 'prod_123',
+    location: 'homepage'
+  });
+});
+
+// 6. Reset on logout
+function onLogout() {
+  journium.track('user_logged_out');
+  journium.reset();
+}
+
+// 7. Cleanup on page unload
+window.addEventListener('beforeunload', async () => {
+  await journium.flush();
+  journium.destroy();
+});
+```
+
+## Browser Console Methods
+
+For debugging in browser console:
+
+```javascript
+// Check if SDK is loaded
+console.log(window.journium);
+
+// Get current configuration
+console.log(journium.getEffectiveOptions());
+
+// Test tracking
+journium.track('console_test_event', { test: true });
+
+// Force send events
+await journium.flush();
+
+// View all methods
+console.log(Object.getOwnPropertyNames(Object.getPrototypeOf(journium)));
+```
+
+## Error Handling
+
+The SDK handles errors gracefully, but you can add your own error handling:
+
+```typescript
+// Track method calls are fire-and-forget (don't throw)
+journium.track('custom_event', { data: 'value' });
+
+// Flush returns a promise you can catch
+journium.flush().catch(error => {
+  console.error('Failed to flush events:', error);
+  // Maybe retry or log to your error service
+});
+
+// Listen for initialization failures
+journium.onOptionsChange((options) => {
+  if (!options || Object.keys(options).length === 0) {
+    console.warn('Failed to load remote configuration');
+  }
+});
+```
+
+## TypeScript Support
+
+All methods are fully typed. Import types for better IDE support:
+
+```typescript
+import { 
+  init, 
+  type JourniumAnalytics,
+  type JourniumConfig,
+  type JourniumLocalOptions 
+} from '@journium/js';
+
+const config: JourniumConfig = {
+  publishableKey: 'pk_...',
+  options: {
+    debug: true
+  }
+};
+
+const analytics: JourniumAnalytics = init(config);
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Configuration Options" href="/docs/js/configuration">
+    Learn about all configuration options
+  </Card>
+  <Card title="TypeScript Types" href="/docs/js/typescript-types">
+    View complete type definitions
+  </Card>
+  <Card title="Platform Integrations" href="/docs/js/shopify-integration">
+    See real-world implementation examples
+  </Card>
+</Cards>

@@ -1,0 +1,291 @@
+---
+title: Configuration Options
+description: Complete guide to configuring Journium JavaScript SDK - learn about all available options for event capture, performance, and behavior customization.
+keywords: journium configuration, javascript sdk config, analytics configuration, event tracking options
+icon: Settings
+---
+
+# Configuration Options
+
+Configure every aspect of Journium to match your needs. Settings provided in the SDK take precedence over dashboard settings.
+
+## Basic Configuration
+
+Initialize Journium with your publishable key and optional configuration:
+
+```ts title="index.ts"
+import { init } from '@journium/js';
+
+const journium = init({
+  publishableKey: 'your-journium-publishable-key',
+  apiHost: 'https://events.journium.app', // Optional: custom API endpoint
+  options: {
+    // Configuration options here
+  }
+});
+```
+
+## Configuration Options Reference
+
+### Debug Mode
+
+Enable detailed logging for development and troubleshooting.
+
+```typescript
+{
+  debug: true  // Default: false
+}
+```
+
+**When to use:**
+- ✅ Development environment
+- ✅ Debugging integration issues
+- ✅ Verifying events are tracked
+- ❌ Production (increases console output)
+
+**Example:**
+```typescript
+const journium = init({
+  publishableKey: 'pk_test_...',
+  options: {
+    debug: process.env.NODE_ENV === 'development'
+  }
+});
+```
+
+### Event Batching
+
+Control how frequently events are sent to the server.
+
+#### Flush At
+
+Number of events to accumulate before automatically sending to server.
+
+```typescript
+{
+  flushAt: 20  // Default: 20
+}
+```
+
+**Recommendations:**
+- **High-traffic sites:** 50-100 (reduce server requests)
+- **Low-traffic sites:** 10-20 (faster event delivery)
+- **Real-time needs:** 1-5 (immediate sending)
+
+#### Flush Interval
+
+Time interval (milliseconds) between automatic flushes.
+
+```typescript
+{
+  flushInterval: 10000  // Default: 10000 (10 seconds)
+}
+```
+
+**Recommendations:**
+- **Standard sites:** 10000-30000ms
+- **Real-time dashboards:** 5000-10000ms
+- **Low-priority tracking:** 30000-60000ms
+
+**Example - Balanced Configuration:**
+```typescript
+const journium = init({
+  publishableKey: 'pk_...',
+  options: {
+    flushAt: 20,          // Send after 20 events
+    flushInterval: 10000  // Or every 10 seconds
+  }
+});
+```
+
+### Session Management
+
+Configure user session behavior and timeout.
+
+```typescript
+{
+  sessionTimeout: 1800000  // Default: 1800000 (30 minutes)
+}
+```
+
+**Common Values:**
+- **30 minutes:** `1800000` (standard)
+- **15 minutes:** `900000` (shorter sessions)
+- **1 hour:** `3600000` (longer sessions)
+- **24 hours:** `86400000` (persistent)
+
+**Use Cases:**
+- **E-commerce:** 30-60 minutes (shopping sessions)
+- **Content sites:** 30 minutes (reading sessions)
+- **SaaS apps:** 2-4 hours (work sessions)
+
+### Automatic Pageview Tracking
+
+Automatically track pageview events on navigation.
+
+```typescript
+{
+  autoTrackPageviews: true  // Default: true
+}
+```
+
+**When to disable:**
+- ❌ Single Page Applications with custom routing
+- ❌ When you want full control over pageview tracking
+- ✅ Keep enabled for standard websites
+
+**Example - Disable for SPA:**
+```typescript
+const journium = init({
+  publishableKey: 'pk_...',
+  options: {
+    autoTrackPageviews: false  // Manual tracking in SPA
+  }
+});
+
+// Then manually track pageviews
+router.on('routeChange', (route) => {
+  journium.capturePageview({ route });
+});
+```
+
+### Autocapture Configuration
+
+Configure automatic capture of user interactions.
+
+#### Simple Enable/Disable
+
+```typescript
+{
+  autocapture: true  // or false
+}
+```
+
+#### Detailed Configuration
+
+```typescript
+{
+  autocapture: {
+    captureClicks: true,              // Track click events
+    captureFormSubmits: true,         // Track form submissions
+    captureFormChanges: false,        // Track form field changes
+    captureTextSelection: false,      // Track text selection
+    ignoreClasses: ['no-track'],      // CSS classes to ignore
+    ignoreElements: ['script', 'style'], // HTML elements to ignore
+    captureContentText: true          // Capture element text content
+  }
+}
+```
+
+**Configuration Examples:**
+
+**E-commerce Site:**
+```typescript
+{
+  autocapture: {
+    captureClicks: true,
+    captureFormSubmits: true,
+    captureFormChanges: false,
+    ignoreClasses: ['analytics-ignore', 'no-track'],
+    ignoreElements: ['input[type="password"]', 'input[type="credit-card"]']
+  }
+}
+```
+
+**Blog/Content Site:**
+```typescript
+{
+  autocapture: {
+    captureClicks: true,
+    captureFormSubmits: true,
+    captureTextSelection: true,  // Track what users highlight
+    ignoreClasses: ['ad', 'sponsored']
+  }
+}
+```
+
+**Privacy-Focused:**
+```typescript
+{
+  autocapture: {
+    captureClicks: true,
+    captureFormSubmits: false,  // No form tracking
+    captureFormChanges: false,
+    captureContentText: false,  // Don't capture text content
+    ignoreElements: ['input', 'textarea']  // Ignore all inputs
+  }
+}
+```
+
+### API Host
+
+Custom API endpoint for self-hosted or regional deployments.
+
+```typescript
+{
+  apiHost: 'https://events.journium.app'  // Default
+}
+```
+
+**Use Cases:**
+- **Self-hosted:** `https://analytics.yourcompany.com`
+- **Regional compliance:** `https://eu.journium.app`
+- **Development:** `http://localhost:3006`
+
+## Complete Configuration Example
+
+```typescript
+import { init } from '@journium/js';
+
+const journium = init({
+  publishableKey: process.env.JOURNIUM_KEY!,
+  apiHost: 'https://events.journium.app',
+  options: {
+    // Development & Debugging
+    debug: process.env.NODE_ENV === 'development',
+    
+    // Performance & Batching
+    flushAt: 20,
+    flushInterval: 10000,
+    
+    // Session Management
+    sessionTimeout: 1800000, // 30 minutes
+    
+    // Automatic Tracking
+    autoTrackPageviews: true,
+    
+    // Autocapture Configuration
+    autocapture: {
+      captureClicks: true,
+      captureFormSubmits: true,
+      captureFormChanges: false,
+      captureTextSelection: false,
+      ignoreClasses: ['no-track', 'analytics-ignore'],
+      ignoreElements: [
+        'input[type="password"]',
+        'input[type="credit-card"]',
+        'script',
+        'style'
+      ],
+      captureContentText: true
+    }
+  }
+});
+
+// Start automatic capture
+journium.startAutocapture();
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="API Methods" href="/docs/js/api-methods">
+    Explore all available methods and functions
+  </Card>
+  <Card title="TypeScript Types" href="/docs/js/typescript-types">
+    View complete type definitions and interfaces
+  </Card>
+  <Card title="Platform Integrations" href="/docs/js/shopify-integration">
+    Platform-specific configuration examples
+  </Card>
+</Cards>

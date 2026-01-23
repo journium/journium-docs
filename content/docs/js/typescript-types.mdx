@@ -1,0 +1,399 @@
+---
+title: TypeScript Types
+description: Complete TypeScript type definitions for Journium JavaScript SDK - interfaces, types, and type safety for analytics integration.
+keywords: journium typescript, typescript types, javascript sdk types, type definitions, typescript analytics
+icon: FileCode
+---
+
+# TypeScript Types
+
+Complete TypeScript type definitions for the Journium JavaScript SDK. All types are exported from `@journium/js` and `@journium/core`.
+
+## Installation
+
+The SDK includes full TypeScript definitions out of the box:
+
+```bash
+npm install @journium/js
+# Types are included automatically - no @types package needed
+```
+
+## Importing Types
+
+```typescript
+import { 
+  init,
+  type JourniumAnalytics,
+  type JourniumConfig,
+  type JourniumLocalOptions,
+  type AutocaptureOptions,
+  type JourniumEvent,
+  type PageviewProperties
+} from '@journium/js';
+```
+
+## Core Types
+
+### `JourniumConfig`
+
+Configuration object for initializing Journium.
+
+```typescript
+interface JourniumConfig {
+  /**
+   * Your Journium publishable key (required)
+   * Format: pk_[dev|staging|prod]_...
+   */
+  publishableKey: string;
+  
+  /**
+   * Custom API endpoint (optional)
+   * Default: 'https://events.journium.app'
+   */
+  apiHost?: string;
+  
+  /**
+   * Local configuration options (optional)
+   * These override remote dashboard settings
+   */
+  options?: JourniumLocalOptions;
+}
+```
+
+**Example Usage:**
+
+```typescript
+const config: JourniumConfig = {
+  publishableKey: 'pk_live_abc123',
+  apiHost: 'https://events.journium.app',
+  options: {
+    debug: false,
+    flushAt: 20
+  }
+};
+
+const journium = init(config);
+```
+
+### `JourniumLocalOptions`
+
+Local configuration options that can be set on the client.
+
+```typescript
+interface JourniumLocalOptions {
+  /**
+   * Enable debug logging to console
+   * Default: false
+   */
+  debug?: boolean;
+  
+  /**
+   * Number of events before auto-flush
+   * Default: 20
+   */
+  flushAt?: number;
+  
+  /**
+   * Flush interval in milliseconds
+   * Default: 10000 (10 seconds)
+   */
+  flushInterval?: number;
+  
+  /**
+   * Auto-capture configuration
+   * Can be boolean or detailed options object
+   * Default: true
+   */
+  autocapture?: boolean | AutocaptureOptions;
+  
+  /**
+   * Automatically track pageview events
+   * Default: true
+   */
+  autoTrackPageviews?: boolean;
+  
+  /**
+   * Session timeout in milliseconds
+   * Default: 1800000 (30 minutes)
+   */
+  sessionTimeout?: number;
+  
+  /**
+   * Additional dynamic properties
+   */
+  [key: string]: unknown;
+}
+```
+
+**Example Usage:**
+
+```typescript
+const options: JourniumLocalOptions = {
+  debug: process.env.NODE_ENV === 'development',
+  flushAt: 10,
+  flushInterval: 5000,
+  sessionTimeout: 3600000, // 1 hour
+  autoTrackPageviews: true,
+  autocapture: {
+    captureClicks: true,
+    captureFormSubmits: true
+  }
+};
+```
+
+### `AutocaptureOptions`
+
+Configuration for automatic event capture.
+
+```typescript
+interface AutocaptureOptions {
+  /**
+   * Capture click events
+   * Default: true
+   */
+  captureClicks?: boolean;
+  
+  /**
+   * Capture form submission events
+   * Default: true
+   */
+  captureFormSubmits?: boolean;
+  
+  /**
+   * Capture form field change events
+   * Default: false
+   */
+  captureFormChanges?: boolean;
+  
+  /**
+   * Capture text selection events
+   * Default: false
+   */
+  captureTextSelection?: boolean;
+  
+  /**
+   * CSS classes to ignore during capture
+   * Elements with these classes won't be tracked
+   * Default: ['journium-ignore']
+   */
+  ignoreClasses?: string[];
+  
+  /**
+   * HTML elements to ignore during capture
+   * Selector strings or tag names
+   * Default: ['script', 'style', 'noscript']
+   */
+  ignoreElements?: string[];
+  
+  /**
+   * Capture element text content
+   * Default: true
+   */
+  captureContentText?: boolean;
+}
+```
+
+**Example Usage:**
+
+```typescript
+const autocaptureConfig: AutocaptureOptions = {
+  captureClicks: true,
+  captureFormSubmits: true,
+  captureFormChanges: false,
+  captureTextSelection: false,
+  ignoreClasses: ['no-track', 'analytics-ignore', 'gdpr-sensitive'],
+  ignoreElements: [
+    'input[type="password"]',
+    'input[type="credit-card"]',
+    'script',
+    'style'
+  ],
+  captureContentText: true
+};
+
+const journium = init({
+  publishableKey: 'pk_...',
+  options: {
+    autocapture: autocaptureConfig
+  }
+});
+```
+
+### `JourniumAnalytics`
+
+The main analytics class instance returned by `init()`.
+
+```typescript
+class JourniumAnalytics {
+  /**
+   * Track a custom event
+   */
+  track(event: string, properties?: Record<string, unknown>): void;
+  
+  /**
+   * Identify a user
+   */
+  identify(distinctId: string, attributes?: Record<string, unknown>): void;
+  
+  /**
+   * Reset user identity (typically on logout)
+   */
+  reset(): void;
+  
+  /**
+   * Manually capture a pageview event
+   */
+  capturePageview(properties?: Record<string, unknown>): void;
+  
+  /**
+   * Start automatic event capture
+   */
+  startAutocapture(): void;
+  
+  /**
+   * Stop automatic event capture
+   */
+  stopAutocapture(): void;
+  
+  /**
+   * Manually flush queued events
+   */
+  flush(): Promise<void>;
+  
+  /**
+   * Get current effective options
+   */
+  getEffectiveOptions(): JourniumLocalOptions;
+  
+  /**
+   * Listen for options changes
+   */
+  onOptionsChange(
+    callback: (options: JourniumLocalOptions) => void
+  ): () => void;
+  
+  /**
+   * Cleanup and destroy instance
+   */
+  destroy(): void;
+}
+```
+
+**Example Usage:**
+
+```typescript
+import { init, type JourniumAnalytics } from '@journium/js';
+
+const analytics: JourniumAnalytics = init({
+  publishableKey: 'pk_...'
+});
+
+// All methods are fully typed
+analytics.track('custom_event', { prop: 'value' });
+analytics.identify('user_123', { email: 'user@example.com' });
+```
+
+## Event Types
+
+### `JourniumEvent`
+
+Internal event structure (for advanced use cases).
+
+```typescript
+interface JourniumEvent {
+  /**
+   * Unique event identifier (UUIDv7)
+   */
+  uuid: string;
+  
+  /**
+   * Ingestion/publishable key
+   */
+  ingestion_key: string;
+  
+  /**
+   * Client timestamp (ISO 8601 format)
+   */
+  client_timestamp: string;
+  
+  /**
+   * Event name
+   */
+  event: string;
+  
+  /**
+   * Event properties (including system properties)
+   */
+  properties: Record<string, unknown>;
+}
+```
+
+### `PageviewProperties`
+
+Properties automatically captured for pageview events.
+
+```typescript
+interface PageviewProperties {
+  /**
+   * Full URL of the page
+   */
+  $current_url?: string;
+  
+  /**
+   * Hostname
+   */
+  $host?: string;
+  
+  /**
+   * URL pathname
+   */
+  $pathname?: string;
+  
+  /**
+   * URL search/query string
+   */
+  $search?: string;
+  
+  /**
+   * Page title
+   */
+  $title?: string;
+  
+  /**
+   * Referrer URL
+   */
+  $referrer?: string;
+  
+  /**
+   * Additional custom properties
+   */
+  [key: string]: unknown;
+}
+```
+
+**Example Usage:**
+
+```typescript
+const pageviewProps: PageviewProperties = {
+  $current_url: 'https://example.com/product/123',
+  $pathname: '/product/123',
+  $title: 'Product Name - Store',
+  category: 'electronics',
+  product_id: '123'
+};
+
+journium.capturePageview(pageviewProps);
+```
+## Next Steps
+
+<Cards>
+  <Card title="API Methods" href="/docs/js/api-methods">
+    See all methods with examples
+  </Card>
+  <Card title="Configuration" href="/docs/js/configuration">
+    Learn about configuration options
+  </Card>
+  <Card title="React SDK Types" href="/docs/react/typescript-types">
+    TypeScript types for React integration
+  </Card>
+</Cards>
