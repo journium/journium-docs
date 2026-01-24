@@ -116,10 +116,14 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
+  // For the main docs page (title is "Journium Docs"), use the template
+  // For other pages, use absolute to avoid double suffixes
+  const isMainDocsPage = page.data.title === 'Journium Docs';
+
   return {
-    title: {
-      absolute: `${page.data.title} | Journium Docs`,
-    },
+    title: isMainDocsPage 
+      ? page.data.title  // Will use root template: "Journium Docs | Journium"
+      : { absolute: `${page.data.title} | Journium Docs` },
     description: page.data.description,
     openGraph: {
       images: getDocsPageImage(page).url,
