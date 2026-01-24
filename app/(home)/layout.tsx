@@ -9,7 +9,7 @@ import {
 import Link from 'fumadocs-core/link';
 import Image from 'next/image';
 import Preview from '@/public/banner.png';
-import { Book, ComponentIcon, Pencil, PlusIcon, CircleQuestionMark, Server } from 'lucide-react';
+import { Book, ComponentIcon, CircleQuestionMark, Server } from 'lucide-react';
 
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
