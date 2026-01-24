@@ -6,6 +6,8 @@ import * as TabsComponents from 'fumadocs-ui/components/tabs';
 import { ThemedImage } from '@/components/ui/themed-image';
 import { CloneExampleRepo } from '@/components/ui/clone-example-repo';
 import * as AccordionsComponents from 'fumadocs-ui/components/accordion';
+import { ShopifyIcon } from '@/components/icons/shopify';
+import { WordPressIcon } from '@/components/icons/wordpress';
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
@@ -15,6 +17,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Mermaid,
     ThemedImage,
     CloneExampleRepo,
+    ShopifyIcon,
+    WordPressIcon,
     ...TabsComponents,
     ...AccordionsComponents,
   };

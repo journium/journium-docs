@@ -1,0 +1,11 @@
+{
+    "title": "Integrations",
+    "description": "Platform Integrations",
+    "root": false,
+    "defaultOpen": true,
+    "pages": [
+      "cdn-usage",
+      "shopify-integration",
+      "wordpress-integration"
+    ]
+  }
