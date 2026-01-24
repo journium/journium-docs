@@ -6,6 +6,8 @@ icon: Rocket
 
 import { ShopifyIcon } from '@/components/icons/shopify';
 import { WordPressIcon } from '@/components/icons/wordpress';
+import { Settings, Code, FileCode } from 'lucide-react'
+
 
 ## Installation
 
@@ -266,13 +268,18 @@ This tracker helps you test data ingestion and insight generation.
 ## API Documentation
 
 <Cards>
-  <Card title="Configuration Options" href="/docs/js/configuration" icon="Settings">
+  <Card title="Configuration Options" href="/docs/js/configuration" 
+  icon={<Settings className="w-5 h-5" />}>
     Complete guide to all configuration options and settings
   </Card>
-  <Card title="API Methods" href="/docs/js/api-methods" icon="Code">
+  <Card title="API Methods" href="/docs/js/api-methods" 
+  icon={<Code className="w-5 h-5" />}>
+  >
     All methods, parameters, and usage examples
   </Card>
-  <Card title="TypeScript Types" href="/docs/js/typescript-types" icon="FileCode">
+  <Card title="TypeScript Types" href="/docs/js/typescript-types" 
+  icon={<FileCode className="w-5 h-5" />}>
+  >
     Complete type definitions for TypeScript projects
   </Card>
 </Cards>
