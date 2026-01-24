@@ -11,6 +11,7 @@ import { getLLMText } from '@/lib/get-llm-text';
 export const revalidate = false;
 
 export async function GET() {
+  // @ts-expect-error - getText method exists at runtime but TypeScript types are not aware
   const scan = source.getPages().map(getLLMText);
   const scanned = await Promise.all(scan);
 

@@ -9,6 +9,7 @@ export async function GET(_req: Request, { params }: RouteContext<'/docs/llms.md
   const page = source.getPage(slug);
   if (!page) notFound();
 
+  // @ts-expect-error - getText method exists at runtime but TypeScript types are not aware
   return new Response(await getLLMText(page), {
     headers: {
       'Content-Type': 'text/markdown',

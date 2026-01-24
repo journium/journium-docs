@@ -1,13 +1,18 @@
 import { ShopifyIcon } from '@/components/icons/shopify';
 import { WordPressIcon } from '@/components/icons/wordpress';
-import { createElement } from 'react';
+import { createElement, ReactElement } from 'react';
+
+interface IconNode {
+  icon?: string | ReactElement;
+  [key: string]: unknown;
+}
 
 /**
  * Custom icon plugin to resolve custom icons from frontmatter
  * MUST run before lucideIconsPlugin so custom icons are processed first
  */
 export function customIconsPlugin() {
-  function replaceIcon(node: any) {
+  function replaceIcon(node: IconNode) {
     // Only process if icon is a string (not yet converted)
     if (typeof node.icon !== 'string') return node;
     
