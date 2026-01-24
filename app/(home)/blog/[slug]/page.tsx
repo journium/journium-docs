@@ -67,8 +67,10 @@ export async function generateMetadata(props: PageProps<'/blog/[slug]'>): Promis
   if (!page) notFound();
 
   return createMetadata({
-    title: page.data.title,
-    description: page.data.description ?? 'The library for building documentation sites',
+    title: {
+      absolute: `${page.data.title} | Journium Blog`,
+    },
+    description: page.data.description ?? 'Latest announcements and insights from Journium.',
     openGraph: {
       images: getBlogPageImage(page).url,
     },

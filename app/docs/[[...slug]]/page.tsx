@@ -117,7 +117,9 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
   if (!page) notFound();
 
   return {
-    title: page.data.title,
+    title: {
+      absolute: `${page.data.title} | Journium Docs`,
+    },
     description: page.data.description,
     openGraph: {
       images: getDocsPageImage(page).url,

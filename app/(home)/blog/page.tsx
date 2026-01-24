@@ -3,6 +3,12 @@ import { blog } from '@/lib/source';
 import { PathUtils } from 'fumadocs-core/source';
 import BannerImage from './banner.png';
 import Image from 'next/image';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Journium Blog',
+  description: 'Latest announcements and insights from Journium.',
+};
 
 function getName(path: string) {
   return PathUtils.basename(path, PathUtils.extname(path));
