@@ -11,6 +11,7 @@ interface BlogAuthorIconProps {
 
 export function BlogAuthorIcon({ name, size = 40, className = '' }: BlogAuthorIconProps) {
   const [imageError, setImageError] = useState(false);
+  const [imageFormat, setImageFormat] = useState<'svg' | 'png'>('svg');
 
   // Convert "Arun Patra" to "arun-patra"
   const getImageFilename = (authorName: string): string => {
@@ -18,19 +19,32 @@ export function BlogAuthorIcon({ name, size = 40, className = '' }: BlogAuthorIc
   };
 
   const filename = getImageFilename(name);
-  const imagePath = imageError 
-    ? '/blog/authors/default-avatar.svg' 
-    : `/blog/authors/${filename}.png`;
+  const getImagePath = (): string => {
+    if (imageError) {
+      return '/blog/authors/journium-team.svg';
+    }
+    return `/blog/authors/${filename}.${imageFormat}`;
+  };
+
+  const handleImageError = () => {
+    // Try PNG if SVG fails
+    if (imageFormat === 'svg') {
+      setImageFormat('png');
+    } else {
+      // If PNG also fails, show default
+      setImageError(true);
+    }
+  };
 
   return (
     <div className={`relative rounded-full overflow-hidden bg-fd-muted border border-fd-muted-foreground/20 ${className}`} style={{ width: size, height: size }}>
       <Image
-        src={imagePath}
+        src={getImagePath()}
         alt={`${name}'s avatar`}
         width={size}
         height={size}
         className="object-cover"
-        onError={() => setImageError(true)}
+        onError={handleImageError}
       />
     </div>
   );
