@@ -49,7 +49,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
               }),
             )}
           >
-            Back
+            All Posts
           </Link>
         </div>
 
