@@ -13,7 +13,14 @@ interface BlogAuthorIconProps {
 export function BlogAuthorIcon({ name, size = 40, className = '' }: BlogAuthorIconProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [currentAttempt, setCurrentAttempt] = useState<'themed-svg' | 'themed-png' | 'svg' | 'png' | 'fallback'>('themed-svg');
+  
+  // Determine if this author should try themed images
+  // Only certain authors (like "Journium Team") have themed variants
+  const shouldTryThemedImages = name.toLowerCase().includes('journium');
+  
+  const [currentAttempt, setCurrentAttempt] = useState<'themed-svg' | 'themed-png' | 'svg' | 'png' | 'fallback'>(
+    shouldTryThemedImages ? 'themed-svg' : 'png'
+  );
 
   // Track mount state to prevent hydration mismatches
   useEffect(() => {
@@ -22,14 +29,14 @@ export function BlogAuthorIcon({ name, size = 40, className = '' }: BlogAuthorIc
     });
   }, []);
 
-  // Reset attempt when theme changes
+  // Reset attempt when theme changes (only for themed images)
   useEffect(() => {
-    if (mounted) {
+    if (mounted && shouldTryThemedImages) {
       startTransition(() => {
         setCurrentAttempt('themed-svg');
       });
     }
-  }, [resolvedTheme, mounted]);
+  }, [resolvedTheme, mounted, shouldTryThemedImages]);
 
   // Convert "Arun Patra" to "arun-patra"
   const getImageFilename = (authorName: string): string => {
@@ -61,21 +68,36 @@ export function BlogAuthorIcon({ name, size = 40, className = '' }: BlogAuthorIc
   };
 
   const handleImageError = () => {
-    // Fallback chain: themed-svg -> themed-png -> svg -> png -> fallback
     startTransition(() => {
-      switch (currentAttempt) {
-        case 'themed-svg':
-          setCurrentAttempt('themed-png');
-          break;
-        case 'themed-png':
-          setCurrentAttempt('svg');
-          break;
-        case 'svg':
-          setCurrentAttempt('png');
-          break;
-        case 'png':
-          setCurrentAttempt('fallback');
-          break;
+      if (shouldTryThemedImages) {
+        // Fallback chain for themed images: themed-svg -> themed-png -> svg -> png -> fallback
+        switch (currentAttempt) {
+          case 'themed-svg':
+            setCurrentAttempt('themed-png');
+            break;
+          case 'themed-png':
+            setCurrentAttempt('svg');
+            break;
+          case 'svg':
+            setCurrentAttempt('png');
+            break;
+          case 'png':
+            setCurrentAttempt('fallback');
+            break;
+        }
+      } else {
+        // Simplified chain for non-themed images: png -> svg -> fallback
+        switch (currentAttempt) {
+          case 'png':
+            setCurrentAttempt('svg');
+            break;
+          case 'svg':
+            setCurrentAttempt('fallback');
+            break;
+          default:
+            setCurrentAttempt('fallback');
+            break;
+        }
       }
     });
   };
