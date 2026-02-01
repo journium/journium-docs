@@ -23,15 +23,18 @@ ${urls}
 </urlset>`;
 }
 
+// TODO: Cleanup the env var and simplify it later
 export async function GET() {
   const baseUrl =
-    process.env.NEXT_PUBLIC_DOCS_BASE_URL || 'http://localhost:3201/blog';
+    process.env.NEXT_PUBLIC_DOCS_BASE_URL || 'http://localhost:3201/docs';
 
   // Ensure baseUrl doesn't end with a slash
   let normalizedBaseUrl = baseUrl.replace(/\/$/, '');
 
-  // Remove /docs from baseUrl if it ends with it (since page.url already includes /docs)
-  if (normalizedBaseUrl.endsWith('/blog')) {
+  // Remove /docs or /blog from baseUrl if it ends with either (since page.url already includes /blog)
+  if (normalizedBaseUrl.endsWith('/docs')) {
+    normalizedBaseUrl = normalizedBaseUrl.slice(0, -5); // Remove '/docs'
+  } else if (normalizedBaseUrl.endsWith('/blog')) {
     normalizedBaseUrl = normalizedBaseUrl.slice(0, -5); // Remove '/blog'
   }
 
