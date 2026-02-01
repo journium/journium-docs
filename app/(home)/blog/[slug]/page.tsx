@@ -6,6 +6,7 @@ import { blog, getBlogPageImage } from '@/lib/source';
 import { createMetadata } from '@/lib/metadata';
 import { buttonVariants } from '@/components/ui/button';
 import { ShareButton } from '@/app/(home)/blog/[slug]/page.client';
+import { BlogAuthor } from '@/components/ui/blog-author';
 import { getMDXComponents } from '@/mdx-components';
 import path from 'node:path';
 import { cn } from '@/lib/cn';
@@ -19,20 +20,10 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
 
   return (
     <article className="flex flex-col mx-auto w-full max-w-[800px] px-4 py-8">
-      <div className="flex flex-row gap-4 text-sm mb-8">
-        <div>
-          <p className="mb-1 text-fd-muted-foreground">Written by</p>
-          <p className="font-medium">{page.data.author}</p>
-        </div>
-        <div>
-          <p className="mb-1 text-sm text-fd-muted-foreground">At</p>
-          <p className="font-medium">
-            {new Date(
-              page.data.date ?? path.basename(page.path, path.extname(page.path)),
-            ).toDateString()}
-          </p>
-        </div>
-      </div>
+      <BlogAuthor
+        author={page.data.author}
+        date={page.data.date ?? path.basename(page.path, path.extname(page.path))}
+      />
 
       <h1 className="text-3xl font-semibold mb-4">{page.data.title}</h1>
       <p className="text-fd-muted-foreground mb-8">{page.data.description}</p>
