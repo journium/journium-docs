@@ -80,7 +80,6 @@ export default function Layout({ children }: LayoutProps<'/'>) {
         },
         ...linkItems,
       ]}
-      className="[--color-fd-primary:var(--color-brand)]"
     >
       {children}
     </HomeLayout>

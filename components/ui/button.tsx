@@ -18,6 +18,8 @@ export const buttonVariants = cva(
       color: variants,
       size: {
         sm: 'gap-1 px-2 py-1.5 text-xs',
+        md: 'gap-1.5 px-4 py-2 text-sm',
+        lg: 'gap-2 px-6 py-3 text-base',
         icon: 'p-1.5 [&_svg]:size-5',
         'icon-sm': 'p-1.5 [&_svg]:size-4.5',
         'icon-xs': 'p-1 [&_svg]:size-4',
