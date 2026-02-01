@@ -23,7 +23,7 @@ export function BlogAuthorIcon({ name, size = 40, className = '' }: BlogAuthorIc
     : `/blog/authors/${filename}.png`;
 
   return (
-    <div className={`relative rounded-full overflow-hidden bg-fd-muted ${className}`} style={{ width: size, height: size }}>
+    <div className={`relative rounded-full overflow-hidden bg-fd-muted border border-fd-muted-foreground/20 ${className}`} style={{ width: size, height: size }}>
       <Image
         src={imagePath}
         alt={`${name}'s avatar`}

@@ -4,6 +4,7 @@ import { PathUtils } from 'fumadocs-core/source';
 import BannerImage from './banner.png';
 import Image from 'next/image';
 import type { Metadata } from 'next';
+import { BlogAuthor } from '@/components/ui/blog-author';
 
 export const metadata: Metadata = {
   title: 'Journium Blog',
@@ -44,12 +45,16 @@ export default function Page() {
             href={post.url}
             className="flex flex-col bg-fd-card rounded-2xl border shadow-sm p-4 transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
           >
-            <p className="font-medium">{post.data.title}</p>
-            <p className="text-sm text-fd-muted-foreground">{post.data.description}</p>
+            <p className="font-medium mb-2">{post.data.title}</p>
+            <p className="text-sm text-fd-muted-foreground mb-4">{post.data.description}</p>
 
-            <p className="mt-auto pt-4 text-xs text-brand">
-              {new Date(post.data.date ?? getName(post.path)).toDateString()}
-            </p>
+            <div className="mt-auto pt-4 border-t">
+              <BlogAuthor
+                author={post.data.author}
+                date={post.data.date ?? getName(post.path)}
+                compact
+              />
+            </div>
           </Link>
         ))}
       </div>
