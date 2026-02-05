@@ -140,7 +140,7 @@ export function BlogSubscribe() {
 
                 {/* Privacy Note */}
                 <p className="mt-4 text-xs text-gray-500 dark:text-gray-500">
-                  We respect your privacy. Unsubscribe at any time.
+                  We respect your privacy. You can unsubscribe at any time.
                 </p>
               </>
             ) : (
@@ -162,10 +162,10 @@ export function BlogSubscribe() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                  You're subscribed!
+                  You&apos;re subscribed!
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Thank you for subscribing. We'll keep you updated with the latest from Journium.
+                  Thank you for subscribing. We&apos;ll keep you updated with the latest from Journium.
                 </p>
               </div>
             )}
