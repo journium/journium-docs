@@ -8,7 +8,8 @@ import {
 } from 'fumadocs-ui/layouts/home/navbar';
 import Link from 'fumadocs-core/link';
 import Image from 'next/image';
-import Preview from '@/public/banner.png';
+import PreviewDark from '@/public/banner_dark.png';
+import PreviewLight from '@/public/banner_light.png';
 import { Book, ComponentIcon, CircleQuestionMark, Server } from 'lucide-react';
 
 export default function Layout({ children }: LayoutProps<'/'>) {
@@ -43,11 +44,19 @@ export default function Layout({ children }: LayoutProps<'/'>) {
               </NavbarMenuTrigger>
               <NavbarMenuContent>
                 <NavbarMenuLink href="/docs" className="md:row-span-2">
-                  <div className="-mx-3 -mt-3">
+                  <div className="-mx-3 -mt-3 relative">
                     <Image
-                      src={Preview}
-                      alt="Perview"
-                      className="rounded-t-lg object-cover"
+                      src={PreviewLight}
+                      alt="Preview"
+                      className="rounded-t-lg object-cover dark:hidden"
+                      style={{
+                        maskImage: 'linear-gradient(to bottom,white 60%,transparent)',
+                      }}
+                    />
+                    <Image
+                      src={PreviewDark}
+                      alt="Preview"
+                      className="rounded-t-lg object-cover hidden dark:block"
                       style={{
                         maskImage: 'linear-gradient(to bottom,white 60%,transparent)',
                       }}
