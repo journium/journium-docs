@@ -1,15 +1,20 @@
 import type { BaseLayoutProps, LinkItemType } from 'fumadocs-ui/layouts/shared';
-import 'katex/dist/katex.css';
+import 'katex/dist/katex.css'; // TODO: Not sure what's this for
 import { JourniumLogo } from '@/components/icons/journium-logo';
 import { Badge } from '@/components/ui/badge';
 import { ThemeSwitcher } from '@/components/ui/theme-switcher';
+import Link from 'next/link';
 
 const docsLogo = (
   <div className="flex items-center gap-2">
-    <JourniumLogo key="docs-logo" size="sm" className="h-6" />
+
+      <JourniumLogo key="docs-logo" size="sm" className="h-6" />
+
     <Badge key="docs-badge" variant="outline" className="rounded-full">
       Docs
     </Badge>
+
+
   </div>
 );
 
@@ -26,7 +31,7 @@ export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
       title: docsLogo,
-      url: 'https://journium.app',
+      url: '/docs',
       //transparentMode: 'top',
     },
     githubUrl: 'https://github.com/journium',
