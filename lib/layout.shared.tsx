@@ -4,7 +4,7 @@ import { JourniumLogo } from '@/components/icons/journium-logo';
 import { Badge } from '@/components/ui/badge';
 import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 
-const logo = (
+const docsLogo = (
   <div className="flex items-center gap-2">
     <JourniumLogo key="docs-logo" size="sm" className="h-6" />
     <Badge key="docs-badge" variant="outline" className="rounded-full">
@@ -16,17 +16,17 @@ const logo = (
 const blogLogo = (
   <div className="flex items-center gap-2">
     <JourniumLogo key="blog-logo" size="sm" className="h-6" />
-    <Badge key="blog-badge" variant="outline" className="rounded-full">
+    {/* <Badge key="blog-badge" variant="outline" className="rounded-full">
       Blog
-    </Badge>
+    </Badge> */}
   </div>
 );
 
 export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
-      title: logo,
-      url: '/docs',
+      title: docsLogo,
+      url: 'https://journium.app',
       //transparentMode: 'top',
     },
     githubUrl: 'https://github.com/journium',
@@ -45,7 +45,7 @@ export function blogBaseOptions(): BaseLayoutProps {
     },
     nav: {
       title: blogLogo,
-      url: '/blog',
+      url: 'https://journium.app',
       //transparentMode: 'top',
     },
     githubUrl: 'https://github.com/journium',
