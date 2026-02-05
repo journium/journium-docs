@@ -23,7 +23,7 @@ export function DocsIndexPage({ title, description }: DocsIndexPageProps) {
           </div>
 
           {/* Journium Icon - Top Right Corner */}
-          <div className="absolute top-4 right-4 md:top-12 md:right-8 z-20 opacity-30 dark:opacity-20 hover:opacity-50 dark:hover:opacity-40 transition-opacity duration-300">
+          <div className="absolute top-12 right-10 md:top-12 md:right-8 z-20 opacity-30 dark:opacity-20 hover:opacity-50 dark:hover:opacity-40 transition-opacity duration-300">
             <JourniumIcon 
               size="lg" 
               className="md:h-20 md:w-20 lg:h-24 lg:w-24" 
