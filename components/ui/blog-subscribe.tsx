@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { subscribeToBlog } from '@/lib/api/blog-api';
 
 export function BlogSubscribe() {
   const [isOpen, setIsOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,26 +18,38 @@ export function BlogSubscribe() {
     }
 
     setIsSubmitting(true);
+    setError(null);
 
-    // Simulate API call to backend
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      // Start timing for UX purposes (goldilocks zone)
+      const startTime = Date.now();
 
-    // TODO: Replace with actual backend call
-    // await fetch('/api/subscribe', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ email }),
-    // });
+      // Make API call through our API layer
+      await subscribeToBlog(email);
 
-    setIsSubmitting(false);
-    setIsSubscribed(true);
+      // Calculate remaining time to reach minimum 1 second
+      const elapsed = Date.now() - startTime;
+      const minDelay = 1000;
+      const remainingDelay = Math.max(0, minDelay - elapsed);
 
-    // Reset after showing success message
-    setTimeout(() => {
-      setIsOpen(false);
-      setEmail('');
-      setTimeout(() => setIsSubscribed(false), 300);
-    }, 2000);
+      // Wait for remaining delay to ensure good UX
+      if (remainingDelay > 0) {
+        await new Promise(resolve => setTimeout(resolve, remainingDelay));
+      }
+
+      setIsSubmitting(false);
+      setIsSubscribed(true);
+
+      // Reset after showing success message
+      setTimeout(() => {
+        setIsOpen(false);
+        setEmail('');
+        setTimeout(() => setIsSubscribed(false), 300);
+      }, 2000);
+    } catch (err) {
+      setIsSubmitting(false);
+      setError(err instanceof Error ? err.message : 'Failed to subscribe. Please try again.');
+    }
   };
 
   return (
@@ -84,12 +98,23 @@ export function BlogSubscribe() {
                       type="email"
                       id="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setError(null); // Clear error on input change
+                      }}
                       placeholder="you@example.com"
                       required
                       disabled={isSubmitting}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     />
+                    {error && (
+                      <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        {error}
+                      </p>
+                    )}
                   </div>
 
                   {/* Buttons */}
@@ -97,7 +122,7 @@ export function BlogSubscribe() {
                     <button
                       type="submit"
                       disabled={isSubmitting || !email}
-                      className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/25 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2"
+                      className="cursor-pointer flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/25 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2"
                     >
                       {isSubmitting ? (
                         <>
@@ -131,7 +156,7 @@ export function BlogSubscribe() {
                       type="button"
                       onClick={() => setIsOpen(false)}
                       disabled={isSubmitting}
-                      className="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="cursor-pointer px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Cancel
                     </button>
