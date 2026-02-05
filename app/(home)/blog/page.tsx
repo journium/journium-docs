@@ -32,7 +32,7 @@ export default function Page() {
         </div>
 
         {/* Journium Icon - Top Right Corner */}
-        <div className="absolute top-4 right-4 md:top-8 md:right-8 z-20 opacity-20 dark:opacity-15 hover:opacity-40 dark:hover:opacity-30 transition-opacity duration-300">
+        <div className="absolute top-4 right-4 md:top-8 md:right-8 z-20 opacity-40 dark:opacity-30 hover:opacity-60 dark:hover:opacity-50 transition-opacity duration-300">
           <JourniumIcon 
             size="lg" 
             className="md:h-24 md:w-24 lg:h-32 lg:w-32" 
