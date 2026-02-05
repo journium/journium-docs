@@ -2,6 +2,7 @@ import { blog } from '@/lib/source';
 import { PathUtils } from 'fumadocs-core/source';
 import type { Metadata } from 'next';
 import { BlogIndexCard } from '@/components/ui/blog-index-card';
+import { BlogSubscribe } from '@/components/ui/blog-subscribe';
 
 export const metadata: Metadata = {
   title: 'Journium Blog',
@@ -52,9 +53,7 @@ export default function Page() {
 
             {/* Optional: Add search or CTA */}
             <div className="mt-8 flex flex-wrap gap-4">
-              <button className="cursor-pointer px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/25">
-                Subscribe to Updates
-              </button>
+              <BlogSubscribe />
               {/* <button className="px-6 py-2.5 bg-white/50 dark:bg-gray-800/50 hover:bg-white/80 dark:hover:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 rounded-lg font-medium transition-colors border border-gray-200 dark:border-gray-700">
                 View All Posts
               </button> */}
