@@ -10,7 +10,8 @@ import Link from 'fumadocs-core/link';
 import Image from 'next/image';
 import PreviewDark from '@/public/banner_dark.png';
 import PreviewLight from '@/public/banner_light.png';
-import { Book, ComponentIcon, CircleQuestionMark, Server } from 'lucide-react';
+import { Book, ComponentIcon, CircleQuestionMark, Server} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
@@ -33,6 +34,21 @@ export default function Layout({ children }: LayoutProps<'/'>) {
               icon: <CircleQuestionMark />,
             },
           ],
+        },
+        {
+          type: 'custom',
+          on: 'nav',
+          children: (
+            <NavbarMenu>
+              <NavbarMenuTrigger>
+                <Link href="/blog">
+                  <Badge key="blog-badge" variant="outline" className="rounded-full">
+                    Blog
+                  </Badge>
+                </Link>
+              </NavbarMenuTrigger>
+            </NavbarMenu>
+          ),
         },
         {
           type: 'custom',
