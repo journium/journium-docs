@@ -12,10 +12,10 @@ interface DocsIndexPageProps {
 
 export function DocsIndexPage({ title, description }: DocsIndexPageProps) {
   return (
-    <DocsPage>
-      <DocsBody className="p-0 ">
-        {/* Hero Section */}
-        <div className="relative -mx-8 -mt-14  mb-12 overflow-hidden bg-linear-to-br from-emerald-500/10 via-teal-500/10 to-cyan-500/10 dark:from-emerald-500/20 dark:via-teal-500/20 dark:to-cyan-500/20">
+    <DocsPage full>
+      <DocsBody className="p-0 -mx-8 -mt-14">
+        {/* Hero Section - Full Width */}
+        <div className="relative mb-12 overflow-hidden bg-linear-to-br from-emerald-500/10 via-teal-500/10 to-cyan-500/10 dark:from-emerald-500/20 dark:via-teal-500/20 dark:to-cyan-500/20">
           {/* Animated background elements */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -top-1/2 -right-1/4 w-96 h-96 bg-emerald-500/20 dark:bg-emerald-400/30 rounded-full blur-3xl animate-pulse" />
@@ -23,7 +23,7 @@ export function DocsIndexPage({ title, description }: DocsIndexPageProps) {
           </div>
 
           {/* Journium Icon - Top Right Corner */}
-          <div className="absolute top-4 right-4 md:top-12 md:right-6 z-20 opacity-30 dark:opacity-20 hover:opacity-50 dark:hover:opacity-40 transition-opacity duration-300">
+          <div className="absolute top-4 right-4 md:top-12 md:right-8 z-20 opacity-30 dark:opacity-20 hover:opacity-50 dark:hover:opacity-40 transition-opacity duration-300">
             <JourniumIcon 
               size="lg" 
               className="md:h-20 md:w-20 lg:h-24 lg:w-24" 
@@ -31,8 +31,8 @@ export function DocsIndexPage({ title, description }: DocsIndexPageProps) {
             />
           </div>
 
-          {/* Content */}
-          <div className="relative z-10 px-6 py-12 md:py-16">
+          {/* Content - Constrained */}
+          <div className="relative z-10 mx-auto max-w-7xl px-6 py-12 md:py-16">
             <div className="max-w-3xl">
               {/* Badge */}
               <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 px-4 py-1.5 text-sm font-medium text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
@@ -62,7 +62,7 @@ export function DocsIndexPage({ title, description }: DocsIndexPageProps) {
         </div>
 
         {/* Getting Started Section */}
-        <div className="px-6">
+        <div className="mx-auto max-w-7xl px-6">
           <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">
             Get Started
           </h2>
