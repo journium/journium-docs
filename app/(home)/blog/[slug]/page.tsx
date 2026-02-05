@@ -40,7 +40,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
               }),
             )}
           >
-            All Posts
+            View All Posts
           </Link>
         </div>
 
