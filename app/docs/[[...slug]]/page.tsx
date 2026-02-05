@@ -11,16 +11,34 @@ import Link from 'fumadocs-core/link';
 import { PathUtils } from 'fumadocs-core/source';
 import * as Twoslash from 'fumadocs-twoslash/ui';
 import { LLMCopyButton, ViewOptions } from '@/components/page-actions';
+import { DocsIndexPage } from '@/components/index-page';
 
-export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+interface PageProps {
+  params: Promise<{ slug?: string[] }>;
+}
+
+export default async function Page(props: PageProps) {
   const params = await props.params;
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
-  const MDX = page.data.body;
+  // Check if this is the main docs index page
+  const isIndexPage = !params.slug || params.slug.length === 0;
 
+  const MDX = page.data.body;
   const lastModifiedTime: Date | undefined = page.data.lastModified;
 
+  // Render custom index page
+  if (isIndexPage) {
+    return (
+      <DocsIndexPage 
+        title={page.data.title} 
+        description={page.data.description} 
+      />
+    );
+  }
+
+  // Render normal MDX page
   return (
     <DocsPage 
     toc={page.data.toc} 
@@ -111,7 +129,7 @@ function DocsCategory({ url }: { url: string }) {
   );
 }
 
-export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params;
   const page = source.getPage(params.slug);
   if (!page) notFound();

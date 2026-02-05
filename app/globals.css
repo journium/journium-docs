@@ -8,6 +8,16 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Fumadocs layout width - controls max width of docs layout */
+:root {
+  --fd-layout-width: 1400px; /* Default is 97rem (~1552px) */
+}
+
+/* Custom max-widths for blog and other pages */
+@theme {
+  --max-width-page: 90rem; /* 1440px - matches blog design */
+}
+
 /* Journium Slate Color Palette - override Fumadocs defaults */
 @theme {
   --color-fd-background: oklch(1 0 0);
