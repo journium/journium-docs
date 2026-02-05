@@ -40,6 +40,9 @@ export function baseOptions(): BaseLayoutProps {
 
 export function blogBaseOptions(): BaseLayoutProps {
   return {
+    searchToggle: {
+      enabled: false,
+    },
     nav: {
       title: blogLogo,
       url: '/blog',
