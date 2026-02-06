@@ -324,8 +324,9 @@ export function AISearch({ children }: { children: ReactNode }) {
 export function AISearchTrigger({ 
   className,
   onClick,
+  variant = 'default',
   ...props 
-}: ComponentProps<'button'>) {
+}: ComponentProps<'button'> & { variant?: 'default' | 'icon' }) {
   const context = useContext(Context);
   
   // If context is not available, return null (component is outside AISearch provider)
@@ -342,6 +343,29 @@ export function AISearchTrigger({
     setOpen(true);
   };
 
+  // Icon-only variant for mobile
+  if (variant === 'icon') {
+    return (
+      <button
+        {...props}
+        className={cn(
+          buttonVariants({
+            variant: 'ghost',
+            size: 'icon-sm',
+          }),
+          'cursor-pointer',
+          className,
+        )}
+        onClick={handleClick}
+        title="Ask AI"
+        aria-label="Ask AI"
+      >
+        <MessageCircleIcon className="size-4" />
+      </button>
+    );
+  }
+
+  // Default variant with text
   return (
     <button
       {...props}

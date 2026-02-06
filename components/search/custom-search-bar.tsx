@@ -76,17 +76,14 @@ export function CustomSearchToggleSm({ className, ...props }: { className?: stri
         <Search />
       </button>
       
-      {/* AI Search Trigger */}
+      {/* AI Search Trigger - icon only for mobile */}
       <AISearchTrigger 
+        variant="icon"
         onClick={() => {
           // Close regular search if it's open
           setOpenSearch(false);
         }}
-        className={cn(
-          buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
-          'cursor-pointer',
-          className
-        )}
+        className={className}
       />
     </div>
   );
