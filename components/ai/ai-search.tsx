@@ -38,7 +38,7 @@ function Header() {
   const { setOpen } = use(Context)!;
 
   return (
-    <div className="sticky top-0 z-10 -mx-2 xl:-mx-4 backdrop-blur-lg bg-fd-background/80 border-b border-fd-border/50">
+    <div className="sticky top-0 z-10 -mx-2 -mt-2 xl:-mx-4 xl:-mt-4 backdrop-blur-lg bg-fd-background/80 border-b border-fd-border/50">
       <div className="flex items-center justify-between px-4 xl:px-6 py-4">
         <div className="flex-1">
           <p className="text-base font-semibold mb-1">Ask AI</p>
