@@ -38,7 +38,7 @@ export function baseOptions(): BaseLayoutProps {
       enabled: true,
       components: {
         lg: <CustomSearchWithAI key="search-lg" />,
-        sm: <CustomSearchToggleSm key="search-sm" />,
+        sm: <CustomSearchToggleSm key="search-sm" className='h-8'/>,
       },
     },
     githubUrl: 'https://github.com/journium',

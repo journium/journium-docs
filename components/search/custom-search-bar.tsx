@@ -54,7 +54,8 @@ export function CustomSearchWithAI() {
 }
 
 /**
- * Custom search toggle for mobile - just the regular search icon (no AI trigger on mobile)
+ * Custom search toggle for mobile - includes both regular search and AI trigger
+ * Note: Returns a fragment with both buttons side-by-side
  */
 export function CustomSearchToggleSm({ className, ...props }: { className?: string; hideIfDisabled?: boolean }) {
   const { setOpenSearch, enabled } = useSearchContext();
@@ -62,15 +63,31 @@ export function CustomSearchToggleSm({ className, ...props }: { className?: stri
   if (!enabled) return null;
 
   return (
-    <button
-      type="button"
-      {...props}
-      className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }), 'cursor-pointer', className)}
-      data-search=""
-      aria-label="Open Search"
-      onClick={() => setOpenSearch(true)}
-    >
-      <Search />
-    </button>
+    <div className="flex items-center gap-2">
+      {/* Regular Search Toggle */}
+      <button
+        type="button"
+        {...props}
+        className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }), 'cursor-pointer', className)}
+        data-search=""
+        aria-label="Open Search"
+        onClick={() => setOpenSearch(true)}
+      >
+        <Search />
+      </button>
+      
+      {/* AI Search Trigger */}
+      <AISearchTrigger 
+        onClick={() => {
+          // Close regular search if it's open
+          setOpenSearch(false);
+        }}
+        className={cn(
+          buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+          'cursor-pointer',
+          className
+        )}
+      />
+    </div>
   );
 }
