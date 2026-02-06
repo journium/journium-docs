@@ -13,7 +13,7 @@ interface DocsIndexPageProps {
 export function DocsIndexPage({ title, description }: DocsIndexPageProps) {
   return (
     <DocsPage full>
-      <DocsBody className="p-0 -mx-8 -mt-14">
+      <DocsBody className="p-0 -mx-8 -mt-14 max-w-none">
         {/* Hero Section - Full Width */}
         <div className="relative mb-12 overflow-hidden bg-linear-to-br from-emerald-500/10 via-teal-500/10 to-cyan-500/10 dark:from-emerald-500/20 dark:via-teal-500/20 dark:to-cyan-500/20">
           {/* Animated background elements */}
@@ -62,7 +62,7 @@ export function DocsIndexPage({ title, description }: DocsIndexPageProps) {
         </div>
 
         {/* Getting Started Section */}
-        <div className="mx-auto max-w-7xl px-6">
+        <div className="mx-0 max-w-7xl px-6 w-full">
           <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">
             Get Started
           </h2>

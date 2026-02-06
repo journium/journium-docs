@@ -11,7 +11,7 @@ import Link from 'fumadocs-core/link';
 import { PathUtils } from 'fumadocs-core/source';
 import * as Twoslash from 'fumadocs-twoslash/ui';
 import { LLMCopyButton, ViewOptions } from '@/components/page-actions';
-import { DocsIndexPage } from '@/components/index-page';
+import { DocsIndexPage } from '@/components/docs-index-page';
 
 interface PageProps {
   params: Promise<{ slug?: string[] }>;
