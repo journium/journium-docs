@@ -31,10 +31,12 @@ export default async function Page(props: PageProps) {
   // Render custom index page
   if (isIndexPage) {
     return (
-      <DocsIndexPage 
-        title={page.data.title} 
-        description={page.data.description} 
-      />
+
+        <DocsIndexPage 
+          title={page.data.title} 
+          description={page.data.description} 
+        />
+
     );
   }
 

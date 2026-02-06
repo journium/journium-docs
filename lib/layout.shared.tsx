@@ -3,7 +3,7 @@ import 'katex/dist/katex.css'; // TODO: Not sure what's this for
 import { JourniumLogo } from '@/components/icons/journium-logo';
 import { Badge } from '@/components/ui/badge';
 import { ThemeSwitcher } from '@/components/ui/theme-switcher';
-import Link from 'next/link';
+import { CustomSearchWithAI, CustomSearchToggleSm } from '@/components/search/custom-search-bar';
 
 const docsLogo = (
   <div className="flex items-center gap-2">
@@ -33,6 +33,13 @@ export function baseOptions(): BaseLayoutProps {
       title: docsLogo,
       url: '/docs',
       //transparentMode: 'top',
+    },
+    searchToggle: {
+      enabled: true,
+      components: {
+        lg: <CustomSearchWithAI key="search-lg" />,
+        sm: <CustomSearchToggleSm key="search-sm" />,
+      },
     },
     githubUrl: 'https://github.com/journium',
     themeSwitch: {
