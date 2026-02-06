@@ -23,7 +23,7 @@ export function CustomSearchWithAI() {
         type="button"
         data-search-full=""
         className={cn(
-          'inline-flex items-center gap-2 rounded-lg border bg-fd-secondary/50 p-1.5 ps-2 text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground flex-1 min-w-0',
+          'h-8 cursor-pointer inline-flex items-center gap-2 rounded-lg border bg-fd-secondary/50 p-1.5 ps-2 text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground flex-1 min-w-0',
         )}
         onClick={() => setOpenSearch(true)}
       >
@@ -46,7 +46,7 @@ export function CustomSearchWithAI() {
         }}
         className={cn(
           buttonVariants({ variant: 'secondary', size: 'sm' }),
-          'gap-1.5 rounded-lg whitespace-nowrap shrink-0'
+          'cursor-pointer gap-1.5 rounded-lg whitespace-nowrap shrink-0'
         )}
       />
     </div>
@@ -56,7 +56,7 @@ export function CustomSearchWithAI() {
 /**
  * Custom search toggle for mobile - just the regular search icon (no AI trigger on mobile)
  */
-export function CustomSearchToggleSm() {
+export function CustomSearchToggleSm({ className, ...props }: { className?: string; hideIfDisabled?: boolean }) {
   const { setOpenSearch, enabled } = useSearchContext();
   
   if (!enabled) return null;
@@ -64,7 +64,8 @@ export function CustomSearchToggleSm() {
   return (
     <button
       type="button"
-      className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }), 'p-2')}
+      {...props}
+      className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }), 'cursor-pointer', className)}
       data-search=""
       aria-label="Open Search"
       onClick={() => setOpenSearch(true)}
