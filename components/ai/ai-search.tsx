@@ -57,7 +57,7 @@ function Header() {
         )}
         onClick={() => setOpen(false)}
       >
-        <X />
+        <X className="size-4 cursor-pointer" />
       </button>
     </div>
   );
@@ -79,11 +79,11 @@ function SearchAIActions() {
               color: 'secondary',
               size: 'sm',
               className: 'rounded-full gap-1.5',
-            }),
+            }), 'cursor-pointer',
           )}
           onClick={() => regenerate()}
         >
-          <RefreshCw className="size-4" />
+          <RefreshCw className="size-4 cursor-pointer" />
           Retry
         </button>
       )}
@@ -94,7 +94,7 @@ function SearchAIActions() {
             color: 'secondary',
             size: 'sm',
             className: 'rounded-full',
-          }),
+          }), 'cursor-pointer',
         )}
         onClick={() => setMessages([])}
       >
@@ -146,7 +146,7 @@ function SearchAIInput(props: ComponentProps<'form'>) {
             buttonVariants({
               color: 'secondary',
               className: 'transition-all rounded-full mt-2 gap-2',
-            }),
+            }), 'cursor-pointer',
           )}
           onClick={stop}
         >
@@ -161,7 +161,7 @@ function SearchAIInput(props: ComponentProps<'form'>) {
             buttonVariants({
               color: 'secondary',
               className: 'transition-all rounded-full mt-2',
-            }),
+            }), 'cursor-pointer',
           )}
           disabled={input.length === 0}
         >
