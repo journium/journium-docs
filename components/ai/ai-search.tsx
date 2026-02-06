@@ -38,27 +38,29 @@ function Header() {
   const { setOpen } = use(Context)!;
 
   return (
-    <div className="sticky top-0 flex items-start gap-2">
-      <div className="flex-1 p-3 border rounded-xl bg-fd-card text-fd-card-foreground">
-        <p className="text-sm font-medium mb-2">Ask AI</p>
-        <p className="text-xs text-fd-muted-foreground">
-          Ask questions about Journium documentation
-        </p>
+    <div className="sticky top-0 z-10 -mx-2 xl:-mx-4 backdrop-blur-lg bg-fd-background/80 border-b border-fd-border/50">
+      <div className="flex items-center justify-between px-4 xl:px-6 py-4">
+        <div className="flex-1">
+          <p className="text-base font-semibold mb-1">Ask AI</p>
+          <p className="text-xs text-fd-muted-foreground">
+            Ask questions about Journium documentation
+          </p>
+        </div>
+        <button
+          aria-label="Close"
+          className={cn(
+            buttonVariants({
+              size: 'icon-sm',
+              color: 'ghost',
+              className: 'rounded-full hover:bg-fd-accent',
+            }),
+            'cursor-pointer',
+          )}
+          onClick={() => setOpen(false)}
+        >
+          <X className="size-4" />
+        </button>
       </div>
-      <button
-        aria-label="Close"
-        tabIndex={-1}
-        className={cn(
-          buttonVariants({
-            size: 'icon-sm',
-            color: 'secondary',
-            className: 'rounded-full',
-          }),
-        )}
-        onClick={() => setOpen(false)}
-      >
-        <X className="size-4 cursor-pointer" />
-      </button>
     </div>
   );
 }
