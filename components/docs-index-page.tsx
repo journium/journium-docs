@@ -32,7 +32,7 @@ export function DocsIndexPage({ title, description }: DocsIndexPageProps) {
           </div>
 
           {/* Content - Constrained */}
-          <div className="relative z-10 mx-auto max-w-7xl px-6 py-12 md:py-16">
+          <div className="relative  mx-auto max-w-7xl px-6 py-12 md:py-16">
             <div className="max-w-3xl">
               {/* Badge */}
               <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 px-4 py-1.5 text-sm font-medium text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">

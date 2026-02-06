@@ -38,27 +38,29 @@ function Header() {
   const { setOpen } = use(Context)!;
 
   return (
-    <div className="sticky top-0 flex items-start gap-2">
-      <div className="flex-1 p-3 border rounded-xl bg-fd-card text-fd-card-foreground">
-        <p className="text-sm font-medium mb-2">Ask AI</p>
-        <p className="text-xs text-fd-muted-foreground">
-          Ask questions about Journium documentation
-        </p>
+    <div className="sticky top-0 z-10 -mx-2 -mt-2 xl:-mx-4 xl:-mt-4 backdrop-blur-lg bg-fd-background/80 border-b border-fd-border/50">
+      <div className="flex items-center justify-between px-4 xl:px-6 py-4">
+        <div className="flex-1">
+          <p className="text-base font-semibold mb-1">Ask AI</p>
+          <p className="text-xs text-fd-muted-foreground">
+            Ask questions about Journium documentation
+          </p>
+        </div>
+        <button
+          aria-label="Close"
+          className={cn(
+            buttonVariants({
+              size: 'icon-sm',
+              color: 'ghost',
+              className: 'rounded-full hover:bg-fd-accent',
+            }),
+            'cursor-pointer',
+          )}
+          onClick={() => setOpen(false)}
+        >
+          <X className="size-4" />
+        </button>
       </div>
-      <button
-        aria-label="Close"
-        tabIndex={-1}
-        className={cn(
-          buttonVariants({
-            size: 'icon-sm',
-            color: 'secondary',
-            className: 'rounded-full',
-          }),
-        )}
-        onClick={() => setOpen(false)}
-      >
-        <X />
-      </button>
     </div>
   );
 }
@@ -79,11 +81,11 @@ function SearchAIActions() {
               color: 'secondary',
               size: 'sm',
               className: 'rounded-full gap-1.5',
-            }),
+            }), 'cursor-pointer',
           )}
           onClick={() => regenerate()}
         >
-          <RefreshCw className="size-4" />
+          <RefreshCw className="size-4 cursor-pointer" />
           Retry
         </button>
       )}
@@ -94,7 +96,7 @@ function SearchAIActions() {
             color: 'secondary',
             size: 'sm',
             className: 'rounded-full',
-          }),
+          }), 'cursor-pointer',
         )}
         onClick={() => setMessages([])}
       >
@@ -146,7 +148,7 @@ function SearchAIInput(props: ComponentProps<'form'>) {
             buttonVariants({
               color: 'secondary',
               className: 'transition-all rounded-full mt-2 gap-2',
-            }),
+            }), 'cursor-pointer',
           )}
           onClick={stop}
         >
@@ -161,7 +163,7 @@ function SearchAIInput(props: ComponentProps<'form'>) {
             buttonVariants({
               color: 'secondary',
               className: 'transition-all rounded-full mt-2',
-            }),
+            }), 'cursor-pointer',
           )}
           disabled={input.length === 0}
         >
@@ -324,8 +326,9 @@ export function AISearch({ children }: { children: ReactNode }) {
 export function AISearchTrigger({ 
   className,
   onClick,
+  variant = 'default',
   ...props 
-}: ComponentProps<'button'>) {
+}: ComponentProps<'button'> & { variant?: 'default' | 'icon' }) {
   const context = useContext(Context);
   
   // If context is not available, return null (component is outside AISearch provider)
@@ -342,6 +345,29 @@ export function AISearchTrigger({
     setOpen(true);
   };
 
+  // Icon-only variant for mobile
+  if (variant === 'icon') {
+    return (
+      <button
+        {...props}
+        className={cn(
+          buttonVariants({
+            variant: 'ghost',
+            size: 'icon-sm',
+          }),
+          'cursor-pointer',
+          className,
+        )}
+        onClick={handleClick}
+        title="Ask AI"
+        aria-label="Ask AI"
+      >
+        <MessageCircleIcon className="size-4" />
+      </button>
+    );
+  }
+
+  // Default variant with text
   return (
     <button
       {...props}
