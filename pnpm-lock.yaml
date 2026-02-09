@@ -29,6 +29,9 @@ importers:
       '@swc/helpers':
         specifier: ^0.5.17
         version: 0.5.18
+      next:
+        specifier: ^16.1.1
+        version: 16.1.1(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.3)
       nx:
         specifier: 22.4.5
         version: 22.4.5(@swc-node/register@1.11.1(@swc/core@1.15.11(@swc/helpers@0.5.18))(@swc/types@0.1.25)(typescript@5.9.3))(@swc/core@1.15.11(@swc/helpers@0.5.18))
