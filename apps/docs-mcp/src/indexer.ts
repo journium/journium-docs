@@ -63,7 +63,7 @@ export class DocsIndex {
       cwd: this.cfg.workspaceRoot,
       absolute: false,
       onlyFiles: true,
-      gitignore: false
+
     });
     console.log(`Found ${files.length} documentation files`);
     const out: DocRecord[] = [];

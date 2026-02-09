@@ -21,19 +21,41 @@ export type DocsMcpConfig = {
     docsRootDir: string; // "content/docs"
   
     /**
-     * The root directory of the workspace (where the docs are located)
+     * The root directory where docs are located
      */
     workspaceRoot: string;
   };
   
-  // Find the workspace root (go up from apps/docs-mcp/src to the workspace root)
-  const workspaceRoot = path.resolve(__dirname, "../../..");
+  /**
+   * Configuration for different environments:
+   * - DEV: Uses monorepo structure (../../.. to get to workspace root)
+   * - PROD: Uses local content directory (../content from dist/)
+   */
+  function getConfig(): DocsMcpConfig {
+    const isDev = process.env.NODE_ENV !== "production";
+    
+    if (isDev) {
+      // Development: navigate to workspace root from apps/docs-mcp/src
+      const workspaceRoot = path.resolve(__dirname, "../../..");
+      return {
+        docsGlob: "apps/docs-app/content/docs/**/*.mdx",
+        useFrontmatterRoutes: true,
+        routeKeys: ["route", "slug", "pathname", "href"],
+        docsRootDir: "apps/docs-app/content/docs",
+        workspaceRoot,
+      };
+    } else {
+      // Production: use local content directory (from dist/ -> ../content)
+      const workspaceRoot = path.resolve(__dirname, "..");
+      return {
+        docsGlob: "content/**/*.mdx",
+        useFrontmatterRoutes: true,
+        routeKeys: ["route", "slug", "pathname", "href"],
+        docsRootDir: "content",
+        workspaceRoot,
+      };
+    }
+  }
   
-  export const config: DocsMcpConfig = {
-    docsGlob: "apps/docs-app/content/docs/**/*.mdx",
-    useFrontmatterRoutes: true,
-    routeKeys: ["route", "slug", "pathname", "href"],
-    docsRootDir: "apps/docs-app/content/docs",
-    workspaceRoot,
-  };
+  export const config: DocsMcpConfig = getConfig();
   

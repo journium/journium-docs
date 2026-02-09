@@ -8,7 +8,10 @@
     "serve": "node --watch --env-file=.env dist/index.js",
     "dev": "tsx watch --env-file=.env src/index.ts",
     "build": "tsc",
-    "start": "node --env-file=.env dist/index.js"
+    "build:docker": "node scripts/prepare-build.js && pnpm build",
+    "start": "NODE_ENV=production node dist/index.js",
+    "docker:build": "pnpm build:docker && docker build -t journium-docs-mcp .",
+    "docker:run": "docker run --rm -p 3100:3100 journium-docs-mcp"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
