@@ -1,107 +1,102 @@
-import express from 'express';
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-  Tool,
-} from '@modelcontextprotocol/sdk/types.js';
+import cors from "cors";
+import type { Request, Response } from "express";
+import { createMcpExpressApp } from "@modelcontextprotocol/sdk/server/express.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 
-const PORT = process.env.PORT || 3000;
+import { config } from "./config.js";
+import { DocsIndex } from "./indexer.js";
+import { createServer } from "./server.js";
 
-// Create Express app
-const app = express();
-
-app.use(express.json());
-
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'docs-mcp' });
-});
-
-// MCP Server setup
-const server = new Server(
-  {
-    name: 'journium-docs-mcp',
-    version: '0.1.0',
-  },
-  {
-    capabilities: {
-      tools: {},
-    },
-  }
-);
-
-// Define tools
-const tools: Tool[] = [
-  {
-    name: 'search_docs',
-    description: 'Search the Journium documentation',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        query: {
-          type: 'string',
-          description: 'Search query',
-        },
-      },
-      required: ['query'],
-    },
-  },
-];
-
-// Handle tool listing
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return { tools };
-});
-
-// Handle tool calls
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args } = request.params;
-
-  switch (name) {
-    case 'search_docs': {
-      const query = args?.query as string;
-      // TODO: Implement actual search logic
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Search results for: ${query}\n\nTODO: Implement search functionality`,
-          },
-        ],
-      };
-    }
-    default:
-      throw new Error(`Unknown tool: ${name}`);
-  }
-});
-
-// Start MCP server with stdio transport
-async function startMCPServer() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error('Journium Docs MCP server started on stdio');
-}
-
-// Start Express server
-function startExpressServer() {
-  app.listen(PORT, () => {
-    console.error(`Express server running on http://localhost:${PORT}`);
-  });
-}
-
-// Run both servers
 async function main() {
-  if (process.env.MCP_MODE === 'stdio') {
-    await startMCPServer();
-  } else {
-    startExpressServer();
-    // Optionally start MCP server too
-    // await startMCPServer();
-  }
+  const port = parseInt(process.env.PORT ?? "3100", 10);
+
+  const index = new DocsIndex(config);
+  await index.rebuild();
+
+  const app = createMcpExpressApp({ host: "0.0.0.0" });
+  app.use(cors());
+  app.use((req, _res, next) => {
+    // Ensure JSON body parsing for POST requests
+    // (createMcpExpressApp may already do it depending on SDK version)
+    if (req.method === "POST") {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (req as any).setTimeout?.(60_000);
+    }
+    next();
+  });
+
+  // Optional: a simple health + reindex endpoint (protect if exposed publicly)
+  app.get("/health", (_req, res) => res.json({ ok: true }));
+  app.post("/reindex", expressJson(), async (_req, res) => {
+    await index.rebuild();
+    res.json({ ok: true, count: index.listRoutes().length });
+  });
+
+  // MCP endpoint (Streamable HTTP)
+  app.all("/mcp", expressJson(), async (req: Request, res: Response) => {
+    const server = createServer(index);
+
+    // Stateless mode: no session IDs (good for scale-to-zero)
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+    });
+
+    res.on("close", () => {
+      transport.close().catch(() => {});
+      server.close().catch(() => {});
+    });
+
+    try {
+      await server.connect(transport);
+      // IMPORTANT: pass req.body explicitly (some Express setups won’t attach it otherwise)
+      await transport.handleRequest(req, res, req.body);
+    } catch (err) {
+      console.error("MCP error:", err);
+      if (!res.headersSent) {
+        res.status(500).json({
+          jsonrpc: "2.0",
+          error: { code: -32603, message: "Internal server error" },
+          id: null,
+        });
+      }
+    }
+  });
+
+  const httpServer = app.listen(port, (err?: unknown) => {
+    if (err) {
+      console.error("Failed to start server:", err);
+      process.exit(1);
+    }
+    console.log(`MCP server listening on http://localhost:${port}/mcp`);
+  });
+
+  const shutdown = () => httpServer.close(() => process.exit(0));
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 }
 
-main().catch((error) => {
-  console.error('Server error:', error);
+// Tiny local JSON middleware (avoid version drift)
+function expressJson() {
+  return (req: any, res: any, next: any) => {
+    if (req.body !== undefined) return next();
+    let data = "";
+    req.on("data", (c: Buffer) => (data += c.toString("utf-8")));
+    req.on("end", () => {
+      if (!data) {
+        req.body = undefined;
+        return next();
+      }
+      try {
+        req.body = JSON.parse(data);
+        next();
+      } catch {
+        res.status(400).json({ error: "Invalid JSON body" });
+      }
+    });
+  };
+}
+
+main().catch((e) => {
+  console.error(e);
   process.exit(1);
 });
