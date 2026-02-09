@@ -1,0 +1,8 @@
+{
+  "name": "@journium/docs-mcp",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/docs-mcp/src",
+  "targets": {},
+  "tags": ["type:app", "platform:node"]
+}

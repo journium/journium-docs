@@ -20,5 +20,8 @@
     "@types/node": "^20",
     "tsx": "^4.21.0",
     "typescript": "^5"
+  },
+  "nx": {
+    "tags": ["type:app", "platform:node"]
   }
 }
