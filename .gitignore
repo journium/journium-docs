@@ -44,3 +44,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+
+.nx/cache
+.nx/workspace-data
+
+# Nx graph visualization artifacts
+graph.html
+/static
+
+# Next.js
+.next
+out
