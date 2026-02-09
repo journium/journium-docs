@@ -5,7 +5,7 @@ import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 import { blog, getBlogPageImage } from '@/lib/source';
 import { createMetadata } from '@/lib/metadata';
 import { buttonVariants } from '@/components/ui/button';
-import { ShareButton } from '@/app/(home)/blog/[slug]/page.client';
+import { ShareButton } from './page.client';
 import { BlogAuthor } from '@/components/ui/blog-author';
 import { getMDXComponents } from '@/mdx-components';
 import path from 'node:path';

@@ -1,21 +1,18 @@
-name: CI
+name: Build All
 
 on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
+  workflow_dispatch: # Manual trigger
+  # schedule:
+  #   - cron: '0 0 * * 0' # Weekly on Sunday at midnight
 
 jobs:
-  lint-and-build:
-    name: Lint and Build
+  build-all:
+    name: Build All Projects
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Required for Nx affected commands
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -52,15 +49,24 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint affected projects
-        run: pnpm run nx affected -t lint --base=origin/main
+      - name: Lint all projects
+        run: pnpm run nx run-many -t lint
 
-      - name: Type check affected projects
-        run: pnpm run nx affected -t typecheck --base=origin/main
+      - name: Type check all projects
+        run: pnpm run nx run-many -t typecheck
 
-      - name: Build affected projects
-        run: pnpm run nx affected -t build --base=origin/main
+      - name: Build all projects
+        run: pnpm run nx run-many -t build
         env:
           NEXT_PUBLIC_ORAMA_PROJECT_ID: ${{ vars.NEXT_PUBLIC_ORAMA_PROJECT_ID }}
           NEXT_PUBLIC_ORAMA_API_KEY: ${{ vars.NEXT_PUBLIC_ORAMA_API_KEY }}
           NEXT_PUBLIC_ORAMA_DATASOURCE_ID: ${{ vars.NEXT_PUBLIC_ORAMA_DATASOURCE_ID }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            apps/*/dist
+            apps/*/.next
+          retention-days: 7

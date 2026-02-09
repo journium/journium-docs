@@ -1,4 +1,4 @@
-import { ProvideLinksToolSchema } from '../../../lib/inkeep-qa-schema';
+import { ProvideLinksToolSchema } from '@/lib/inkeep-qa-schema';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { convertToModelMessages, streamText, stepCountIs } from 'ai';
 import { z } from 'zod';
