@@ -58,12 +58,19 @@ export class DocsIndex {
 
   async rebuild(): Promise<void> {
     console.log("Rebuilding docs index...");
-    const files = await fg(this.cfg.docsGlob, { dot: false });
-    console.log("Found files:", files);
+    const files = await fg(this.cfg.docsGlob, { 
+      dot: false,
+      cwd: this.cfg.workspaceRoot,
+      absolute: false,
+      onlyFiles: true,
+      gitignore: false
+    });
+    console.log(`Found ${files.length} documentation files`);
     const out: DocRecord[] = [];
 
     for (const filePath of files) {
-      const raw = await fs.readFile(filePath, "utf-8");
+      const fullPath = path.join(this.cfg.workspaceRoot, filePath);
+      const raw = await fs.readFile(fullPath, "utf-8");
       const parsed = matter(raw);
       const fm = (parsed.data ?? {}) as Record<string, unknown>;
 
