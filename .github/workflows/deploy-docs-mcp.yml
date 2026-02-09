@@ -1,12 +1,12 @@
 name: Deploy Docs MCP Server to ECS
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'apps/docs-mcp/**'
-      - 'apps/docs-app/content/docs/**'
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'apps/docs-mcp/**'
+  #     - 'apps/docs-app/content/docs/**'
   workflow_dispatch:
 
 env:
