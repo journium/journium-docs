@@ -21,41 +21,58 @@ This server indexes MDX documentation files and exposes them via MCP tools for A
 
 ## Development
 
-```bash
-# Install dependencies (from workspace root)
-pnpm install
+All commands should be run from the **monorepo root** using Nx:
 
-# Run in development mode
-pnpm dev
+```bash
+# Run in development mode with hot reload
+nx dev docs-mcp
 
 # Build TypeScript
-pnpm build
+nx build docs-mcp
 
-# Run built version
-pnpm start
+# Prepare content (copy MDX files)
+nx prepare-content docs-mcp
+
+# Run built version locally
+nx start docs-mcp
+
+# Validate setup
+nx validate docs-mcp
 ```
 
 ## Docker Deployment
 
-### Build Docker Image
+### Build Docker Image (from monorepo root)
 
 ```bash
-# Prepare content and build Docker image
-pnpm docker:build
+# Full build with Nx (recommended)
+nx prepare-content docs-mcp    # Copy MDX files
+nx build docs-mcp               # Compile TypeScript
+nx docker-build docs-mcp        # Build Docker image
 
-# Or manually:
-pnpm build:docker  # Copy MDX files and compile TypeScript
-docker build -t journium-docs-mcp .
+# Or run all steps in sequence
+nx run-many -t prepare-content build docker-build -p docs-mcp
 ```
 
 ### Run Docker Container
 
 ```bash
 # Run locally
-pnpm docker:run
+nx docker-run docs-mcp
 
-# Or manually:
+# Or manually
 docker run --rm -p 3100:3100 journium-docs-mcp
+```
+
+### Manual Docker Build
+
+If you prefer to run Docker commands directly:
+
+```bash
+# From monorepo root
+nx prepare-content docs-mcp
+nx build docs-mcp
+docker build -f apps/docs-mcp/Dockerfile -t journium-docs-mcp .
 ```
 
 ### Environment Variables
@@ -63,13 +80,41 @@ docker run --rm -p 3100:3100 journium-docs-mcp
 - `PORT` - Server port (default: 3100)
 - `NODE_ENV` - Environment (development/production)
 
+## Nx Targets
+
+| Target | Description |
+|--------|-------------|
+| `dev` | Start development server with hot reload |
+| `build` | Compile TypeScript to dist/ |
+| `prepare-content` | Copy MDX files from docs-app to content/ |
+| `build-docker-prep` | Run prepare-content and build in sequence |
+| `docker-build` | Build Docker image from monorepo root |
+| `docker-run` | Run Docker container locally |
+| `start` | Run production build locally |
+| `validate` | Validate entire setup |
+
 ## AWS ECS Deployment
 
-### 1. Build and Push to ECR
+### Using Nx
+
+```bash
+# Prepare and build
+nx run-many -t prepare-content build -p docs-mcp
+
+# Build Docker image
+nx docker-build docs-mcp
+
+# Deploy (requires AWS CLI configured)
+cd apps/docs-mcp && ./scripts/deploy-ecs.sh
+```
+
+### Build and Push to ECR
 
 ```bash
 # Build for production
-pnpm build:docker
+nx prepare-content docs-mcp
+nx build docs-mcp
+nx docker-build docs-mcp
 
 # Tag for ECR
 docker tag journium-docs-mcp:latest <account>.dkr.ecr.<region>.amazonaws.com/journium-docs-mcp:latest
@@ -77,62 +122,6 @@ docker tag journium-docs-mcp:latest <account>.dkr.ecr.<region>.amazonaws.com/jou
 # Push to ECR
 docker push <account>.dkr.ecr.<region>.amazonaws.com/journium-docs-mcp:latest
 ```
-
-### 2. ECS Task Definition
-
-```json
-{
-  "family": "journium-docs-mcp",
-  "networkMode": "awsvpc",
-  "requiresCompatibilities": ["FARGATE"],
-  "cpu": "256",
-  "memory": "512",
-  "containerDefinitions": [
-    {
-      "name": "docs-mcp",
-      "image": "<account>.dkr.ecr.<region>.amazonaws.com/journium-docs-mcp:latest",
-      "portMappings": [
-        {
-          "containerPort": 3100,
-          "protocol": "tcp"
-        }
-      ],
-      "environment": [
-        {
-          "name": "NODE_ENV",
-          "value": "production"
-        },
-        {
-          "name": "PORT",
-          "value": "3100"
-        }
-      ],
-      "healthCheck": {
-        "command": ["CMD-SHELL", "node -e \"fetch('http://localhost:3100/health').then(r => r.ok ? process.exit(0) : process.exit(1))\""],
-        "interval": 30,
-        "timeout": 10,
-        "retries": 3,
-        "startPeriod": 5
-      },
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/journium-docs-mcp",
-          "awslogs-region": "<region>",
-          "awslogs-stream-prefix": "ecs"
-        }
-      }
-    }
-  ]
-}
-```
-
-### 3. Service Configuration
-
-- **Launch Type**: Fargate
-- **Desired Count**: 1 (or more for HA)
-- **Load Balancer**: Optional, for external access
-- **Auto Scaling**: Based on CPU/Memory metrics
 
 ## API Endpoints
 
@@ -150,9 +139,9 @@ The server exposes these MCP tools:
 
 ## Build Process
 
-1. **prepare-build.js** - Copies MDX files from docs-app to local content/
-2. **TypeScript Build** - Compiles src/ to dist/
-3. **Docker Build** - Creates containerized image with everything included
+1. **prepare-content** - Copies MDX files from docs-app to local content/
+2. **build** - Compiles TypeScript src/ to dist/
+3. **docker-build** - Creates containerized image with everything included
 
 ## File Structure
 
@@ -164,15 +153,49 @@ apps/docs-mcp/
 │   ├── server.ts      # MCP server implementation
 │   └── index.ts       # Main entry point
 ├── scripts/
-│   └── prepare-build.js  # Build preparation script
+│   ├── prepare-build.js  # Build preparation script
+│   ├── deploy-ecs.sh     # AWS ECS deployment
+│   └── validate.sh       # Setup validation
 ├── content/           # Generated during build (gitignored)
-├── Dockerfile         # Multi-stage Docker build
-├── .dockerignore
-└── package.json
+├── dist/              # Compiled TypeScript (gitignored)
+├── Dockerfile         # Multi-stage Docker build (runs from monorepo root)
+├── project.json       # Nx targets configuration
+└── package.json       # Dependencies
 ```
+
+## Testing
+
+### Local Development
+```bash
+nx dev docs-mcp
+# Server at http://localhost:3100/mcp
+```
+
+### Production Build
+```bash
+nx build docs-mcp
+nx start docs-mcp
+```
+
+### Docker
+```bash
+nx docker-build docs-mcp
+nx docker-run docs-mcp
+# Test: curl http://localhost:3100/health
+```
+
+## CI/CD
+
+The project includes GitHub Actions workflow for automated deployment. See `.github/workflows/deploy-docs-mcp.yml`.
+
+## Documentation
+
+- **DEPLOYMENT.md** - Complete AWS ECS setup and deployment guide
+- **MIGRATION.md** - Summary of changes and architecture decisions
 
 ## Notes
 
+- All commands should be run from the monorepo root using `nx`
 - Content directory is gitignored and generated during build
 - Development mode uses monorepo structure
 - Production mode is fully self-contained
