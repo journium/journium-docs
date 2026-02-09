@@ -1,7 +1,7 @@
 import { source, getDocsPageImage } from '@/lib/source';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle , PageLastUpdate} from 'fumadocs-ui/layouts/notebook/page';
 import { notFound } from 'next/navigation';
-import { getMDXComponents } from '@/apps/docs-app/mdx-components';
+import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
 import { Separator } from '@/components/ui/separator';
 import { Card, Cards } from 'fumadocs-ui/components/card';
