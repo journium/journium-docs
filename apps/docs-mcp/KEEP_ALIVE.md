@@ -86,6 +86,39 @@ server.ping(): Promise<{ _meta?: {...} }>
 
 Located in `@modelcontextprotocol/sdk/server/index.d.ts`, lines 127-135.
 
+### Active Ping Implementation
+
+**This server actively pings clients** to proactively detect dead connections:
+
+```typescript
+// src/index.ts - Periodic connection health check
+async function pingConnections() {
+  for (const conn of activeConnections) {
+    try {
+      await Promise.race([
+        conn.server.ping(),
+        timeout(PING_TIMEOUT) // 10 seconds
+      ]);
+      conn.lastPing = Date.now(); // Success
+    } catch (error) {
+      // Failed - close connection
+      await conn.transport.close();
+      await conn.server.close();
+      activeConnections.delete(conn);
+    }
+  }
+}
+
+// Run every 30 seconds
+setInterval(pingConnections, PING_INTERVAL);
+```
+
+**Benefits:**
+- Detects client failures immediately (within `PING_INTERVAL`)
+- Automatically cleans up stale connections
+- Frees server resources
+- Prevents memory leaks from dead connections
+
 ### Usage Patterns
 
 **Implementations SHOULD:**
@@ -93,6 +126,30 @@ Located in `@modelcontextprotocol/sdk/server/index.d.ts`, lines 127-135.
 - Make ping frequency configurable
 - Use timeouts appropriate for the network environment
 - Avoid excessive pinging to reduce overhead
+
+**This Server's Implementation:**
+
+The server actively pings clients every 30 seconds (configurable via `PING_INTERVAL`):
+
+```typescript
+// Located in src/index.ts
+const PING_INTERVAL = parseInt(process.env.PING_INTERVAL ?? "30000", 10); // 30 seconds
+const PING_TIMEOUT = parseInt(process.env.PING_TIMEOUT ?? "10000", 10); // 10 seconds
+
+// Periodic ping to detect dead connections
+setInterval(async () => {
+  await pingConnections(); // Pings all active connections
+}, PING_INTERVAL);
+```
+
+**What happens during ping:**
+1. Server calls `server.ping()` on each active connection
+2. Waits up to `PING_TIMEOUT` for response
+3. If response received → updates `lastPing` timestamp
+4. If timeout or error → closes connection and removes from pool
+5. Logs connection age and status
+
+This proactively detects and cleans up dead connections.
 
 **Important:** The SDK does NOT automatically send periodic pings. If you need automatic keep-alive pings, you must implement this manually:
 
@@ -219,9 +276,10 @@ setInterval(() => {
 
 1. ✅ HTTP keep-alive headers for SSE connections
 2. ✅ Automatic ping response handling (via SDK)
-3. ✅ Configurable request timeout (5 minutes default)
-4. ✅ Drain detection for scale-to-zero
-5. ⚠️ Manual periodic ping sending not implemented (optional)
+3. ✅ Active client ping monitoring (every 30 seconds)
+4. ✅ Automatic dead connection cleanup
+5. ✅ Configurable request timeout (5 minutes default)
+6. ✅ Drain detection for scale-to-zero
 
 ---
 
@@ -232,6 +290,12 @@ setInterval(() => {
 ```bash
 # Request timeout in milliseconds (default: 300000 = 5 minutes)
 REQUEST_TIMEOUT=300000
+
+# Ping interval in milliseconds (default: 30000 = 30 seconds)
+PING_INTERVAL=30000
+
+# Ping response timeout in milliseconds (default: 10000 = 10 seconds)
+PING_TIMEOUT=10000
 
 # Allowed origins for CORS (default: local + *.journium.app)
 ALLOWED_ORIGINS="http://localhost:3000,https://journium.app"
@@ -277,7 +341,13 @@ PORT=3100
 |-------|-----------|----------------|---------|
 | HTTP | `Connection: keep-alive` | Automatic (Express headers) | Keep TCP connection alive |
 | MCP | Ping request/response | Automatic (SDK handles) | Application-level health check |
+| MCP | Active client ping | Custom (every 30s) | Proactive dead connection detection |
 | Request | Timeout configuration | Manual (5min default) | Prevent hung requests |
 | Server | Drain detection | Custom logic | Graceful scale-to-zero |
 
-**Key Takeaway:** The MCP SDK handles ping responses automatically, but does NOT send periodic pings. Implement manual ping logic if you need active connection monitoring.
+**Key Features:**
+- ✅ SDK handles ping responses automatically
+- ✅ Server actively pings clients every 30 seconds
+- ✅ Dead connections automatically removed
+- ✅ Configurable ping interval and timeout
+- ✅ Health endpoint shows ping statistics

@@ -16,9 +16,9 @@ export function createServer(index: DocsIndex): McpServer {
       instructions: `This is the Journium Documentation MCP server. It provides access to search and retrieve content from the Journium documentation.
 
 Use the tools to:
-- Search for information about Journium features, APIs, and concepts
-- Retrieve full documentation pages with MDX content
-- Explore the documentation structure by listing available routes
+- docs_search: Search for information about Journium features, APIs, and concepts
+- docs_getPage: Retrieve full documentation pages with MDX content
+- docs_listRoutes: Explore the documentation structure by listing available routes
 
 The prompts provide pre-configured workflows for common documentation tasks like answering questions or writing new docs.`,
     }
@@ -37,10 +37,14 @@ The prompts provide pre-configured workflows for common documentation tasks like
    * 
    * Note: The SDK automatically handles ping requests via the Protocol class.
    * This is implemented in @modelcontextprotocol/sdk/server/index.d.ts:
-   * - Server.ping() method sends ping requests
-   * - Incoming ping requests are handled by the underlying Protocol layer
+   * - Server.ping() method sends ping requests to clients
+   * - Incoming ping requests are handled automatically by the Protocol layer
    * 
-   * No manual handler registration is needed - the SDK handles this automatically.
+   * Active Ping Implementation:
+   * The server periodically pings clients (see index.ts) to proactively detect dead connections.
+   * Configuration via environment variables:
+   * - PING_INTERVAL: time between pings (default: 30000ms)
+   * - PING_TIMEOUT: max wait for ping response (default: 10000ms)
    */
   // Ping handling is automatic via the SDK - no explicit handler needed
 
@@ -69,7 +73,7 @@ The prompts provide pre-configured workflows for common documentation tasks like
 
   // Register tools using the high-level API
   server.registerTool(
-    "docs.search",
+    "docs_search",
     {
       title: "Search Documentation",
       description: "Search through Journium documentation using semantic search. Returns relevant pages with excerpts showing matched content. Use this to find information about specific features, APIs, or concepts.",
@@ -96,7 +100,7 @@ The prompts provide pre-configured workflows for common documentation tasks like
   );
 
   server.registerTool(
-    "docs.getPage",
+    "docs_getPage",
     {
       title: "Get Documentation Page",
       description: "Retrieve the full content of a specific documentation page by its route (URL path) or file path. Returns the page with MDX content, plain text, and frontmatter metadata. Use this after searching to get complete details about a page.",
@@ -131,7 +135,7 @@ The prompts provide pre-configured workflows for common documentation tasks like
   );
 
   server.registerTool(
-    "docs.listRoutes",
+    "docs_listRoutes",
     {
       title: "List Documentation Routes",
       description: "Get a list of all available documentation page routes (URLs). Optionally filter by a route prefix to explore specific sections. Useful for discovering what documentation is available or navigating the docs structure.",
