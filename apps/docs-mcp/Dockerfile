@@ -1,21 +1,33 @@
 # Multi-stage build for Journium Documentation MCP Server
 # Run from monorepo root: docker build -f apps/docs-mcp/Dockerfile -t journium-docs-mcp .
 
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy docs-mcp directory (includes src, package.json, tsconfig.json, content, dist if exists)
+# Copy docs-mcp directory (includes src, package.json, tsconfig.json)
 COPY apps/docs-mcp ./
+
+# Copy documentation source files for content preparation
+COPY apps/docs-app/content/docs ./source-docs
 
 # Install pnpm and dependencies
 RUN npm install -g pnpm && pnpm install --no-frozen-lockfile
+
+# Prepare content: Copy MDX files from source to content directory
+RUN mkdir -p content && \
+    find source-docs -name "*.mdx" -type f | while read file; do \
+      target="content/${file#source-docs/}"; \
+      mkdir -p "$(dirname "$target")"; \
+      cp "$file" "$target"; \
+    done && \
+    echo "✅ Copied $(find content -name "*.mdx" | wc -l) MDX files"
 
 # Build TypeScript
 RUN pnpm build
 
 # Stage 2: Production
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 

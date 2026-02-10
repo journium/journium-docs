@@ -1,114 +1,309 @@
-name: Deploy Docs MCP Server to ECS
+name: 🚀 Docs MCP Server Deployment
+
+run-name: "🚀 Deploy Docs MCP to ${{ github.event.inputs.target_environment || 'staging' }} from ${{ github.ref_name }}"
 
 on:
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - 'apps/docs-mcp/**'
-  #     - 'apps/docs-app/content/docs/**'
   workflow_dispatch:
+    inputs:
+      target_environment:
+        description: 'Target environment for deployment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
 
-env:
-  AWS_REGION: us-east-1
-  ECR_REPOSITORY: journium-docs-mcp
-  ECS_CLUSTER: journium-cluster
-  ECS_SERVICE: docs-mcp-service
-  ECS_TASK_DEFINITION: journium-docs-mcp
+permissions:
+  contents: read
+  deployments: write
+  actions: write
+  id-token: write  # Required for AWS OIDC authentication
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Deploy to ECS
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-
+  setup:
+    name: "Environment"
+    runs-on: [ubuntu-latest]
+    environment: ${{ github.event.inputs.target_environment }}
+    outputs:
+      environment_name: ${{ steps.env-detection.outputs.environment_name }}
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
+      - name: "🎯 Detect Environment"
+        id: env-detection
         run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          TARGET_ENV="${{ github.event.inputs.target_environment }}"
+          echo "🎯 Target environment: $TARGET_ENV"
+          
+          # Validate environment
+          case "$TARGET_ENV" in
+            "staging"|"production")
+              echo "✅ Valid environment: $TARGET_ENV"
+              ;;
+            *)
+              echo "❌ Invalid environment: $TARGET_ENV"
+              echo "Valid environments: staging, production"
+              exit 1
+              ;;
+          esac
+          
+          echo "environment_name=$TARGET_ENV" >> $GITHUB_OUTPUT
 
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
+  build:
+    name: "🔨 Build"
+    needs: [setup]
+    runs-on: [ubuntu-latest]
+    environment: ${{ needs.setup.outputs.environment_name }}
+    permissions:
+      actions: read
+      contents: read
+      id-token: write  # Required for AWS OIDC authentication
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU for multi-platform builds
+        uses: docker/setup-qemu-action@v3
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          platforms: linux/arm64
 
-      - name: Install dependencies
-        working-directory: apps/docs-mcp
-        run: pnpm install --frozen-lockfile
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Prepare build and compile
-        working-directory: apps/docs-mcp
-        run: pnpm build:docker
-
+      # Configure AWS credentials using OIDC (no access keys needed)
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, tag, and push image to Amazon ECR
-        id: build-image
-        working-directory: apps/docs-mcp
+      - name: "🐳 Build & Push docs-mcp (ECR)"
+        uses: docker/build-push-action@v6
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-
-      - name: Download task definition
-        run: |
-          aws ecs describe-task-definition \
-            --task-definition ${{ env.ECS_TASK_DEFINITION }} \
-            --query taskDefinition > task-definition.json
-
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
+          ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY || 'journium/docs-mcp' }}
+          ENVIRONMENT_NAME: ${{ needs.setup.outputs.environment_name }}
         with:
-          task-definition: task-definition.json
-          container-name: docs-mcp
-          image: ${{ steps.build-image.outputs.image }}
+          context: .
+          file: apps/docs-mcp/Dockerfile
+          platforms: linux/arm64
+          push: true
+          provenance: false
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY || 'journium/docs-mcp' }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY || 'journium/docs-mcp' }}:${{ needs.setup.outputs.environment_name }}
+            ${{ github.ref == 'refs/heads/main' && format('{0}/{1}:latest', steps.login-ecr.outputs.registry, vars.ECR_REPOSITORY || 'journium/docs-mcp') || '' }}
+          cache-from: |
+            type=registry,ref=${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY || 'journium/docs-mcp' }}:buildcache
+            type=registry,ref=${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY || 'journium/docs-mcp' }}:${{ needs.setup.outputs.environment_name }}
+            type=registry,ref=${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY || 'journium/docs-mcp' }}:latest
+          cache-to: type=registry,ref=${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY || 'journium/docs-mcp' }}:buildcache,mode=max
 
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+  deploy-staging:
+    name: "🚀 Deploy to Staging"
+    needs: [setup, build]
+    if: ${{ !failure() && !cancelled() && needs.setup.outputs.environment_name == 'staging' }}
+    runs-on: [ubuntu-latest]
+    environment:
+      name: ${{ needs.setup.outputs.environment_name }}
+      url: https://docs-mcp.staging.journium.app
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Configure AWS credentials using OIDC
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
 
-      - name: Deployment summary
+      - name: Install AWS Copilot CLI
         run: |
+          echo "📦 Installing AWS Copilot CLI..."
+          curl -Lo /tmp/copilot-cli https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux
+          chmod +x /tmp/copilot-cli
+          sudo mv /tmp/copilot-cli /usr/local/bin/copilot
+          copilot --version
+          echo "✅ Copilot CLI installed successfully"
+
+      - name: "🚀 Deploy docs-mcp to staging"
+        env:
+          APP_NAME: ${{ vars.COPILOT_APP_NAME || 'journium' }}
+          ENV_NAME: ${{ needs.setup.outputs.environment_name }}
+          SERVICE_NAME: docs-mcp
+        run: |
+          set -e
+          set -o pipefail
+          
+          echo "🚀 Deploying ${SERVICE_NAME} to ${ENV_NAME} environment"
+          echo "📦 App: ${APP_NAME}"
+          echo ""
+          
+          copilot svc deploy \
+            --app ${APP_NAME} \
+            --env ${ENV_NAME} \
+            --name ${SERVICE_NAME} \
+            --force
+          
+          echo ""
           echo "✅ Deployment completed successfully!"
-          echo "Image: ${{ steps.build-image.outputs.image }}"
-          echo "Region: ${{ env.AWS_REGION }}"
-          echo "Cluster: ${{ env.ECS_CLUSTER }}"
-          echo "Service: ${{ env.ECS_SERVICE }}"
+
+      - name: "📊 Get Service Status"
+        if: always()
+        env:
+          APP_NAME: ${{ vars.COPILOT_APP_NAME || 'journium' }}
+          ENV_NAME: ${{ needs.setup.outputs.environment_name }}
+          SERVICE_NAME: docs-mcp
+        run: |
+          echo "📊 Getting service status..."
+          copilot svc status \
+            --app ${APP_NAME} \
+            --env ${ENV_NAME} \
+            --name ${SERVICE_NAME} || true
+
+  deploy-production:
+    name: "🚀 Deploy to Production"
+    needs: [setup, build]
+    if: ${{ !failure() && !cancelled() && needs.setup.outputs.environment_name == 'production' }}
+    runs-on: [ubuntu-latest]
+    environment:
+      name: ${{ needs.setup.outputs.environment_name }}
+      url: https://docs-mcp.journium.app
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Configure AWS credentials using OIDC
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Install AWS Copilot CLI
+        run: |
+          echo "📦 Installing AWS Copilot CLI..."
+          curl -Lo /tmp/copilot-cli https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux
+          chmod +x /tmp/copilot-cli
+          sudo mv /tmp/copilot-cli /usr/local/bin/copilot
+          copilot --version
+          echo "✅ Copilot CLI installed successfully"
+
+      - name: "🚀 Deploy docs-mcp to production"
+        env:
+          APP_NAME: ${{ vars.COPILOT_APP_NAME || 'journium' }}
+          ENV_NAME: ${{ needs.setup.outputs.environment_name }}
+          SERVICE_NAME: docs-mcp
+        run: |
+          set -e
+          set -o pipefail
+          
+          echo "🚀 Deploying ${SERVICE_NAME} to ${ENV_NAME} environment"
+          echo "📦 App: ${APP_NAME}"
+          echo ""
+          
+          copilot svc deploy \
+            --app ${APP_NAME} \
+            --env ${ENV_NAME} \
+            --name ${SERVICE_NAME} \
+            --force
+          
+          echo ""
+          echo "✅ Deployment completed successfully!"
+
+      - name: "📊 Get Service Status"
+        if: always()
+        env:
+          APP_NAME: ${{ vars.COPILOT_APP_NAME || 'journium' }}
+          ENV_NAME: ${{ needs.setup.outputs.environment_name }}
+          SERVICE_NAME: docs-mcp
+        run: |
+          echo "📊 Getting service status..."
+          copilot svc status \
+            --app ${APP_NAME} \
+            --env ${ENV_NAME} \
+            --name ${SERVICE_NAME} || true
+
+  summary:
+    name: "📊 Deployment Summary"
+    needs: [setup, build, deploy-staging, deploy-production]
+    runs-on: [ubuntu-latest]
+    if: always()
+    steps:
+      - name: "📊 Generate Deployment Report"
+        run: |
+          echo "## 🚀 Docs MCP Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.setup.outputs.environment_name }}" = "production" ]; then
+            echo "⚠️ **PRODUCTION DEPLOYMENT** ⚠️" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** 🎯 ${{ needs.setup.outputs.environment_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Status:** ${{ needs.build.result }}" >> $GITHUB_STEP_SUMMARY
+          
+          # Check which deploy job actually ran
+          if [ "${{ needs.deploy-staging.result }}" == "success" ] || [ "${{ needs.deploy-staging.result }}" == "failure" ]; then
+            echo "**Deploy Status:** ${{ needs.deploy-staging.result }} (Staging)" >> $GITHUB_STEP_SUMMARY
+            DEPLOY_RESULT="${{ needs.deploy-staging.result }}"
+          elif [ "${{ needs.deploy-production.result }}" == "success" ] || [ "${{ needs.deploy-production.result }}" == "failure" ]; then
+            echo "**Deploy Status:** ${{ needs.deploy-production.result }} (Production)" >> $GITHUB_STEP_SUMMARY
+            DEPLOY_RESULT="${{ needs.deploy-production.result }}"
+          else
+            echo "**Deploy Status:** Not executed" >> $GITHUB_STEP_SUMMARY
+            DEPLOY_RESULT="skipped"
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$DEPLOY_RESULT" == "success" ]; then
+            echo "✅ **Deployment completed successfully!**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Service URL:**" >> $GITHUB_STEP_SUMMARY
+            if [ "${{ needs.setup.outputs.environment_name }}" = "production" ]; then
+              echo "- Docs MCP: https://docs-mcp.journium.app" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "🎉 **Production deployment completed** - Changes are now live" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- Docs MCP: https://docs-mcp.staging.journium.app" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "🧪 **Staging deployment completed** - Ready for testing" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "❌ **Deployment had issues. Check individual job logs for details.**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Troubleshooting:**" >> $GITHUB_STEP_SUMMARY
+            echo "1. Check the failed job logs above for specific error messages" >> $GITHUB_STEP_SUMMARY
+            echo "2. Verify all required secrets are properly configured" >> $GITHUB_STEP_SUMMARY
+            echo "3. Ensure AWS resources are accessible and properly configured" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Deployment triggered by: ${{ github.event_name }} on ${{ github.ref_name }}*" >> $GITHUB_STEP_SUMMARY
