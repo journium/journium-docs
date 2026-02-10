@@ -45,9 +45,8 @@ variables:                    # Pass environment variables as key value pairs.
   PORT: "3100"
   NODE_ENV: production
   MCP_MODE: http
-  # SSE configuration
-  SSE_KEEPALIVE_INTERVAL: "30000"  # 30 seconds - prevent ALB idle timeout
-  REQUEST_TIMEOUT: "300000"         # 5 minutes - max request duration
+  # Request timeout - SDK default is 60s, we set 5min for long-running operations
+  REQUEST_TIMEOUT: "300000"
   # CORS configuration (comma-separated)
   ALLOWED_ORIGINS: "http://localhost:3000,https://journium.app,https://*.journium.app"
 environments:

@@ -79,6 +79,10 @@ docker build -f apps/docs-mcp/Dockerfile -t journium-docs-mcp .
 
 - `PORT` - Server port (default: 3100)
 - `NODE_ENV` - Environment (development/production)
+- `REQUEST_TIMEOUT` - Request timeout in milliseconds (default: 300000 = 5 minutes)
+- `ALLOWED_ORIGINS` - Comma-separated list of allowed CORS origins
+
+For more details on connection health and keep-alive configuration, see **KEEP_ALIVE.md**.
 
 ## Nx Targets
 
@@ -192,6 +196,7 @@ The project includes GitHub Actions workflow for automated deployment. See `.git
 
 - **DEPLOYMENT.md** - Complete AWS ECS setup and deployment guide
 - **MIGRATION.md** - Summary of changes and architecture decisions
+- **KEEP_ALIVE.md** - Keep-alive, ping, and connection health documentation
 
 ## Notes
 

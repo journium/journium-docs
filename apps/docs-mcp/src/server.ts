@@ -24,6 +24,26 @@ The prompts provide pre-configured workflows for common documentation tasks like
     }
   );
 
+  /**
+   * Ping handler: responds to ping requests to verify connection health
+   * 
+   * Per MCP specification (2025-06-18):
+   * "The Model Context Protocol includes an optional ping mechanism that allows either party
+   * to verify that their counterpart is still responsive and the connection is alive."
+   * 
+   * The server MUST respond promptly with an empty response.
+   * 
+   * Reference: https://modelcontextprotocol.io/specification/2025-06-18/basic/utilities/ping
+   * 
+   * Note: The SDK automatically handles ping requests via the Protocol class.
+   * This is implemented in @modelcontextprotocol/sdk/server/index.d.ts:
+   * - Server.ping() method sends ping requests
+   * - Incoming ping requests are handled by the underlying Protocol layer
+   * 
+   * No manual handler registration is needed - the SDK handles this automatically.
+   */
+  // Ping handling is automatic via the SDK - no explicit handler needed
+
   // Define input schemas
   const SearchSchema = z.object({
     query: z.string().min(1).describe("Search query string"),

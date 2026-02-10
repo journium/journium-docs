@@ -7,7 +7,32 @@ import { config } from "./config.js";
 import { DocsIndex } from "./indexer.js";
 import { createServer } from "./server.js";
 
-// Configuration
+/**
+ * Configuration
+ * 
+ * Keep-Alive and Timeout Strategy:
+ * 
+ * 1. HTTP-Level Keep-Alive:
+ *    - SSE connections use HTTP Connection: keep-alive header (line 157)
+ *    - This keeps the TCP connection alive for long-running SSE streams
+ * 
+ * 2. MCP Protocol Ping:
+ *    - Per MCP spec (https://modelcontextprotocol.io/specification/2025-06-18/basic/utilities/ping)
+ *    - The SDK automatically handles incoming ping requests
+ *    - No automatic periodic ping sending (must be implemented manually if needed)
+ *    - Implementations SHOULD periodically issue pings to detect connection health
+ * 
+ * 3. Request Timeouts:
+ *    - SDK default: 60 seconds (DEFAULT_REQUEST_TIMEOUT_MSEC in protocol.d.ts)
+ *    - Our override: 5 minutes for long-running operations
+ *    - Can be overridden per-request via RequestOptions.timeout
+ *    - Progress notifications can reset timeout if resetTimeoutOnProgress: true
+ * 
+ * References:
+ * - MCP Ping: https://modelcontextprotocol.io/specification/2025-06-18/basic/utilities/ping
+ * - SDK Protocol: @modelcontextprotocol/sdk/shared/protocol.d.ts
+ * - Known Issue: https://github.com/modelcontextprotocol/typescript-sdk/issues/245
+ */
 const REQUEST_TIMEOUT = parseInt(process.env.REQUEST_TIMEOUT ?? "300000", 10); // 5 minutes (SDK default is 60s)
 const DRAIN_DETECTION_TIMEOUT = 60000; // 60 seconds of no requests = draining
 
@@ -44,9 +69,7 @@ async function main() {
   const index = new DocsIndex(config);
   await index.rebuild();
 
-  // Create MCP server once (not per request!)
-  const mcpServer = createServer(index);
-
+  // Don't create MCP server here - we'll create one per connection
   const app = createMcpExpressApp({ host: "0.0.0.0" });
   
   // CORS configuration with origin validation
@@ -139,19 +162,44 @@ async function main() {
     }
 
     // Use shared MCP server instance (not a new one per request!)
+    // NOTE: Per SDK Issue #1405, each HTTP session needs its own Server instance
+    // because Server.connect() overwrites the transport and breaks concurrent connections
+    const server = createServer(index);
+    
     // Stateless mode: no session IDs (good for scale-to-zero)
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });
 
     // Track this connection
-    const connection = { transport, server: mcpServer };
+    const connection = { transport, server };
     activeConnections.add(connection);
 
-    // Set up SSE-specific headers for better proxy/CDN compatibility
+    // Set up SSE-specific headers for better proxy/CDN/ALB compatibility
     if (req.method === "GET") {
+      /**
+       * SSE Keep-Alive Headers:
+       * 
+       * 1. X-Accel-Buffering: no
+       *    - Disables nginx buffering to enable real-time SSE streaming
+       * 
+       * 2. Connection: keep-alive
+       *    - Keeps TCP connection alive for long-lived SSE streams
+       *    - Essential for maintaining persistent connections through load balancers
+       *    - Prevents premature connection closure by proxies
+       * 
+       * 3. Cache-Control: no-cache, no-store, must-revalidate
+       *    - Prevents intermediate caches from buffering SSE streams
+       * 
+       * Note: These headers provide HTTP-level keep-alive for the SSE connection.
+       * For MCP-level connection health checks, clients can use the ping mechanism.
+       * 
+       * Reference: https://modelcontextprotocol.io/specification/2025-06-18/basic/transports
+       */
       res.setHeader("X-Accel-Buffering", "no"); // Disable nginx buffering
       res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.setHeader("Connection", "keep-alive"); // Keep ALB connection alive
+      res.setHeader("X-Accel-Buffering", "no");
       
       // Log SSE stream setup
       console.log(`SSE stream initiated. Last-Event-ID: ${req.get("Last-Event-ID") || "none"}`);
@@ -163,7 +211,9 @@ async function main() {
       transport.close().catch((err) => {
         console.error("Error closing transport:", err);
       });
-      // Don't close the shared server instance!
+      server.close().catch((err) => {
+        console.error("Error closing server:", err);
+      });
       console.log(`Connection closed. Active connections: ${activeConnections.size}`);
     });
 
@@ -174,8 +224,9 @@ async function main() {
     });
 
     try {
-      await mcpServer.connect(transport);
-      // IMPORTANT: pass req.body explicitly (some Express setups won't attach it otherwise)
+      // Connect the transport to the server for this request
+      await server.connect(transport);
+      // Handle the HTTP request through the transport
       await transport.handleRequest(req, res, req.body);
     } catch (err) {
       console.error("MCP error:", err);
@@ -231,16 +282,12 @@ async function main() {
     isDraining = true;
     clearInterval(drainCheckInterval);
     
-    // Close all active connections
+    // Close all active connections (each has its own server instance)
     for (const conn of activeConnections) {
       conn.transport.close().catch(() => {});
+      conn.server.close().catch(() => {});
     }
     activeConnections.clear();
-    
-    // Close the shared MCP server instance
-    mcpServer.close().catch((err) => {
-      console.error("Error closing MCP server:", err);
-    });
     
     httpServer.close(() => {
       console.log("Server closed");
