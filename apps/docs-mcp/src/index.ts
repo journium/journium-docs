@@ -7,26 +7,86 @@ import { config } from "./config.js";
 import { DocsIndex } from "./indexer.js";
 import { createServer } from "./server.js";
 
+// Configuration
+const REQUEST_TIMEOUT = parseInt(process.env.REQUEST_TIMEOUT ?? "300000", 10); // 5 minutes (SDK default is 60s)
+const DRAIN_DETECTION_TIMEOUT = 60000; // 60 seconds of no requests = draining
+
+// Track active connections and draining state
+const activeConnections = new Set<{ transport: StreamableHTTPServerTransport; server: any }>();
+let isDraining = false;
+let lastRequestTime = Date.now();
+
+// Allowed origins for CORS and security
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+  : ["http://localhost:3000", "https://journium.app", "https://*.journium.app"];
+
+function isValidOrigin(origin: string | undefined): boolean {
+  if (!origin) return true; // No origin header (non-browser clients)
+  
+  for (const allowed of ALLOWED_ORIGINS) {
+    if (allowed.includes("*")) {
+      // Simple wildcard matching for subdomains
+      const pattern = allowed.replace(/\*/g, ".*");
+      if (new RegExp(`^${pattern}$`).test(origin)) {
+        return true;
+      }
+    } else if (origin === allowed) {
+      return true;
+    }
+  }
+  return false;
+}
+
 async function main() {
   const port = parseInt(process.env.PORT ?? "3100", 10);
 
   const index = new DocsIndex(config);
   await index.rebuild();
 
+  // Create MCP server once (not per request!)
+  const mcpServer = createServer(index);
+
   const app = createMcpExpressApp({ host: "0.0.0.0" });
-  app.use(cors());
+  
+  // CORS configuration with origin validation
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (isValidOrigin(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  }));
+  
+  // Request tracking for drain detection
   app.use((req, _res, next) => {
-    // Ensure JSON body parsing for POST requests
-    // (createMcpExpressApp may already do it depending on SDK version)
-    if (req.method === "POST") {
+    lastRequestTime = Date.now();
+    next();
+  });
+  
+  // Timeout configuration for long-lived SSE connections
+  app.use((req, _res, next) => {
+    if (req.method === "POST" || req.method === "GET") {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (req as any).setTimeout?.(60_000);
+      (req as any).setTimeout?.(REQUEST_TIMEOUT);
     }
     next();
   });
 
-  // Optional: a simple health + reindex endpoint (protect if exposed publicly)
-  app.get("/health", (_req, res) => res.json({ ok: true }));
+  // Health check endpoint with draining status
+  app.get("/health", (_req, res) => 
+    res.json({ 
+      ok: true, 
+      draining: isDraining,
+      activeConnections: activeConnections.size,
+      uptime: process.uptime(),
+    })
+  );
+  
+  // Reindex endpoint
   app.post("/reindex", expressJson(), async (_req, res) => {
     await index.rebuild();
     res.json({ ok: true, count: index.listRoutes().length });
@@ -34,24 +94,92 @@ async function main() {
 
   // MCP endpoint (Streamable HTTP)
   app.all("/mcp", expressJson(), async (req: Request, res: Response) => {
-    const server = createServer(index);
+    // Security: Validate Origin header to prevent DNS rebinding attacks
+    const origin = req.get("Origin");
+    if (origin && !isValidOrigin(origin)) {
+      console.warn(`Rejected request from invalid origin: ${origin}`);
+      return res.status(403).json({
+        jsonrpc: "2.0",
+        error: { code: -32600, message: "Invalid Origin header" },
+        id: null,
+      });
+    }
 
+    // Validate Accept header (MCP spec requirement)
+    const accept = req.get("Accept");
+    if (accept && !accept.includes("application/json") && !accept.includes("text/event-stream") && accept !== "*/*") {
+      console.warn(`Rejected request with invalid Accept header: ${accept}`);
+      return res.status(400).json({
+        jsonrpc: "2.0",
+        error: { code: -32600, message: "Accept header must include application/json or text/event-stream" },
+        id: null,
+      });
+    }
+
+    // Handle MCP Protocol Version header (spec requirement for version negotiation)
+    const protocolVersion = req.get("MCP-Protocol-Version") || "2025-03-26";
+    const supportedVersions = ["2025-03-26", "2025-06-18", "2025-11-25"];
+    
+    if (protocolVersion && !supportedVersions.includes(protocolVersion)) {
+      console.warn(`Unsupported MCP protocol version: ${protocolVersion}`);
+      // Allow it to proceed anyway for backwards compatibility
+      // but log the version for monitoring
+    }
+    
+    console.log(`MCP request - Method: ${req.method}, Protocol Version: ${protocolVersion}`);
+
+    // If we're draining, reject new SSE connections (but allow POST requests to complete)
+    if (isDraining && req.method === "GET") {
+      console.log("Rejecting new SSE connection during drain");
+      return res.status(503).json({
+        jsonrpc: "2.0",
+        error: { code: -32603, message: "Server draining" },
+        id: null,
+      });
+    }
+
+    // Use shared MCP server instance (not a new one per request!)
     // Stateless mode: no session IDs (good for scale-to-zero)
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });
 
+    // Track this connection
+    const connection = { transport, server: mcpServer };
+    activeConnections.add(connection);
+
+    // Set up SSE-specific headers for better proxy/CDN compatibility
+    if (req.method === "GET") {
+      res.setHeader("X-Accel-Buffering", "no"); // Disable nginx buffering
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      
+      // Log SSE stream setup
+      console.log(`SSE stream initiated. Last-Event-ID: ${req.get("Last-Event-ID") || "none"}`);
+    }
+
+    // Clean up on connection close
     res.on("close", () => {
-      transport.close().catch(() => {});
-      server.close().catch(() => {});
+      activeConnections.delete(connection);
+      transport.close().catch((err) => {
+        console.error("Error closing transport:", err);
+      });
+      // Don't close the shared server instance!
+      console.log(`Connection closed. Active connections: ${activeConnections.size}`);
+    });
+
+    // Handle connection errors
+    res.on("error", (err) => {
+      console.error("Response error:", err);
+      activeConnections.delete(connection);
     });
 
     try {
-      await server.connect(transport);
-      // IMPORTANT: pass req.body explicitly (some Express setups won’t attach it otherwise)
+      await mcpServer.connect(transport);
+      // IMPORTANT: pass req.body explicitly (some Express setups won't attach it otherwise)
       await transport.handleRequest(req, res, req.body);
     } catch (err) {
       console.error("MCP error:", err);
+      activeConnections.delete(connection);
       if (!res.headersSent) {
         res.status(500).json({
           jsonrpc: "2.0",
@@ -64,13 +192,68 @@ async function main() {
 
   const httpServer = app.listen(port, (err?: unknown) => {
     if (err) {
-      console.error("Failed to start server:", err);
+      console.error("Failed to start server :", err);
       process.exit(1);
     }
     console.log(`MCP server listening on http://localhost:${port}/mcp`);
+    console.log(`Configuration:`);
+    console.log(`  - Request Timeout: ${REQUEST_TIMEOUT}ms`);
+    console.log(`  - Allowed Origins: ${ALLOWED_ORIGINS.join(", ")}`);
   });
 
-  const shutdown = () => httpServer.close(() => process.exit(0));
+  // Drain detection: if no requests for 60s, assume we're being drained
+  const drainCheckInterval = setInterval(() => {
+    if (Date.now() - lastRequestTime > DRAIN_DETECTION_TIMEOUT) {
+      if (!isDraining && activeConnections.size > 0) {
+        console.log(`No requests for ${DRAIN_DETECTION_TIMEOUT}ms, assuming drain. Closing ${activeConnections.size} connections...`);
+        isDraining = true;
+        
+        // Close all active SSE connections to force clients to reconnect to healthy instances
+        for (const conn of activeConnections) {
+          conn.transport.close().catch((err) => {
+            console.error("Error closing transport during drain:", err);
+          });
+        }
+        activeConnections.clear();
+      }
+    } else {
+      // Reset draining state if we start receiving requests again
+      if (isDraining) {
+        console.log("Requests resumed, exiting drain mode");
+        isDraining = false;
+      }
+    }
+  }, 10000); // Check every 10 seconds
+
+  // Graceful shutdown
+  const shutdown = () => {
+    console.log("Shutting down gracefully...");
+    isDraining = true;
+    clearInterval(drainCheckInterval);
+    
+    // Close all active connections
+    for (const conn of activeConnections) {
+      conn.transport.close().catch(() => {});
+    }
+    activeConnections.clear();
+    
+    // Close the shared MCP server instance
+    mcpServer.close().catch((err) => {
+      console.error("Error closing MCP server:", err);
+    });
+    
+    httpServer.close(() => {
+      console.log("Server closed");
+      process.exit(0);
+    });
+    
+    // Force exit after 30 seconds if graceful shutdown hangs
+    setTimeout(() => {
+      console.error("Forced shutdown after timeout");
+      process.exit(1);
+    }, 30000);
+  };
+  
   process.on("SIGINT", shutdown);
   process.on("SIGTERM", shutdown);
 }

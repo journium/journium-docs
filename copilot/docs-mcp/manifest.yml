@@ -12,13 +12,17 @@ http:
   # To match all requests you can use the "/" path.
   path: '/'
   # You can specify a custom health check path. The default is "/".
-  healthcheck: '/health'
-  # Enable session stickiness for SSE connections
+  healthcheck:
+    path: '/health'
+    interval: 15s
+    timeout: 10s
+    healthy_threshold: 2
+    unhealthy_threshold: 3
+    grace_period: 60s
+  # Enable session stickiness - CRITICAL for SSE connections
   stickiness: true
-  # Connection draining time
-  deregistration_delay: 30s
-  # Increase idle timeout for long-lived SSE connections (default is 60s)
-  # target_container: docs-mcp
+  # Increased connection draining time for graceful SSE disconnection
+  deregistration_delay: 300s
 
 # Configuration for your containers and service.
 image:
@@ -26,8 +30,8 @@ image:
   # Port exposed through your container to route traffic to it.
   port: 3100
 
-cpu: 256       # Number of CPU units for the task.
-memory: 512    # Amount of memory in MiB used by the task.
+cpu: 512       # Number of CPU units for the task.
+memory: 1024   # Amount of memory in MiB used by the task (increased for SSE connections)
 platform: linux/arm64  # See https://aws.github.io/copilot-cli/docs/manifest/lb-web-service/#platform
 count: 1       # Number of tasks that should be running in your service.
 exec: true     # Enable running commands in your container.
@@ -41,6 +45,11 @@ variables:                    # Pass environment variables as key value pairs.
   PORT: "3100"
   NODE_ENV: production
   MCP_MODE: http
+  # SSE configuration
+  SSE_KEEPALIVE_INTERVAL: "30000"  # 30 seconds - prevent ALB idle timeout
+  REQUEST_TIMEOUT: "300000"         # 5 minutes - max request duration
+  # CORS configuration (comma-separated)
+  ALLOWED_ORIGINS: "http://localhost:3000,https://journium.app,https://*.journium.app"
 environments:
   staging:
     image:
@@ -50,6 +59,13 @@ environments:
     memory: 1024
     http:
       alias: mcp.staging.journium.app
+      healthcheck:
+        interval: 15s
+        timeout: 10s
+        healthy_threshold: 2
+        unhealthy_threshold: 3
+      stickiness: true
+      deregistration_delay: 300s
 
 
   production:
@@ -60,6 +76,13 @@ environments:
     memory: 2048
     http:
       alias: mcp.journium.app
+      healthcheck:
+        interval: 15s
+        timeout: 10s
+        healthy_threshold: 2
+        unhealthy_threshold: 3
+      stickiness: true
+      deregistration_delay: 300s
 
 
 

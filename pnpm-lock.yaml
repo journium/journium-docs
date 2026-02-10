@@ -193,7 +193,7 @@ importers:
   apps/docs-mcp:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ^1.0.4
+        specifier: ^1.26.0
         version: 1.26.0(zod@4.3.5)
       cors:
         specifier: ^2.8.6

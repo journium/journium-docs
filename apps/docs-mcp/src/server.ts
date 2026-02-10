@@ -3,18 +3,57 @@ import { z } from "zod";
 import type { DocsIndex } from "./indexer.js";
 
 export function createServer(index: DocsIndex): McpServer {
-  const server = new McpServer({
-    name: "docs-mcp",
-    version: "1.0.0",
+  const server = new McpServer(
+    {
+      name: "journium-devtools",
+      version: "1.0.0",
+    },
+    {
+      capabilities: {
+        tools: {},
+        prompts: {},
+      },
+      instructions: `This is the Journium Documentation MCP server. It provides access to search and retrieve content from the Journium documentation.
+
+Use the tools to:
+- Search for information about Journium features, APIs, and concepts
+- Retrieve full documentation pages with MDX content
+- Explore the documentation structure by listing available routes
+
+The prompts provide pre-configured workflows for common documentation tasks like answering questions or writing new docs.`,
+    }
+  );
+
+  // Define input schemas
+  const SearchSchema = z.object({
+    query: z.string().min(1).describe("Search query string"),
+    limit: z.number().int().min(1).max(25).optional().describe("Maximum number of results to return (default: 8)"),
   });
 
-  // ---- Tools ----
+  const GetPageSchema = z.object({
+    route: z.string().optional().describe("URL route of the documentation page (e.g., /docs/getting-started)"),
+    filePath: z.string().optional().describe("File system path to the documentation file"),
+    include: z
+      .object({
+        mdx: z.boolean().optional().describe("Include raw MDX content"),
+        text: z.boolean().optional().describe("Include plain text content"),
+        frontmatter: z.boolean().optional().describe("Include frontmatter metadata"),
+      })
+      .optional()
+      .describe("Options for what content to include in the response"),
+  });
 
-  server.tool(
+  const ListRoutesSchema = z.object({
+    prefix: z.string().optional().describe("Optional prefix to filter routes (e.g., /docs/api)"),
+  });
+
+  // Register tools using the high-level API
+  server.registerTool(
     "docs.search",
     {
-      query: z.string().min(1),
-      limit: z.number().int().min(1).max(25).optional(),
+      title: "Search Documentation",
+      description: "Search through Journium documentation using semantic search. Returns relevant pages with excerpts showing matched content. Use this to find information about specific features, APIs, or concepts.",
+      inputSchema: SearchSchema,
     },
     async ({ query, limit }) => {
       const hits = index.search(query, limit ?? 8).map((h) => ({
@@ -33,22 +72,15 @@ export function createServer(index: DocsIndex): McpServer {
           },
         ],
       };
-    },
+    }
   );
 
-  server.tool(
+  server.registerTool(
     "docs.getPage",
     {
-      // allow either route or filePath
-      route: z.string().optional(),
-      filePath: z.string().optional(),
-      include: z
-        .object({
-          mdx: z.boolean().optional(),
-          text: z.boolean().optional(),
-          frontmatter: z.boolean().optional(),
-        })
-        .optional(),
+      title: "Get Documentation Page",
+      description: "Retrieve the full content of a specific documentation page by its route (URL path) or file path. Returns the page with MDX content, plain text, and frontmatter metadata. Use this after searching to get complete details about a page.",
+      inputSchema: GetPageSchema,
     },
     async ({ route, filePath, include }) => {
       const doc =
@@ -75,32 +107,33 @@ export function createServer(index: DocsIndex): McpServer {
       if (inc.text) payload.text = doc.text;
 
       return { content: [{ type: "text", text: JSON.stringify(payload, null, 2) }] };
-    },
+    }
   );
 
-  server.tool(
+  server.registerTool(
     "docs.listRoutes",
     {
-      prefix: z.string().optional(),
+      title: "List Documentation Routes",
+      description: "Get a list of all available documentation page routes (URLs). Optionally filter by a route prefix to explore specific sections. Useful for discovering what documentation is available or navigating the docs structure.",
+      inputSchema: ListRoutesSchema,
     },
     async ({ prefix }) => {
       const routes = index.listRoutes(prefix);
       return { content: [{ type: "text", text: JSON.stringify({ prefix, routes }, null, 2) }] };
-    },
+    }
   );
 
-  // ---- Prompts ----
-  // These are “workflow templates” that hosts can show via /prompts and then run.
-
+  // Register prompts
   server.registerPrompt(
     "answer_from_docs",
     {
-      description: "Answer questions using documentation search and retrieval",
+      title: "Answer Questions from Documentation",
+      description: "Get answers to questions grounded in the Journium documentation. The assistant will search the docs, retrieve relevant pages, and provide accurate answers with citations. Best for learning how to use Journium features.",
       argsSchema: {
-        question: z.string().min(1),
+        question: z.string().min(1).describe("The question to answer using Journium documentation (e.g., 'How do I create a journal entry?')"),
       },
     },
-    ({ question }) => ({
+    async ({ question }) => ({
       messages: [
         {
           role: "user",
@@ -111,24 +144,25 @@ export function createServer(index: DocsIndex): McpServer {
               `Question: ${question}\n\n` +
               `Instructions:\n` +
               `1) Call docs.search with a focused query.\n` +
-              `2) Call docs.getPage for the top 2–3 hits.\n` +
+              `2) Call docs.getPage for the top 2-3 hits.\n` +
               `3) Answer using only those sources; include citations like: [title](route).\n`,
           },
         },
       ],
-    }),
+    })
   );
 
   server.registerPrompt(
     "write_mdx_snippet",
     {
-      description: "Generate MDX documentation snippets based on existing docs style",
+      title: "Write MDX Documentation Snippet",
+      description: "Generate new documentation content that matches the existing Journium docs style and tone. Searches existing docs to learn terminology and patterns, then drafts a new MDX snippet with proper formatting.",
       argsSchema: {
-        topic: z.string().min(1),
-        style: z.enum(["concise", "tutorial", "reference"]).default("concise"),
+        topic: z.string().min(1).describe("The topic or feature to document (e.g., 'journal templates', 'search filters')"),
+        style: z.enum(["concise", "tutorial", "reference"]).default("concise").describe("Writing style: concise (brief overview), tutorial (step-by-step), or reference (detailed specification)"),
       },
     },
-    ({ topic, style }) => ({
+    async ({ topic, style }) => ({
       messages: [
         {
           role: "user",
@@ -144,7 +178,7 @@ export function createServer(index: DocsIndex): McpServer {
           },
         },
       ],
-    }),
+    })
   );
 
   return server;
