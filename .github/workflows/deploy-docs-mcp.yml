@@ -69,19 +69,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Install pnpm using the official action
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Set up QEMU for multi-platform builds
+        uses: docker/setup-qemu-action@v3
         with:
-          run_install: false
-
-      # Set up Node.js and configure pnpm caching
-      - name: "📦 Setup Node.js"
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: pnpm-lock.yaml
+          platforms: linux/arm64
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -104,8 +95,9 @@ jobs:
           ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY || 'journium/docs-mcp' }}
           ENVIRONMENT_NAME: ${{ needs.setup.outputs.environment_name }}
         with:
-          context: apps/docs-mcp
+          context: .
           file: apps/docs-mcp/Dockerfile
+          platforms: linux/arm64
           push: true
           provenance: false
           tags: |
