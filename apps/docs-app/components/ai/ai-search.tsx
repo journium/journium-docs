@@ -216,7 +216,8 @@ function List(props: Omit<ComponentProps<'div'>, 'dir'>) {
     <div
       ref={containerRef}
       {...props}
-      className={cn('fd-scroll-container overflow-y-auto min-w-0 flex flex-col', props.className)}
+      className={cn('fd-scroll-container overflow-y-auto min-w-0 flex flex-col select-text [touch-action:pan-y]', props.className)}
+      data-vaul-no-drag
     >
       {props.children}
     </div>
@@ -265,7 +266,7 @@ function Message({ message, ...props }: { message: UIMessage } & ComponentProps<
   }
 
   return (
-    <div {...props}>
+    <div {...props} data-vaul-no-drag className="select-text">
       <p
         className={cn(
           'mb-1 text-base font-medium text-fd-muted-foreground flex items-center gap-1.5',
@@ -464,7 +465,7 @@ export function AISearchPanel() {
       {/* Mobile: Sheet */}
       {isMobile && (
         <Sheet open={open} onOpenChange={setOpen} side="bottom">
-          <SheetContent side="bottom" className="p-4 pb-6 max-h-[85dvh]">
+          <SheetContent side="bottom" className="px-4 pb-6 max-h-[85dvh]">
             <SheetHeader className="mb-4">
               <SheetTitle>Ask AI</SheetTitle>
               <SheetDescription>

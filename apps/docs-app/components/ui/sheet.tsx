@@ -128,17 +128,19 @@ function SheetContent({
         <SheetOverlay />
         <DrawerPrimitive.Content
           className={cn(
-            'fixed z-50 flex flex-col bg-fd-popover text-fd-popover-foreground',
+            'fixed z-50 flex flex-col bg-fd-popover text-fd-popover-foreground focus-visible:outline-none',
             side === 'top' &&
-              'inset-x-0 top-0 mb-24 max-h-[90dvh] border-b rounded-b-2xl',
+              'inset-x-0 top-0 mb-24 max-h-[90dvh] rounded-b-2xl',
             side === 'bottom' &&
-              'inset-x-0 bottom-0 mt-24 max-h-[90dvh] border-t rounded-t-2xl',
+              'inset-x-0 bottom-0 mt-24 max-h-[90dvh] rounded-t-2xl',
             className
           )}
           {...props}
         >
           {shouldShowHandle && (
-            <div className="mx-auto mt-4 mb-2 h-1.5 w-12 rounded-full bg-fd-muted" />
+            <div className="w-full flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing">
+              <div className="h-1.5 w-12 rounded-full bg-fd-muted" />
+            </div>
           )}
           {children}
         </DrawerPrimitive.Content>
@@ -151,7 +153,7 @@ function SheetContent({
       <SheetOverlay />
       <SheetPrimitive.Content
         className={cn(
-          'fixed z-50 flex flex-col bg-fd-popover text-fd-popover-foreground shadow-xl transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
+          'fixed z-50 flex flex-col bg-fd-popover text-fd-popover-foreground shadow-xl transition ease-in-out focus-visible:outline-none data-[state=closed]:duration-300 data-[state=open]:duration-500',
           side === 'right' &&
             'inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm',
           side === 'left' &&
