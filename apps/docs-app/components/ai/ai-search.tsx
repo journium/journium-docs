@@ -23,6 +23,13 @@ import { DefaultChatTransport } from 'ai';
 import { Markdown } from '../markdown';
 import { Presence } from '@radix-ui/react-presence';
 import Image from 'next/image';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '../ui/sheet';
 
 const Context = createContext<{
   open: boolean;
@@ -34,7 +41,7 @@ function useChatContext() {
   return use(Context)!.chat;
 }
 
-function Header() {
+function Header({ showClose = true }: { showClose?: boolean }) {
   const { setOpen } = use(Context)!;
 
   return (
@@ -46,20 +53,22 @@ function Header() {
             Ask questions about Journium documentation
           </p>
         </div>
-        <button
-          aria-label="Close"
-          className={cn(
-            buttonVariants({
-              size: 'icon-sm',
-              color: 'ghost',
-              className: 'rounded-full hover:bg-fd-accent',
-            }),
-            'cursor-pointer',
-          )}
-          onClick={() => setOpen(false)}
-        >
-          <X className="size-4" />
-        </button>
+        {showClose && (
+          <button
+            aria-label="Close"
+            className={cn(
+              buttonVariants({
+                size: 'icon-sm',
+                color: 'ghost',
+                className: 'rounded-full hover:bg-fd-accent',
+              }),
+              'cursor-pointer',
+            )}
+            onClick={() => setOpen(false)}
+          >
+            <X className="size-4" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -309,6 +318,36 @@ function Message({ message, ...props }: { message: UIMessage } & ComponentProps<
   );
 }
 
+function ChatContent() {
+  const chat = useChatContext();
+
+  return (
+    <>
+      <List
+        className="px-3 py-4 flex-1 overscroll-contain"
+        style={{
+          maskImage:
+            'linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent 100%)',
+        }}
+      >
+        <div className="flex flex-col gap-4">
+          {chat.messages
+            .filter((msg) => msg.role !== 'system')
+            .map((item) => (
+              <Message key={item.id} message={item} />
+            ))}
+        </div>
+      </List>
+      <div className="rounded-xl border bg-fd-card text-fd-card-foreground has-focus-visible:ring-2 has-focus-visible:ring-fd-ring">
+        <SearchAIInput />
+        <div className="flex items-center gap-1.5 p-1 empty:hidden">
+          <SearchAIActions />
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function AISearch({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const chat = useChat({
@@ -391,7 +430,17 @@ export function AISearchTrigger({
 
 export function AISearchPanel() {
   const { open, setOpen } = use(Context)!;
-  const chat = useChatContext();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const onKeyPress = useEffectEvent((e: KeyboardEvent) => {
     if (e.key === 'Escape' && open) {
@@ -412,69 +461,63 @@ export function AISearchPanel() {
 
   return (
     <>
-      <style>
-        {`
-        @keyframes ask-ai-open {
-          from {
-            width: 0px;
-          }
-          to {
-            width: var(--ai-chat-width);
-          }
-        }
-        @keyframes ask-ai-close {
-          from {
-            width: var(--ai-chat-width);
-          }
-          to {
-            width: 0px;
-          }
-        }`}
-      </style>
-      <Presence present={open}>
-        <div
-          data-state={open ? 'open' : 'closed'}
-          className="fixed inset-0 z-30 backdrop-blur-xs bg-fd-overlay data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out lg:hidden"
-          onClick={() => setOpen(false)}
-        />
-      </Presence>
-      <Presence present={open}>
-        <div
-          className={cn(
-            'overflow-hidden z-30 bg-fd-popover text-fd-popover-foreground [--ai-chat-width:400px] xl:[--ai-chat-width:460px]',
-            'max-lg:fixed max-lg:inset-x-2 max-lg:top-4 max-lg:border max-lg:rounded-2xl max-lg:shadow-xl',
-            'lg:sticky lg:top-0 lg:h-dvh lg:border-s  lg:ms-auto lg:in-[#nd-docs-layout]:[grid-area:toc] lg:in-[#nd-notebook-layout]:row-span-full lg:in-[#nd-notebook-layout]:col-start-5',
-            open
-              ? 'animate-fd-dialog-in lg:animate-[ask-ai-open_200ms]'
-              : 'animate-fd-dialog-out lg:animate-[ask-ai-close_200ms]',
-          )}
-        >
-          <div className="flex flex-col p-2 size-full max-lg:max-h-[80dvh] lg:w-(--ai-chat-width) xl:p-4">
-            <Header />
-            <List
-              className="px-3 py-4 flex-1 overscroll-contain"
-              style={{
-                maskImage:
-                  'linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent 100%)',
-              }}
+      {/* Mobile: Sheet */}
+      {isMobile && (
+        <Sheet open={open} onOpenChange={setOpen} side="bottom">
+          <SheetContent side="bottom" className="p-4 pb-6 max-h-[85dvh]">
+            <SheetHeader className="mb-4">
+              <SheetTitle>Ask AI</SheetTitle>
+              <SheetDescription>
+                Ask questions about Journium documentation
+              </SheetDescription>
+            </SheetHeader>
+            <div className="flex flex-col h-[calc(85dvh-10rem)]">
+              <ChatContent />
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
+
+      {/* Desktop: Sidebar */}
+      {!isMobile && (
+        <>
+          <style>
+            {`
+            @keyframes ask-ai-open {
+              from {
+                width: 0px;
+              }
+              to {
+                width: var(--ai-chat-width);
+              }
+            }
+            @keyframes ask-ai-close {
+              from {
+                width: var(--ai-chat-width);
+              }
+              to {
+                width: 0px;
+              }
+            }`}
+          </style>
+          <Presence present={open}>
+            <div
+              className={cn(
+                'overflow-hidden z-30 bg-fd-popover text-fd-popover-foreground [--ai-chat-width:400px] xl:[--ai-chat-width:460px]',
+                'sticky top-0 h-dvh border-s ms-auto in-[#nd-docs-layout]:[grid-area:toc] in-[#nd-notebook-layout]:row-span-full in-[#nd-notebook-layout]:col-start-5',
+                open
+                  ? 'animate-[ask-ai-open_200ms]'
+                  : 'animate-[ask-ai-close_200ms]',
+              )}
             >
-              <div className="flex flex-col gap-4">
-                {chat.messages
-                  .filter((msg) => msg.role !== 'system')
-                  .map((item) => (
-                    <Message key={item.id} message={item} />
-                  ))}
-              </div>
-            </List>
-            <div className="rounded-xl border bg-fd-card text-fd-card-foreground has-focus-visible:ring-2 has-focus-visible:ring-fd-ring">
-              <SearchAIInput />
-              <div className="flex items-center gap-1.5 p-1 empty:hidden">
-                <SearchAIActions />
+              <div className="flex flex-col p-2 size-full w-(--ai-chat-width) xl:p-4">
+                <Header showClose={true} />
+                <ChatContent />
               </div>
             </div>
-          </div>
-        </div>
-      </Presence>
+          </Presence>
+        </>
+      )}
     </>
   );
 }

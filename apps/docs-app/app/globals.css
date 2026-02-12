@@ -81,3 +81,36 @@ html {
 
 /* Let Fumadocs components handle their own backgrounds */
 /* Don't set body background/color as it conflicts with Fumadocs theming */
+
+/* Vaul drawer styles */
+[vaul-drawer] {
+  touch-action: none;
+  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+[vaul-drawer][vaul-drawer-direction="bottom"] {
+  transform: translate3d(0, 100%, 0);
+}
+
+[vaul-drawer][vaul-drawer-direction="top"] {
+  transform: translate3d(0, -100%, 0);
+}
+
+[vaul-drawer][data-state="open"] {
+  transform: translate3d(0, 0, 0);
+}
+
+[vaul-overlay] {
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+[vaul-overlay][data-state="open"] {
+  opacity: 1;
+}
+
+/* Prevent body scroll when drawer is open */
+[vaul-drawer-wrapper][data-state="open"] body {
+  overflow: hidden;
+}
+
