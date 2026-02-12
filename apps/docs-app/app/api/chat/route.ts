@@ -1,4 +1,5 @@
 import { ProvideLinksToolSchema } from '@/lib/inkeep-qa-schema';
+import { createOpenAI } from '@ai-sdk/openai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { convertToModelMessages, streamText, stepCountIs } from 'ai';
 import { z } from 'zod';
@@ -16,12 +17,10 @@ const FetchDocumentationSchema = z.object({
 // Option 3: Any OpenAI-compatible API (using createOpenAICompatible)
 
 const getAIProvider = () => {
-  // Option 1: Use OpenAI
+  // Option 1: Use OpenAI (with official SDK for proper usage tracking)
   if (process.env.OPENAI_API_KEY) {
-    return createOpenAICompatible({
-      name: 'openai',
+    return createOpenAI({
       apiKey: process.env.OPENAI_API_KEY,
-      baseURL: 'https://api.openai.com/v1',
     });
   }
 
@@ -45,10 +44,8 @@ const getAIProvider = () => {
 
   // For CI builds without API keys, return a dummy provider that will error at runtime
   // This allows the build to succeed but the API will fail when actually called
-  return createOpenAICompatible({
-    name: 'dummy',
+  return createOpenAI({
     apiKey: 'dummy-key-for-build',
-    baseURL: 'https://api.openai.com/v1',
   });
 };
 
@@ -75,6 +72,8 @@ const getProviderName = () => {
 };
 
 // Relevance check prompt - strict classification
+// CURRENTLY DISABLED - See note below about pre-check being disabled
+/*
 const RELEVANCE_CHECK_PROMPT = `You are a strict topic classifier. Determine if the user's question is related to Journium.
 
 Journium is: An awareness layer for modern applications that turns raw telemetry into proactive, narrative insights. It's a product for developers to integrate into their applications for monitoring, analytics, and observability.
@@ -98,6 +97,7 @@ Respond with ONLY one word: either "RELEVANT" or "OFF_TOPIC"
 User question: {question}
 
 Classification:`;
+*/
 
 // System prompt for the AI assistant - STRICT BOUNDARIES
 const SYSTEM_PROMPT = `You are a specialized AI assistant EXCLUSIVELY for Journium documentation and integration support.
@@ -216,54 +216,73 @@ DOCUMENTATION ACCESS:
 - NEVER make up answers - if uncertain, say so and offer to search the documentation`;
 
 // Helper function to check relevance using a fast LLM call
-async function checkRelevance(question: string, aiProvider: ReturnType<typeof getAIProvider>, requestId: string): Promise<boolean> {
-  try {
-    console.log(`[${requestId}] Checking relevance for question: ${question.substring(0, 100)}...`);
-    
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'user',
-            content: RELEVANCE_CHECK_PROMPT.replace('{question}', question)
-          }
-        ],
-        temperature: 0,
-        max_tokens: 10,
-      }),
-    });
-
-    if (!response.ok) {
-      console.warn(`[${requestId}] Relevance check failed, allowing question through`);
-      return true; // Fail open - allow the question if check fails
-    }
-
-    const data = await response.json();
-    const classification = data.choices?.[0]?.message?.content?.trim().toUpperCase();
-    const isRelevant = classification === 'RELEVANT';
-    
-    console.log(`[${requestId}] Relevance classification: ${classification} (isRelevant: ${isRelevant})`);
-    return isRelevant;
-  } catch (error) {
-    console.error(`[${requestId}] Error in relevance check:`, error);
-    return true; // Fail open - allow the question if check errors
-  }
-}
+// CURRENTLY DISABLED - See note in POST handler below
+// The pre-check was bypassing conversation history, preventing strike counting
+// 
+// async function checkRelevance(question: string, aiProvider: ReturnType<typeof getAIProvider>, requestId: string): Promise<boolean> {
+//   try {
+//     console.log(`[${requestId}] Checking relevance for question: ${question.substring(0, 100)}...`);
+//     
+//     const response = await fetch('https://api.openai.com/v1/chat/completions', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+//       },
+//       body: JSON.stringify({
+//         model: 'gpt-4o-mini',
+//         messages: [
+//           {
+//             role: 'user',
+//             content: RELEVANCE_CHECK_PROMPT.replace('{question}', question)
+//           }
+//         ],
+//         temperature: 0,
+//         max_tokens: 10,
+//       }),
+//     });
+//
+//     if (!response.ok) {
+//       console.warn(`[${requestId}] Relevance check failed, allowing question through`);
+//       return true; // Fail open - allow the question if check fails
+//     }
+//
+//     const data = await response.json();
+//     const classification = data.choices?.[0]?.message?.content?.trim().toUpperCase();
+//     const isRelevant = classification === 'RELEVANT';
+//     
+//     console.log(`[${requestId}] Relevance classification: ${classification} (isRelevant: ${isRelevant})`);
+//     return isRelevant;
+//   } catch (error) {
+//     console.error(`[${requestId}] Error in relevance check:`, error);
+//     return true; // Fail open - allow the question if check errors
+//   }
+// }
 
 // Helper to count off-topic strikes in conversation history
-function countOffTopicStrikes(messages: Array<{ role: string; content: string | unknown }>): number {
+function countOffTopicStrikes(messages: Array<{ role: string; content?: string | unknown; parts?: unknown[] }>): number {
   let strikes = 0;
   const offTopicResponse = "I can only assist with Journium documentation, features, and integration.";
   
   for (const msg of messages) {
-    if (msg.role === 'assistant' && typeof msg.content === 'string') {
-      if (msg.content.includes(offTopicResponse)) {
+    if (msg.role === 'assistant') {
+      // Try to find the text content - might be in content or parts
+      let textContent = '';
+      
+      if (typeof msg.content === 'string') {
+        textContent = msg.content;
+      } else if (Array.isArray(msg.parts)) {
+        // Extract text from parts array
+        for (const part of msg.parts) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if (typeof part === 'object' && part !== null && 'text' in part && typeof (part as any).text === 'string') {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            textContent += (part as any).text;
+          }
+        }
+      }
+      
+      if (textContent.includes(offTopicResponse)) {
         strikes++;
       }
     }
@@ -339,36 +358,31 @@ export async function POST(req: Request) {
       );
     }
 
-    // Relevance check: Get the latest user message
-    const lastUserMessage = reqJson.messages
-      ?.filter((msg: { role?: string }) => msg.role === 'user')
-      .pop();
+    // Relevance check: DISABLED for now
+    // The pre-check was preventing strike counting because responses weren't
+    // being added to conversation history. Instead, we rely on:
+    // 1. Strict system prompt to reject off-topic questions
+    // 2. Strike counting based on rejection messages in conversation history
+    // 
+    // Future improvement: Make pre-check work with streaming responses
+    // so rejection messages get properly added to history
     
-    if (lastUserMessage && typeof lastUserMessage.content === 'string') {
-      const userQuestion = lastUserMessage.content.trim();
-      
-      // Only check relevance if we have OpenAI API key (for the pre-check)
-      if (process.env.OPENAI_API_KEY && userQuestion.length > 0) {
-        const isRelevant = await checkRelevance(userQuestion, aiProvider, requestId);
-        
-        if (!isRelevant) {
-          console.log(`[${requestId}] Question classified as OFF_TOPIC, returning rejection`);
-          
-          // Return a structured response that the frontend can handle
-          // This will be displayed as an assistant message
-          return new Response(
-            JSON.stringify({
-              role: 'assistant',
-              content: 'I can only assist with Journium documentation, features, and integration. Please ask a question related to Journium, or visit our documentation at https://journium.app/docs.',
-            }),
-            {
-              status: 200,
-              headers: { 'Content-Type': 'application/json' }
-            }
-          );
-        }
-      }
-    }
+    // const lastUserMessage = reqJson.messages
+    //   ?.filter((msg: { role?: string }) => msg.role === 'user')
+    //   .pop();
+    // 
+    // if (lastUserMessage && typeof lastUserMessage.content === 'string') {
+    //   const userQuestion = lastUserMessage.content.trim();
+    //   
+    //   if (process.env.OPENAI_API_KEY && userQuestion.length > 0) {
+    //     const isRelevant = await checkRelevance(userQuestion, aiProvider, requestId);
+    //     
+    //     if (!isRelevant) {
+    //       console.log(`[${requestId}] Question classified as OFF_TOPIC`);
+    //       // Would need to return streaming response here for strike counting to work
+    //     }
+    //   }
+    // }
 
     // Convert messages and add system prompt
     const messages = await convertToModelMessages(reqJson.messages, {
@@ -458,7 +472,14 @@ export async function POST(req: Request) {
         console.log(`[${requestId}] Finish reason: ${finishReason}`);
         console.log(`[${requestId}] Response length: ${text?.length || 0} chars`);
         if (usage) {
-          console.log(`[${requestId}] Usage:`, JSON.stringify(usage, null, 2));
+          // Log full usage object to see all available fields
+          console.log(`[${requestId}] Usage (full):`, JSON.stringify(usage, null, 2));
+          // Log specific token counts if available
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const usageObj = usage as any;
+          if (usageObj.promptTokens !== undefined) {
+            console.log(`[${requestId}] Tokens: ${usageObj.promptTokens} input, ${usageObj.completionTokens} output, ${usageObj.totalTokens} total`);
+          }
         }
         if (toolCalls && toolCalls.length > 0) {
           console.log(`[${requestId}] Tool calls (${toolCalls.length}):`, JSON.stringify(toolCalls, null, 2));

@@ -35,6 +35,7 @@ const Context = createContext<{
   open: boolean;
   setOpen: (open: boolean) => void;
   chat: UseChatHelpers<UIMessage>;
+  lockMessage: string | null;
 } | null>(null);
 
 function useChatContext() {
@@ -339,7 +340,7 @@ function LoadingDots() {
 }
 
 function ChatContent() {
-  const chat = useChatContext();
+  const { chat, lockMessage } = use(Context)!;
 
   return (
     <>
@@ -356,13 +357,13 @@ function ChatContent() {
             .map((item) => (
               <Message key={item.id} message={item} />
             ))}
-          {chat.error && (
+          {(lockMessage || chat.error) && (
             <div className="rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950 p-4">
               <p className="text-sm text-red-800 dark:text-red-200 font-medium mb-1">
                 Conversation Locked
               </p>
               <p className="text-sm text-red-700 dark:text-red-300">
-                {chat.error.message || 'An error occurred. Please start a new conversation.'}
+                {lockMessage || 'This conversation has been locked due to repeated off-topic questions. Please refresh the page to start a new conversation.'}
               </p>
             </div>
           )}
@@ -380,19 +381,27 @@ function ChatContent() {
 
 export function AISearch({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [lockMessage, setLockMessage] = useState<string | null>(null);
+  
   const chat = useChat({
     id: 'search',
     transport: new DefaultChatTransport({
       api: '/api/chat',
     }),
     onError: (error) => {
+      // Suppress console logging for conversation lock errors
+      if (error.message?.includes('conversation_locked') || error.message?.includes('repeated off-topic')) {
+        // Set friendly message without logging
+        setLockMessage('This conversation has been locked due to repeated off-topic questions. Please refresh the page to start a new conversation.');
+        return; // Don't log to console
+      }
+      // Log other errors normally
       console.error('Chat error:', error);
-      // The error will be displayed in the UI automatically
     },
   });
 
   return (
-    <Context value={useMemo(() => ({ chat, open, setOpen }), [chat, open])}>{children}</Context>
+    <Context value={useMemo(() => ({ chat, open, setOpen, lockMessage }), [chat, open, lockMessage])}>{children}</Context>
   );
 }
 
