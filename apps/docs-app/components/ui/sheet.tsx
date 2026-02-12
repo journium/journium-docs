@@ -132,7 +132,7 @@ function SheetContent({
             side === 'top' &&
               'inset-x-0 top-0 mb-24 max-h-[90dvh] rounded-b-2xl',
             side === 'bottom' &&
-              'inset-x-0 bottom-0 mt-24 max-h-[90dvh] rounded-t-2xl',
+              'inset-x-0 bottom-0 mt-24 rounded-t-2xl',
             className
           )}
           {...props}

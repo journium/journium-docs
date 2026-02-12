@@ -12,7 +12,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Loader2, RefreshCw, Send, Sparkles, User, X } from 'lucide-react';
+import { Loader2, RefreshCw, Send, User, X } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { buttonVariants } from '../ui/button';
 import Link from 'fumadocs-core/link';
@@ -30,6 +30,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from '../ui/sheet';
+import { JrSparkles } from '../icons/jr-sparkles';
 
 const Context = createContext<{
   open: boolean;
@@ -444,7 +445,7 @@ export function AISearchTrigger({
         title="Ask AI"
         aria-label="Ask AI"
       >
-        <Sparkles className="size-4" />
+        <JrSparkles className="size-4" />
       </button>
     );
   }
@@ -465,7 +466,7 @@ export function AISearchTrigger({
       )}
       onClick={handleClick}
     >
-      <Sparkles className="size-4" />
+      <JrSparkles className="size-4" />
       Ask AI
     </button>
   );
@@ -474,6 +475,7 @@ export function AISearchTrigger({
 export function AISearchPanel() {
   const { open, setOpen } = use(Context)!;
   const [isMobile, setIsMobile] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -484,6 +486,30 @@ export function AISearchPanel() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Handle iOS keyboard positioning with Visual Viewport API
+  useEffect(() => {
+    if (!isMobile || !open) return;
+
+    const handleViewportResize = () => {
+      if (window.visualViewport) {
+        // Use a small delay to ensure accurate height on iOS
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setViewportHeight(window.visualViewport!.height);
+          });
+        });
+      }
+    };
+
+    if (window.visualViewport) {
+      handleViewportResize(); // Set initial height
+      window.visualViewport.addEventListener('resize', handleViewportResize);
+      return () => {
+        window.visualViewport?.removeEventListener('resize', handleViewportResize);
+      };
+    }
+  }, [isMobile, open]);
 
   const onKeyPress = useEffectEvent((e: KeyboardEvent) => {
     if (e.key === 'Escape' && open) {
@@ -507,14 +533,28 @@ export function AISearchPanel() {
       {/* Mobile: Sheet */}
       {isMobile && (
         <Sheet open={open} onOpenChange={setOpen} side="bottom">
-          <SheetContent side="bottom" className="px-4 pb-6 max-h-[85dvh]">
+          <SheetContent 
+            side="bottom" 
+            className="px-4 pb-6"
+            style={viewportHeight ? {
+              maxHeight: `${viewportHeight}px`,
+              height: `${Math.min(viewportHeight * 0.85, viewportHeight)}px`,
+            } : undefined}
+          >
             <SheetHeader className="mb-4">
               <SheetTitle>Ask AI</SheetTitle>
               <SheetDescription>
                 Ask questions about Journium documentation
               </SheetDescription>
             </SheetHeader>
-            <div className="flex flex-col h-[calc(85dvh-10rem)]">
+            <div 
+              className="flex flex-col"
+              style={viewportHeight ? {
+                height: `${viewportHeight * 0.85 - 160}px`, // Subtract header and padding
+              } : {
+                height: 'calc(85dvh - 10rem)',
+              }}
+            >
               <ChatContent />
             </div>
           </SheetContent>
