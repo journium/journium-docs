@@ -465,7 +465,7 @@ export function AISearchPanel() {
       {/* Mobile: Sheet */}
       {isMobile && (
         <Sheet open={open} onOpenChange={setOpen} side="bottom">
-          <SheetContent side="bottom" className="p-4 pb-6 max-h-[85dvh]">
+          <SheetContent side="bottom" className="px-4 pb-6 max-h-[85dvh]">
             <SheetHeader className="mb-4">
               <SheetTitle>Ask AI</SheetTitle>
               <SheetDescription>
