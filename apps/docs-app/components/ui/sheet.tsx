@@ -138,7 +138,9 @@ function SheetContent({
           {...props}
         >
           {shouldShowHandle && (
-            <div className="mx-auto mt-4 mb-2 h-1.5 w-12 rounded-full bg-fd-muted" />
+            <div className="w-full flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing">
+              <div className="h-1.5 w-12 rounded-full bg-fd-muted" />
+            </div>
           )}
           {children}
         </DrawerPrimitive.Content>

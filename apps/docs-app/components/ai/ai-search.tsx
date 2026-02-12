@@ -216,7 +216,8 @@ function List(props: Omit<ComponentProps<'div'>, 'dir'>) {
     <div
       ref={containerRef}
       {...props}
-      className={cn('fd-scroll-container overflow-y-auto min-w-0 flex flex-col', props.className)}
+      className={cn('fd-scroll-container overflow-y-auto min-w-0 flex flex-col select-text [touch-action:pan-y]', props.className)}
+      data-vaul-no-drag
     >
       {props.children}
     </div>
@@ -265,7 +266,7 @@ function Message({ message, ...props }: { message: UIMessage } & ComponentProps<
   }
 
   return (
-    <div {...props}>
+    <div {...props} data-vaul-no-drag className="select-text">
       <p
         className={cn(
           'mb-1 text-base font-medium text-fd-muted-foreground flex items-center gap-1.5',
