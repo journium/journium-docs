@@ -265,6 +265,9 @@ function Message({ message, ...props }: { message: UIMessage } & ComponentProps<
     }
   }
 
+  // Show loading dots if this is an assistant message with no content yet
+  const hasContent = markdown.trim().length > 0;
+
   return (
     <div {...props} data-vaul-no-drag className="select-text">
       <p
@@ -298,23 +301,39 @@ function Message({ message, ...props }: { message: UIMessage } & ComponentProps<
         )}
         {roleName[message.role] ?? 'unknown'}
       </p>
-      <div className="prose text-sm">
-        <Markdown text={markdown} />
-      </div>
-      {links && links.length > 0 && (
-        <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
-          {links.map((item, i) => (
-            <Link
-              key={i}
-              href={item.url}
-              className="block text-xs rounded-lg border p-3 hover:bg-fd-accent hover:text-fd-accent-foreground"
-            >
-              <p className="font-medium">{item.title}</p>
-              <p className="text-fd-muted-foreground">Reference {item.label}</p>
-            </Link>
-          ))}
-        </div>
+      {!hasContent && message.role === 'assistant' ? (
+        <LoadingDots />
+      ) : (
+        <>
+          <div className="prose text-sm">
+            <Markdown text={markdown} />
+          </div>
+          {links && links.length > 0 && (
+            <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
+              {links.map((item, i) => (
+                <Link
+                  key={i}
+                  href={item.url}
+                  className="block text-xs rounded-lg border p-3 hover:bg-fd-accent hover:text-fd-accent-foreground"
+                >
+                  <p className="font-medium">{item.title}</p>
+                  <p className="text-fd-muted-foreground">Reference {item.label}</p>
+                </Link>
+              ))}
+            </div>
+          )}
+        </>
       )}
+    </div>
+  );
+}
+
+function LoadingDots() {
+  return (
+    <div className="flex items-center gap-1 py-2">
+      <span className="size-2 rounded-full bg-fd-muted-foreground/40 animate-[bounce_1s_ease-in-out_infinite]" />
+      <span className="size-2 rounded-full bg-fd-muted-foreground/40 animate-[bounce_1s_ease-in-out_0.1s_infinite]" />
+      <span className="size-2 rounded-full bg-fd-muted-foreground/40 animate-[bounce_1s_ease-in-out_0.2s_infinite]" />
     </div>
   );
 }
@@ -337,6 +356,16 @@ function ChatContent() {
             .map((item) => (
               <Message key={item.id} message={item} />
             ))}
+          {chat.error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950 p-4">
+              <p className="text-sm text-red-800 dark:text-red-200 font-medium mb-1">
+                Conversation Locked
+              </p>
+              <p className="text-sm text-red-700 dark:text-red-300">
+                {chat.error.message || 'An error occurred. Please start a new conversation.'}
+              </p>
+            </div>
+          )}
         </div>
       </List>
       <div className="rounded-xl border bg-fd-card text-fd-card-foreground has-focus-visible:ring-2 has-focus-visible:ring-fd-ring">
@@ -356,6 +385,10 @@ export function AISearch({ children }: { children: ReactNode }) {
     transport: new DefaultChatTransport({
       api: '/api/chat',
     }),
+    onError: (error) => {
+      console.error('Chat error:', error);
+      // The error will be displayed in the UI automatically
+    },
   });
 
   return (
