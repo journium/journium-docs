@@ -128,11 +128,11 @@ function SheetContent({
         <SheetOverlay />
         <DrawerPrimitive.Content
           className={cn(
-            'fixed z-50 flex flex-col bg-fd-popover text-fd-popover-foreground',
+            'fixed z-50 flex flex-col bg-fd-popover text-fd-popover-foreground focus-visible:outline-none',
             side === 'top' &&
-              'inset-x-0 top-0 mb-24 max-h-[90dvh] border-b rounded-b-2xl',
+              'inset-x-0 top-0 mb-24 max-h-[90dvh] rounded-b-2xl',
             side === 'bottom' &&
-              'inset-x-0 bottom-0 mt-24 max-h-[90dvh] border-t rounded-t-2xl',
+              'inset-x-0 bottom-0 mt-24 max-h-[90dvh] rounded-t-2xl',
             className
           )}
           {...props}
@@ -151,7 +151,7 @@ function SheetContent({
       <SheetOverlay />
       <SheetPrimitive.Content
         className={cn(
-          'fixed z-50 flex flex-col bg-fd-popover text-fd-popover-foreground shadow-xl transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
+          'fixed z-50 flex flex-col bg-fd-popover text-fd-popover-foreground shadow-xl transition ease-in-out focus-visible:outline-none data-[state=closed]:duration-300 data-[state=open]:duration-500',
           side === 'right' &&
             'inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm',
           side === 'left' &&
