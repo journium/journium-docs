@@ -335,39 +335,6 @@ function LoadingDots() {
       <span className="size-2 rounded-full bg-fd-muted-foreground/40 animate-[bounce_1s_ease-in-out_infinite]" />
       <span className="size-2 rounded-full bg-fd-muted-foreground/40 animate-[bounce_1s_ease-in-out_0.1s_infinite]" />
       <span className="size-2 rounded-full bg-fd-muted-foreground/40 animate-[bounce_1s_ease-in-out_0.2s_infinite]" />
-      {!hasContent && message.role === 'assistant' ? (
-        <LoadingDots />
-      ) : (
-        <>
-          <div className="prose text-sm">
-            <Markdown text={markdown} />
-          </div>
-          {links && links.length > 0 && (
-            <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
-              {links.map((item, i) => (
-                <Link
-                  key={i}
-                  href={item.url}
-                  className="block text-xs rounded-lg border p-3 hover:bg-fd-accent hover:text-fd-accent-foreground"
-                >
-                  <p className="font-medium">{item.title}</p>
-                  <p className="text-fd-muted-foreground">Reference {item.label}</p>
-                </Link>
-              ))}
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
-
-function LoadingDots() {
-  return (
-    <div className="flex items-center gap-1 py-2">
-      <span className="size-2 rounded-full bg-fd-muted-foreground/40 animate-[bounce_1s_ease-in-out_infinite]" />
-      <span className="size-2 rounded-full bg-fd-muted-foreground/40 animate-[bounce_1s_ease-in-out_0.1s_infinite]" />
-      <span className="size-2 rounded-full bg-fd-muted-foreground/40 animate-[bounce_1s_ease-in-out_0.2s_infinite]" />
     </div>
   );
 }
