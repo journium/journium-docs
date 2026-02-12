@@ -12,7 +12,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Loader2, MessageCircleIcon, RefreshCw, Send, User, X } from 'lucide-react';
+import { Loader2, RefreshCw, Send, Sparkles, User, X } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { buttonVariants } from '../ui/button';
 import Link from 'fumadocs-core/link';
@@ -355,14 +355,14 @@ export function AISearchTrigger({
             variant: 'ghost',
             size: 'icon-sm',
           }),
-          'cursor-pointer',
+          'cursor-pointer h-8 w-8',
           className,
         )}
         onClick={handleClick}
         title="Ask AI"
         aria-label="Ask AI"
       >
-        <MessageCircleIcon className="size-4" />
+        <Sparkles className="size-4" />
       </button>
     );
   }
@@ -375,7 +375,7 @@ export function AISearchTrigger({
         buttonVariants({
           variant: 'secondary',
         }),
-        'gap-3 text-fd-muted-foreground rounded-2xl transition-[translate,opacity]',
+        'h-8 gap-3 text-fd-muted-foreground rounded-2xl transition-[translate,opacity]',
         // Default fixed positioning styles (can be overridden with className)
         !className && 'fixed bottom-4 w-24 end-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] shadow-lg z-20',
         open && !className && 'translate-y-10 opacity-0',
@@ -383,7 +383,7 @@ export function AISearchTrigger({
       )}
       onClick={handleClick}
     >
-      <MessageCircleIcon className="size-4.5" />
+      <Sparkles className="size-4" />
       Ask AI
     </button>
   );

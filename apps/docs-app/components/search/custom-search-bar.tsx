@@ -68,12 +68,12 @@ export function CustomSearchToggleSm({ className, ...props }: { className?: stri
       <button
         type="button"
         {...props}
-        className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }), 'cursor-pointer', className)}
+        className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }), 'cursor-pointer h-8 w-8', className)}
         data-search=""
         aria-label="Open Search"
         onClick={() => setOpenSearch(true)}
       >
-        <Search />
+        <Search className="size-4 shrink-0" />
       </button>
       
       {/* AI Search Trigger - icon only for mobile */}
