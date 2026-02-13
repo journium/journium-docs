@@ -1,0 +1,11 @@
+{
+    "title": "Tools",
+    "description": "Tools documentation",
+    "root": false,
+    "icon": "Hammer",
+    "defaultOpen": false,
+    "pages": [
+      "vscode-extension",
+      "mcp-server"
+    ]
+  }
