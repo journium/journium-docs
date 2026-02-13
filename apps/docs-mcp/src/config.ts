@@ -51,7 +51,7 @@ export type DocsMcpConfig = {
         routeKeys: ["route", "slug", "pathname", "href"],
         docsRootDir: "apps/docs-app/content/docs",
         workspaceRoot,
-        excludeRoutePatterns: ["/shared/**"],
+        excludeRoutePatterns: ["/.includes/**"],
       };
     } else {
       // Production: use local content directory (from dist/ -> ../content)
@@ -62,7 +62,7 @@ export type DocsMcpConfig = {
         routeKeys: ["route", "slug", "pathname", "href"],
         docsRootDir: "content",
         workspaceRoot,
-        excludeRoutePatterns: ["/shared/**"],
+        excludeRoutePatterns: ["/.includes/**"],
       };
     }
   }

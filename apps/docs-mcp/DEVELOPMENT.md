@@ -1,6 +1,6 @@
 # Commands
 
-Buiild MCP Server
+Build MCP Server (Local)
 
 ```bash
 # Run in development mode with hot reload
@@ -14,4 +14,12 @@ nx prepare-content docs-mcp
 
 # Run built version locally
 nx start docs-mcp
+```
+
+Build MCP Server (Docker)
+
+```bash
+nx docker-build docs-mcp        # Build Docker image
+nx docker-run docs-mcp          # Run 
+
 ```
