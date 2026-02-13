@@ -28,17 +28,19 @@ A Journium InsightTracker is defined using a structured YAML format that follows
       type: 'object',
       typeDescription: 'Contains `name`, `displayName`, and optional `description`',
       required: true,
+      typeDescriptionLink: '#metadata-properties',
     },
     spec: {
       description: 'Tracker specification.',
       type: 'object',
       typeDescription: 'Defines the tracker type, trigger, LLM prompt, and data selection',
       required: true,
+      typeDescriptionLink: '#spec-properties-llm-tracker',
     },
   }}
 />
 
-## `metadata` Properties
+### `metadata` Properties
 
 <TypeTable
   type={{
@@ -63,7 +65,7 @@ A Journium InsightTracker is defined using a structured YAML format that follows
   }}
 />
 
-## `spec` Properties (LLM Tracker)
+### `spec` Properties (LLM Tracker)
 
 <TypeTable
   type={{
@@ -78,6 +80,7 @@ A Journium InsightTracker is defined using a structured YAML format that follows
       type: 'object',
       typeDescription: 'Contains `mode` and optional `schedule`',
       required: true,
+      typeDescriptionLink: '#trigger-properties',
     },
     llmPrompt: {
       description: 'LLM prompt used to generate the insight.',
@@ -90,11 +93,12 @@ A Journium InsightTracker is defined using a structured YAML format that follows
       type: 'object',
       typeDescription: 'Controls what event data is available to the tracker',
       required: true,
+      typeDescriptionLink: '#data-properties',
     },
   }}
 />
 
-## `trigger` Properties
+#### `trigger` Properties
 
 <TypeTable
   type={{
@@ -113,7 +117,7 @@ A Journium InsightTracker is defined using a structured YAML format that follows
   }}
 />
 
-## `data` Properties
+#### `data` Properties
 
 <TypeTable
   type={{
@@ -139,3 +143,118 @@ A Journium InsightTracker is defined using a structured YAML format that follows
     },
   }}
 />
+
+## Examples
+
+### Full Example
+
+```yaml title=".journium/trackers/signup-to-first-habit.yml"
+apiVersion: journium.app/v0Alpha
+kind: InsightTracker
+metadata:
+  name: signup-to-first-habit
+  displayName: Signup to First Habit Dropoff
+  description: Track how many users sign up but don't complete their first habit
+spec:
+  type: LLM
+  trigger:
+    mode: automatic
+  llmPrompt: |
+    You are a helpful assistant that generates insights based on the provided data.
+    The data is a list of events that have occurred in the system.
+    Generate an insight based on the data.
+    The insight should be a single sentence that summarizes the data.
+    The insight should be in the following format:
+    - **[Insight Title]**: [Insight Description]
+  data:
+    events:
+      - signup_completed
+      - habit_created
+    minEvents: 1
+    maxEvents: 100
+```
+
+## Snippets
+
+### Configure schedule
+
+You can configure the schedule for the tracker to run on.
+
+
+#### Preset cadence
+
+Valid presets are: `hourly`, `daily`, `weekly`, `monthly`.
+
+```yaml title=".journium/trackers/my-tracker.yml"
+spec:
+  trigger:
+    mode: automatic
+    schedule: daily
+```
+#### Cron expression
+
+In the example below, the tracker will run every 45 minutes.
+The cron expression is a string that follows the format of 
+the [cron](https://en.wikipedia.org/wiki/Cron) expression parser.
+
+
+```yaml title=".journium/trackers/my-tracker.yml"
+spec:
+  trigger:
+    mode: automatic
+    schedule: 
+      cron: "*/45 * * * *"
+```
+
+#### Manual Schedule
+
+For trackers in manual mode, the tracker will not run automatically. It will only run when explicitly triggered. 
+You can trigger a tracker manually from the Journium UI.
+
+```yaml title=".journium/trackers/my-tracker.yml"
+spec:
+  trigger:
+    mode: manual
+``` 
+
+### Event selection and limits
+
+You can specify the events to include in the tracker and the limits on the number of events to process.
+
+#### Process a set of events
+
+The example below will process the `signup_completed` and `habit_created` events.
+```yaml title=".journium/trackers/my-tracker.yml"
+spec:
+  data:
+    events:
+      - signup_completed
+      - habit_created
+```
+
+#### Process all events
+
+The example below will process all events.
+```yaml title=".journium/trackers/my-tracker.yml"
+spec:
+  data:
+    events: "*"
+```
+
+#### Minimum number of events
+
+The example below will execute only if at least 50 events are available.
+```yaml title=".journium/trackers/my-tracker.yml"
+spec:
+  data:
+    minEvents: 50
+```
+
+#### Maximum number of events
+
+The example below will select at most 100 events. Remaining events will be ignored in the current execution.
+```yaml title=".journium/trackers/my-tracker.yml"
+spec:
+  data:
+    maxEvents: 100
+```

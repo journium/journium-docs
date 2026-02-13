@@ -11,7 +11,7 @@ import * as ButtonComponents from '@/components/ui/button';
 import * as LucideIconComponents from 'lucide-react';
 import { createGenerator, createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { AutoTypeTable } from 'fumadocs-typescript/ui';
-import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { TypeTable } from '@/components/type-table';
 
 
 // Filter out non-component exports from lucide-react (like createLucideIcon, Icon, etc.)
