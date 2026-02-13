@@ -9,9 +9,51 @@ export type DocRecord = {
   route: string;        // resolved route
   title: string;        // from frontmatter or filename
   frontmatter: Record<string, unknown>;
-  bodyMdx: string;      // raw MDX body (without frontmatter)
-  text: string;         // naive plain-text for searching
+  bodyMdx: string;      // raw MDX body (without frontmatter, includes NOT resolved)
+  bodyMdxResolved: string;  // MDX with <include> tags resolved
+  text: string;         // naive plain-text for searching (from resolved MDX)
 };
+
+/**
+ * Resolves <include>path</include> tags in MDX content
+ * Reads the referenced file and replaces the include tag with its content
+ */
+async function resolveIncludes(
+  mdx: string,
+  currentFilePath: string,
+  workspaceRoot: string
+): Promise<string> {
+  const includeRegex = /<include>(.*?)<\/include>/g;
+  let resolved = mdx;
+  const matches = [...mdx.matchAll(includeRegex)];
+  console.log(`Found ${matches.length} <include> tags in ${currentFilePath}`);
+
+  for (const match of matches) {
+    const includePath = match[1].trim();
+    console.log(`Resolving include: ${includePath} from ${currentFilePath}`);
+    try {
+      // Resolve relative path from the current file
+      const currentDir = path.dirname(path.join(workspaceRoot, currentFilePath));
+      const absoluteIncludePath = path.resolve(currentDir, includePath);
+      
+      // Read the included file
+      const includedContent = await fs.readFile(absoluteIncludePath, "utf-8");
+      
+      // Parse to get just the body (without frontmatter)
+      const parsed = matter(includedContent);
+      const bodyContent = parsed.content ?? "";
+      
+      // Replace the include tag with the actual content
+      resolved = resolved.replace(match[0], bodyContent);
+      console.log(`Resolved include: ${includePath} from ${currentFilePath}`);
+    } catch (err) {
+      console.warn(`Failed to resolve include: ${includePath} from ${currentFilePath}`, err);
+      // Leave the include tag in place if resolution fails
+    }
+  }
+
+  return resolved;
+}
 
 function stripMdxToText(mdx: string): string {
   // Cheap + safe MVP: remove code fences + JSX-ish tags + markdown punctuation.
@@ -23,6 +65,41 @@ function stripMdxToText(mdx: string): string {
     .replace(/[#>*_\-\[\]\(\)!]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/**
+ * Check if a route matches any of the exclusion patterns
+ * Supports glob-like patterns:
+ * - "/shared/**" matches any route starting with /shared/
+ * - "/internal/*" matches routes like /internal/foo but not /internal/foo/bar
+ * - "/exact" matches exactly /exact
+ */
+function isRouteExcluded(route: string, patterns?: string[]): boolean {
+  if (!patterns || patterns.length === 0) {
+    return false;
+  }
+
+  return patterns.some((pattern) => {
+    // Exact match
+    if (pattern === route) {
+      return true;
+    }
+
+    // Pattern ends with /** - match any route starting with the prefix
+    if (pattern.endsWith("/**")) {
+      const prefix = pattern.slice(0, -3); // remove /**
+      return route === prefix || route.startsWith(prefix + "/");
+    }
+
+    // Pattern ends with /* - match one level deep
+    if (pattern.endsWith("/*")) {
+      const prefix = pattern.slice(0, -2); // remove /*
+      const remainder = route.startsWith(prefix + "/") ? route.slice(prefix.length + 1) : null;
+      return remainder !== null && !remainder.includes("/");
+    }
+
+    return false;
+  });
 }
 
 function deriveRouteFromFile(filePath: string, docsRootDir: string): string {
@@ -57,7 +134,7 @@ export class DocsIndex {
   constructor(private cfg: DocsMcpConfig) {}
 
   async rebuild(): Promise<void> {
-    console.log("Rebuilding docs index...");
+    console.log(">>>> Rebuilding docs index...");
     const files = await fg(this.cfg.docsGlob, { 
       dot: false,
       cwd: this.cfg.workspaceRoot,
@@ -83,8 +160,18 @@ export class DocsIndex {
           ? getFrontmatterRoute(fm, this.cfg.routeKeys)
           : undefined) ?? deriveRouteFromFile(filePath, this.cfg.docsRootDir);
 
+      // Skip this document if its route matches an exclusion pattern
+      if (isRouteExcluded(route, this.cfg.excludeRoutePatterns)) {
+        console.log(`Excluding route: ${route} (file: ${filePath})`);
+        continue;
+      }
+
       const bodyMdx = parsed.content ?? "";
-      const text = stripMdxToText(bodyMdx);
+      
+      // Resolve <include> tags in the MDX content
+      const bodyMdxResolved = await resolveIncludes(bodyMdx, filePath, this.cfg.workspaceRoot);
+      
+      const text = stripMdxToText(bodyMdxResolved);
 
       out.push({
         filePath,
@@ -92,6 +179,7 @@ export class DocsIndex {
         title,
         frontmatter: fm,
         bodyMdx,
+        bodyMdxResolved,
         text,
       });
     }

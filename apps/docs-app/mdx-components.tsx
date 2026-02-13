@@ -9,6 +9,8 @@ import { SignUpForFree } from '@/components/ui/sign-up-for-free';
 import * as AccordionsComponents from 'fumadocs-ui/components/accordion';
 import * as ButtonComponents from '@/components/ui/button';
 import * as LucideIconComponents from 'lucide-react';
+import { TypeTable } from '@/components/type-table';
+
 
 // Filter out non-component exports from lucide-react (like createLucideIcon, Icon, etc.)
 const LucideIcons = Object.fromEntries(
@@ -30,5 +32,6 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ...AccordionsComponents,
     ...ButtonComponents,
     ...LucideIcons,
+    TypeTable,
   };
 }

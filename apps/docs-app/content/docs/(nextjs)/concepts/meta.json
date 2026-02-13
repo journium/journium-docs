@@ -6,7 +6,7 @@
     "pages": [
       "application",
       "events",
-      "insight_tracker",
+      "insight_trackers",
       "jobs",
       "insights"
     ]

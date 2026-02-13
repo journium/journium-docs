@@ -1,0 +1,285 @@
+---
+title: Tracker Specification
+description: Learn about the Journium Insight Tracker specification. Irrespective of how a tracker is created or maintained, 
+             it is always stored as a YAML file.
+icon: InsightTracker
+---
+
+A Journium InsightTracker is defined using a structured YAML format that follows the [Journium InsightTracker schema](https://journium.app/schemas/journium-insight-tracker.schema.json).
+
+## Top-Level Properties
+
+<TypeTable
+  type={{
+    apiVersion: {
+      description: 'The version of the Journium InsightTracker schema.',
+      type: 'string',
+      typeDescription: 'Currently supported: `journium.app/v0Alpha`',
+      required: true,
+    },
+    kind: {
+      description: 'The type of the tracker. Must be `InsightTracker` for Journium InsightTrackers.',
+      type: 'string',
+      typeDescription: '`"InsightTracker"`',
+      required: true,
+    },
+    metadata: {
+      description: 'Metadata for the tracker.',
+      type: 'object',
+      typeDescription: 'Contains `name`, `displayName`, and optional `description`',
+      required: true,
+      typeDescriptionLink: '#metadata-properties',
+    },
+    spec: {
+      description: 'Tracker specification.',
+      type: 'object',
+      typeDescription: 'Defines the tracker type, trigger, LLM prompt, and data selection',
+      required: true,
+      typeDescriptionLink: '#spec-properties-llm-tracker',
+    },
+  }}
+/>
+
+### `metadata` Properties
+
+<TypeTable
+  type={{
+    name: {
+      description: 'Unique identifier for this tracker. Must be unique within the application. Use kebab-case (e.g., `signup-to-first-habit`). Trackers may reference other trackers by name.',
+      type: 'string',
+      typeDescription: '3-63 characters, pattern: `^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`',
+      required: true,
+    },
+    displayName: {
+      description: 'Human-friendly name shown in the Journium UI (e.g., "Signup to First Habit Dropoff").',
+      type: 'string',
+      typeDescription: '1-120 characters',
+      required: true,
+    },
+    description: {
+      description: 'Description of the tracker. This is used to describe the tracker in the Journium UI.',
+      type: 'string',
+      typeDescription: '1-200 characters',
+      required: false,
+    },
+  }}
+/>
+
+### `spec` Properties (LLM Tracker)
+
+<TypeTable
+  type={{
+    type: {
+      description: 'Spec type discriminator. Must be `LLM` for LLM-based trackers.',
+      type: 'string',
+      typeDescription: '`"LLM"`',
+      required: true,
+    },
+    trigger: {
+      description: 'Controls when the tracker runs.',
+      type: 'object',
+      typeDescription: 'Contains `mode` and optional `schedule`',
+      required: true,
+      typeDescriptionLink: '#trigger-properties',
+    },
+    llmPrompt: {
+      description: 'LLM prompt used to generate the insight.',
+      type: 'string',
+      typeDescription: '10-5000 characters',
+      required: true,
+    },
+    data: {
+      description: 'Event data selection and limits.',
+      type: 'object',
+      typeDescription: 'Controls what event data is available to the tracker',
+      required: true,
+      typeDescriptionLink: '#data-properties',
+    },
+  }}
+/>
+
+#### `trigger` Properties
+
+<TypeTable
+  type={{
+    mode: {
+      description: 'If `automatic`, Journium runs this tracker on a schedule. If `manual`, it only runs when explicitly triggered.',
+      type: 'string',
+      typeDescription: '`"automatic"` | `"manual"`',
+      required: true,
+    },
+    schedule: {
+      description: 'Required when mode is `automatic`. Either a preset cadence or a cron schedule.',
+      type: 'string | object',
+      typeDescription: 'Preset: `"hourly"` | `"daily"` | `"weekly"` | `"monthly"` or Cron object: `{ cron: string }`',
+      required: false,
+    },
+  }}
+/>
+
+#### `data` Properties
+
+<TypeTable
+  type={{
+    minEvents: {
+      description: 'Optional minimum number of events required to run the tracker.',
+      type: 'integer',
+      typeDescription: 'Minimum value: 1',
+      required: false,
+      default: 1,
+    },
+    maxEvents: {
+      description: 'Optional maximum number of events to consider. If omitted, the execution engine applies a reasonable default.',
+      type: 'integer',
+      typeDescription: 'Range: 1-1000',
+      required: false,
+      default: 1000,
+    },
+    events: {
+      description: 'Events to include. Use `*` for all events, or provide an explicit allowlist of event names.',
+      type: 'string | array',
+      typeDescription: '`"*"` or array of event names (e.g., `["signup_completed", "habit_created"]`)',
+      required: true,
+    },
+  }}
+/>
+
+## Examples
+
+### Full Example
+
+```yaml title=".journium/trackers/signup-to-first-habit.yml"
+apiVersion: journium.app/v0Alpha
+kind: InsightTracker
+metadata:
+  name: signup-to-first-habit
+  displayName: Signup to First Habit Dropoff
+  description: Track how many users sign up but don't complete their first habit
+spec:
+  type: LLM
+  trigger:
+    mode: automatic
+  llmPrompt: |
+    You are a helpful assistant that generates insights based on the provided data.
+    The data is a list of events that have occurred in the system.
+    Generate an insight based on the data.
+    The insight should be a single sentence that summarizes the data.
+    The insight should be in the following format:
+    - **[Insight Title]**: [Insight Description]
+  data:
+    events:
+      - signup_completed
+      - habit_created
+    minEvents: 1
+    maxEvents: 100
+```
+
+## Snippets
+
+The following snippets describe each configuration option in the tracker specification.
+
+### Execution schedule
+
+You can configure the schedule for the tracker to run on.
+
+
+#### Preset cadence
+
+Valid presets are: `hourly`, `daily`, `weekly`, `monthly`.
+
+```yaml title=".journium/trackers/my-tracker.yml"
+spec:
+  trigger:
+    mode: automatic
+    schedule: daily
+```
+#### Cron expression
+
+In the example below, the tracker will run every 45 minutes.
+The cron expression is a string that follows the format of 
+the [cron](https://en.wikipedia.org/wiki/Cron) expression parser.
+
+
+```yaml title=".journium/trackers/my-tracker.yml"
+spec:
+  trigger:
+    mode: automatic
+    schedule: 
+      cron: "*/45 * * * *"
+```
+
+#### Manual Schedule
+
+For trackers in manual mode, the tracker will not run automatically. It will only run when explicitly triggered. 
+You can trigger a tracker manually from the Journium UI.
+
+```yaml title=".journium/trackers/my-tracker.yml"
+spec:
+  trigger:
+    mode: manual
+``` 
+
+### Event selection and limits
+
+You can specify the events to include in the tracker and the limits on the number of events to process.
+
+#### Process a set of events
+
+The example below will process the `signup_completed` and `habit_created` events.
+```yaml title=".journium/trackers/my-tracker.yml"
+spec:
+  data:
+    events:
+      - signup_completed
+      - habit_created
+```
+
+#### Process all events
+
+The example below will process all events.
+```yaml title=".journium/trackers/my-tracker.yml"
+spec:
+  data:
+    events: "*"
+```
+
+#### Minimum number of events
+
+The example below will execute only if at least 50 events are available.
+```yaml title=".journium/trackers/my-tracker.yml"
+spec:
+  data:
+    minEvents: 50
+```
+
+#### Maximum number of events
+
+The example below will select at most 100 events. Remaining events will be ignored in the current execution.
+```yaml title=".journium/trackers/my-tracker.yml"
+spec:
+  data:
+    maxEvents: 100
+```
+
+
+### LLM Prompt
+
+The LLM prompt is used to generate the insight. As a best practice, you should use the `|` character to define a multi-line string.
+Consider the following example:
+
+```yaml title=".journium/trackers/my-tracker.yml"
+spec: 
+  llmPrompt: |
+    You are a helpful assistant that generates insights based on the provided data.
+    The data is a list of events that have occurred in the system.
+    Generate an insight based on the data.
+    The insight should be a single sentence that summarizes the data.
+    The insight should be in the following format:
+    - **[Insight Title]**: [Insight Description]
+```
+
+#### Best practices
+
+- Consider keeping the LLM prompt concise and to the point.
+- Try to acheive a single goal per tracker.
+- Configure different trackers for different goals.

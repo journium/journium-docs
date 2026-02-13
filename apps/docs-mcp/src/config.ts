@@ -24,6 +24,14 @@ export type DocsMcpConfig = {
      * The root directory where docs are located
      */
     workspaceRoot: string;
+  
+    /**
+     * Optional: Route patterns to exclude from the index.
+     * These are typically internal/shared files that are included in other MDX files
+     * but shouldn't be exposed as standalone routes.
+     * Supports glob-like patterns (e.g., "/shared/**", "/internal/*")
+     */
+    excludeRoutePatterns?: string[];
   };
   
   /**
@@ -43,6 +51,7 @@ export type DocsMcpConfig = {
         routeKeys: ["route", "slug", "pathname", "href"],
         docsRootDir: "apps/docs-app/content/docs",
         workspaceRoot,
+        excludeRoutePatterns: ["/.includes/**"],
       };
     } else {
       // Production: use local content directory (from dist/ -> ../content)
@@ -53,6 +62,7 @@ export type DocsMcpConfig = {
         routeKeys: ["route", "slug", "pathname", "href"],
         docsRootDir: "content",
         workspaceRoot,
+        excludeRoutePatterns: ["/.includes/**"],
       };
     }
   }

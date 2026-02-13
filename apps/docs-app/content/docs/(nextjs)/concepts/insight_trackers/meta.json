@@ -1,0 +1,11 @@
+{
+    "title": "Insight Trackers",
+    "description": "Insight Trackers documentation",
+    "root": false,
+    "defaultOpen": false,
+    "pages": [
+      "creating_trackers",
+      "tracker_specification",
+      "tracker_repositories"
+    ]
+  }

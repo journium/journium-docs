@@ -5,7 +5,7 @@ description: Events are single pieces of telemetry data that drive analytics
 icon: Event
 ---
 
-<include>../../shared/.shared.events.part1.mdx</include>
+<include>../../.includes/.shared.events.part1.mdx</include>
 
 
 ### Custom Events
@@ -13,22 +13,14 @@ icon: Event
 Custom Events are events that you manually send to Journium. 
 You can send any event you want to Journium, and you can add any properties you want to the event.
 
-```tsx title="app/your-path/page.tsx"
-import { useTrackEvent } from '@journium/react';
-
-function ProductPage() {
-  const trackEvent = useTrackEvent();
-
-  const handlePurchase = () => {
-    trackEvent('purchase_started', {
-      product_id: 'prod_123',
-      page: 'product_detail',
-      value: 29.99
-    });
-  };
-
-  return <button onClick={handlePurchase}>Buy Now</button>;
-}
+```ts
+journium.track('product_viewed', {
+  product_id: 'prod_123',
+  product_name: 'Running Shoes',
+  price: 89.99,
+  currency: 'USD',
+  category: 'Footwear'
+});
 ```
 
 ### Auto-captured Events
@@ -37,4 +29,4 @@ Auto-captured Events are events that are automatically captured by the SDK. They
 or disabled by configuring the SDK. See 
 [Configuration Options](/docs/js/configuration) for more details.
 
-<include>../../shared/.shared.events.part2.mdx</include>
+<include>../../.includes/.shared.events.part2.mdx</include>
