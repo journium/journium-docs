@@ -258,3 +258,26 @@ spec:
   data:
     maxEvents: 100
 ```
+
+
+### LLM Prompt
+
+The LLM prompt is used to generate the insight. As a best practice, you should use the `|` character to define a multi-line string.
+Consider the following example:
+
+```yaml title=".journium/trackers/my-tracker.yml"
+spec: 
+  llmPrompt: |
+    You are a helpful assistant that generates insights based on the provided data.
+    The data is a list of events that have occurred in the system.
+    Generate an insight based on the data.
+    The insight should be a single sentence that summarizes the data.
+    The insight should be in the following format:
+    - **[Insight Title]**: [Insight Description]
+```
+
+#### Best practices
+
+- Consider keeping the LLM prompt concise and to the point.
+- Try to acheive a single goal per tracker.
+- Configure different trackers for different goals.
