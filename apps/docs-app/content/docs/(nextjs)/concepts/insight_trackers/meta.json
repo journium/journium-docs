@@ -5,6 +5,7 @@
     "defaultOpen": false,
     "pages": [
       "creating_trackers",
-      "tracker_specification"
+      "tracker_specification",
+      "tracker_repositories"
     ]
   }
