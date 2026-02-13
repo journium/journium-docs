@@ -127,7 +127,7 @@ The prompts provide pre-configured workflows for common documentation tasks like
         filePath: doc.filePath,
       };
       if (inc.frontmatter) payload.frontmatter = doc.frontmatter;
-      if (inc.mdx) payload.mdx = doc.bodyMdx;
+      if (inc.mdx) payload.mdx = doc.bodyMdxResolved;
       if (inc.text) payload.text = doc.text;
 
       return { content: [{ type: "text", text: JSON.stringify(payload, null, 2) }] };

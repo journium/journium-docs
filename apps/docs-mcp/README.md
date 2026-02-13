@@ -138,9 +138,13 @@ docker push <account>.dkr.ecr.<region>.amazonaws.com/journium-docs-mcp:latest
 
 The server exposes these MCP tools:
 
-1. **search_docs** - Search documentation by query
-2. **get_doc_by_route** - Retrieve specific doc by route
-3. **list_routes** - List all available documentation routes
+1. **docs_search** - Search documentation by query
+2. **docs_getPage** - Retrieve specific doc by route or file path
+3. **docs_listRoutes** - List all available documentation routes
+
+### Implementation Notes
+
+The indexer automatically resolves `<include>` tags in MDX files during indexing, allowing documentation to be modular and reusable across different sections while presenting a seamless experience to AI assistants.
 
 ## Build Process
 

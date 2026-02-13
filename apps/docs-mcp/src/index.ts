@@ -100,7 +100,9 @@ async function main() {
   const port = parseInt(process.env.PORT ?? "3100", 10);
 
   const index = new DocsIndex(config);
+  console.log("Rebuilding docs index....");
   await index.rebuild();
+  console.log("Docs index rebuilt");
 
   // Don't create MCP server here - we'll create one per connection
   const app = createMcpExpressApp({ host: "0.0.0.0" });
