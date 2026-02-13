@@ -6,4 +6,63 @@ description: Learn how to version control your trackers in a Git repository.
 icon: TrackerRepository
 ---
 
-TODO: Add content here.
+As a best practice, it is recommended to use a Git repository to store your trackers. You can connect a repository to your application instance
+to deploy and manage your trackers.
+When you push your changes to the deployment branch, the trackers will be synced to your application instance.
+You can select any branch as the deployment branch. By default, the deployment branch is the default branch of the repository.
+
+<Callout>
+**Note**: Your tracker yaml files should be in the <span className="font-mono text-primary">.journium/trackers</span> directory in your repository.
+For example, if your repository is `https://github.com/my-org/my-repo`, your tracker yaml files should be in the `https://github.com/my-org/my-repo/.journium/trackers` directory.
+</Callout>
+
+Follw the steps below to to link a git repository containing tracker yaml files to your application instance.
+
+<section id="setup-section">
+<div className="fd-steps [&_h3]:fd-step">
+
+### Connect Git Account
+
+To link a repository, you need to have a Git integration configured in Journium. You can configure a Git integration at 
+[Integrations | Git](https://dashboard.journium.app/integrations/git) by connecting your GitHub account. For other 
+Git providers, drop us a note at [support@journium.app](mailto:support@journium.app).
+
+The GitHub App for Journium is used to connect your GitHub repositories to your application instance. 
+You can provide permissions to the specific repositories you want to connect to your application instance.
+
+<ThemedImage 
+  srcLight="/images/git_integration_configuration_light.png" 
+  srcDark="/images/git_integration_configuration_dark.png" 
+  alt="Git Integration Configuration" 
+  width={1000} 
+  height={1000} 
+/>
+
+### Link Repository
+
+After you have configured a Git integration, you can link a repository to your application instance.
+
+<ThemedImage 
+  srcLight="/images/link_repository_light.png" 
+  srcDark="/images/link_repository_dark.png" 
+  alt="Link Repository" 
+  width={1000} 
+  height={1000} 
+/>
+
+### View Deployment History
+
+Navigate to the Tracker Repositories page to view the deployment history of your trackers. When you push changes to
+the deployment branch, the trackers will be synced to your application instance. This is called a deployment. Files are
+deployed to the application instance only if the YAML is valid.
+
+<ThemedImage 
+  srcLight="/images/deployment_history_light.png" 
+  srcDark="/images/deployment_history_dark.png" 
+  alt="Deployment History" 
+  width={1000} 
+  height={1000} 
+/>
+
+</div>
+</section>

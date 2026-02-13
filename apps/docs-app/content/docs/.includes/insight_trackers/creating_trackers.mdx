@@ -135,13 +135,14 @@ The YAML editor is pre-filled with a sample tracker specification. You can edit 
   height={1000} 
 />
 
-## Version Control
+The editor provides a validation status badge to indicate the validity of the YAML. If errors exist, they are shown in the gutter.
+Hover over the error to see the error message. You can save only if the YAML is valid.
 
-You can version control your trackers in a Git repository. This will allow you to deploy and manage your trackers.
+## From Git Repository
 
 You can connect a repository to your application instance at 
-[Developers | Insight Trackers | Connect Repository](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/insight-trackers/connect-repository).
-Choose the repository you want to connect to your application instance.
+[Developers | Insight Trackers | Link Git Repository](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/insight-trackers/new/git).
+Tracker files from your git repository will be synced to your application instance.
 
 <ThemedImage 
   srcLight="/images/tracker_repository_connection_light.png" 
@@ -150,3 +151,13 @@ Choose the repository you want to connect to your application instance.
   width={1000} 
   height={1000} 
 />
+
+
+When you push your changes to the deployment branch, the trackers will be synced to your application instance.
+You can select any branch as the deployment branch. By default, the deployment branch is the default branch of the repository.
+
+<Callout>
+**Note**: Your tracker yaml files should be in the <span className="font-mono text-primary">.journium/trackers</span> directory in your repository.
+For example, if your repository is `https://github.com/my-org/my-repo`, your tracker yaml files should be in the `https://github.com/my-org/my-repo/.journium/trackers` directory.
+</Callout>
+
