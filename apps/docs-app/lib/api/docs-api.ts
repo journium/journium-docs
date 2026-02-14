@@ -32,7 +32,8 @@ export async function submitPageFeedback(
 }
 
 /**
- * Submit block-level feedback
+ * Submit block-level feedback.
+ * NOTE: This is not implemented yet.
  */
 export async function submitBlockFeedback(
   feedback: BlockFeedback
