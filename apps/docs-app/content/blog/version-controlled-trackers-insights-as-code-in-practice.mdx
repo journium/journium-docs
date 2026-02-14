@@ -7,25 +7,23 @@ date: 2026-02-14
 author: Arun Patra
 ---
 
-We're excited to announce full support for **version-controlled insight trackers** in Journium. You can now define, review, and deploy your product intelligence exactly like you ship code—in Git, through pull requests, with automatic deployments.
-
-This isn't a convenience feature. It's the complete implementation of Insights as Code.
+We're excited to announce full support for **version-controlled insight trackers** in Journium. Define, review, and deploy your product intelligence exactly like you ship code—in Git, through pull requests, with automatic deployments.
 
 ## The Problem: Analytics Configuration Trapped in UIs
 
-Most analytics tools force you to configure everything through dashboards. Click through forms. Configure dropdowns. Hope you remember what you changed last week. This approach works fine for exploration, but it breaks down when analytics become critical infrastructure.
+Most analytics tools force you to configure everything through dashboards. This approach works for exploration, but breaks down when analytics become critical infrastructure.
 
-Consider what happens when a tracker starts producing incorrect insights. Who modified it? What was the configuration before? Why did they make that change? The answers usually require checking with multiple people, hoping someone remembers the context, and manually reconstructing the previous state from memory.
+Consider what happens when a tracker starts producing incorrect insights. Who modified it? What was the configuration before? Why did they make that change? The answers require checking with multiple people, hoping someone remembers the context, and manually reconstructing the previous state from memory.
 
-Or imagine shipping a feature and realizing two weeks later that nobody configured analytics for it. By the time you add tracking, you've lost two weeks of data about user behavior during the critical launch period.
+Or shipping a feature and realizing two weeks later that nobody configured analytics for it—you've lost two weeks of critical launch period data.
 
-These aren't edge cases. They're the inevitable result of treating analytics configuration as separate from code—something that lives in dashboards instead of version control, changes without review, and deploys independently of the features it monitors.
+These aren't edge cases. They're inevitable when analytics configuration lives in dashboards instead of version control, changes without review, and deploys independently of the features it monitors.
 
-For teams that already treat infrastructure, testing, and observability as code, this workflow feels fundamentally broken. Your servers are managed with Terraform. Your tests run in CI. Your monitoring alerts live in Git. But your analytics? Those still require clicking through a dashboard.
+For teams that already treat infrastructure, testing, and observability as code, this workflow feels broken.
 
 ## The Solution: Trackers as YAML in Git
 
-With Journium's tracker repositories, your insight definitions live where they belong—in your codebase:
+Journium tracker repositories put insight definitions in your codebase:
 
 ```yaml title=".journium/trackers/onboarding-dropoff.yml"
 apiVersion: journium.app/v0Alpha
@@ -54,7 +52,7 @@ spec:
     maxEvents: 500
 ```
 
-This tracker specification is now a **first-class artifact** in your repository. It gets reviewed, versioned, and deployed just like application code.
+Trackers are first-class artifacts in your repository—reviewed, versioned, and deployed like application code.
 
 ## How It Works
 
@@ -63,14 +61,7 @@ This tracker specification is now a **first-class artifact** in your repository.
 
 ### Connect Your Repository
 
-Link any GitHub repository to your Journium application instance. You control which repositories have access—Journium only sees what you explicitly authorize.
-
-The setup takes less than two minutes:
-
-1. Install the Journium GitHub App
-2. Grant repository access
-3. Choose your deployment branch (usually `main` or `production`)
-4. Done
+Link any GitHub repository to your Journium application. Install the GitHub App, grant repository access, choose your deployment branch. Done.
 
 ### Organize Your Trackers
 
@@ -88,19 +79,13 @@ my-app/
 └── package.json
 ```
 
-You can colocate trackers with your application code (recommended) or maintain them in a separate repository. Both approaches work—choose what fits your team's workflow.
+Colocate trackers with application code or maintain them separately—both work.
 
-**Monorepo-friendly**: The `.journium/trackers/` convention works at any depth. Place trackers at the root or within individual packages. Journium discovers them automatically.
+**Monorepo-friendly**: The `.journium/trackers/` convention works at any depth. Journium discovers trackers automatically.
 
 ### Deploy on Push
 
-When you push changes to your deployment branch, Journium automatically syncs your trackers:
-
-- **Validates YAML** against the schema before deployment
-- **Shows deployment history** with timestamps and commit references
-- **Fails fast** if validation errors exist—broken trackers never deploy
-
-No manual syncing. No dashboard clicks. Push your branch, and your insights deploy.
+Push to your deployment branch. Journium validates YAML against the schema, shows deployment history with commit references, and fails fast if validation errors exist. Broken trackers never deploy.
 
 </div>
 </section>
@@ -109,9 +94,7 @@ No manual syncing. No dashboard clicks. Push your branch, and your insights depl
 
 ### Real-Time Validation in Your Editor
 
-The [Journium VS Code extension](https://marketplace.visualstudio.com/items?itemName=Journium.journium) brings the same level of tooling to tracker configuration that you expect for code. As you type, the extension validates your YAML against the tracker schema, catching errors before you commit. Auto-completion suggests valid values for every property. Hover over any field to see inline documentation explaining what it does.
-
-This means you can write trackers with the same confidence you write code—knowing that invalid configurations are caught immediately, not after deployment. Works in VS Code, Cursor, and any VS Code-compatible editor.
+The [Journium VS Code extension](https://marketplace.visualstudio.com/items?itemName=Journium.journium) validates YAML against the tracker schema as you type, suggests valid values via auto-completion, and shows inline documentation on hover. Write trackers with the same confidence you write code—invalid configurations are caught immediately, not after deployment.
 
 ```yaml title=".journium/trackers/example.yml"
 spec:
@@ -139,24 +122,22 @@ spec:
     maxEvents: 500
 ```
 
-Your team reviews the change. Discusses the rationale. Approves or requests modifications. Merges when ready.
-
-**The insight logic is now part of your code review process.**
+Your team reviews the change, discusses the rationale, approves or requests modifications. Insight logic is now part of your code review process.
 
 ### Rollback with Git
 
-If an insight tracker causes issues (too noisy, wrong events, unclear prompt), rollback is one command:
+Tracker causing issues? Rollback is one command:
 
 ```bash title="Terminal"
 git revert abc123
 git push
 ```
 
-Your trackers instantly revert to the previous working state. No dashboard archaeology required.
+Trackers revert to the previous working state instantly.
 
 ### CI/CD Integration
 
-Because trackers are just YAML files in your repository, you can validate them in CI before they reach production. Add a validation step to your GitHub Actions workflow:
+Trackers are YAML files in your repository—validate them in CI before production:
 
 ```yaml title=".github/workflows/validate-trackers.yml"
 name: Validate Trackers
@@ -176,7 +157,7 @@ jobs:
             -d ".journium/trackers/*.yaml"
 ```
 
-Now broken trackers fail CI and never merge. Your analytics stay reliable because they're subject to the same quality gates as your application code.
+Broken trackers fail CI and never merge. Analytics stay reliable through the same quality gates as application code.
 
 ## Why This Matters
 
@@ -186,9 +167,9 @@ Three months after launch, you discover that a critical onboarding insight track
 
 This scenario plays out constantly in organizations using traditional analytics tools. Analytics logic lives in dashboard configurations—hidden from view, unversioned, unreviewable. When something breaks or produces misleading results, there's no paper trail. Just a guess about what might have changed.
 
-Version-controlled trackers eliminate this problem entirely. Every tracker is a YAML file in your repository. What events are we tracking? Why does this analysis matter? When should it run? How much data should it consider? These decisions are explicit, readable, and subject to the same review process as your application code.
+Version-controlled trackers eliminate this. Every tracker is a YAML file in your repository—explicit, readable, and subject to the same review process as application code.
 
-When someone proposes changing a tracker's event selection from 100 to 500 samples, that change appears in a pull request. Your team discusses whether the larger sample size is worth the additional processing cost. Someone points out that the tracker already struggles to complete within its time window. The change gets refined before it merges. The insight logic improves through peer review, not trial-and-error in production.
+When someone proposes changing a tracker's event selection from 100 to 500 samples, the change appears in a pull request. Your team discusses whether the larger sample size is worth the processing cost. Someone points out the tracker already struggles to complete within its time window. The change gets refined before merge. Insight logic improves through peer review, not trial-and-error in production.
 
 ### Change History is Preserved
 
@@ -204,15 +185,15 @@ f2e9d8a Add new tracker for feature-adoption analysis
 c4b1a6e Update onboarding-dropoff to run daily instead of weekly
 ```
 
-Every modification to your analytics is captured in Git history with full context. You can see exactly who changed what, when they changed it, what the commit message explains, and what the code review discussion revealed. This audit trail doesn't just help with debugging—it creates institutional knowledge about why your analytics are configured the way they are.
+Every modification to your analytics is captured in Git history with full context—who changed what, when, the commit message, and the code review discussion. This audit trail creates institutional knowledge about why your analytics are configured the way they are.
 
-When a new team member asks "why does this tracker only analyze 100 events?", the answer isn't lost in someone's memory or buried in Slack. It's in the Git history, often with a link to the original discussion about performance tradeoffs.
+When a new team member asks "why does this tracker only analyze 100 events?", the answer isn't lost in someone's memory or buried in Slack. It's in Git history, often with a link to the original discussion about performance tradeoffs.
 
 ### Analytics Logic Lives Near Code
 
-Here's a common pattern that version-controlled trackers eliminate: Your team ships a new collaboration feature on Monday. On Tuesday, someone files a ticket to "add analytics for the new feature." On Wednesday, a product manager configures a tracker in the dashboard. By Thursday, you realize the tracker is misconfigured because the PM didn't know about the edge cases the engineers handled during implementation.
+Here's a common pattern version-controlled trackers eliminate: Team ships a new collaboration feature Monday. Tuesday, someone files a ticket to "add analytics for the new feature." Wednesday, a PM configures a tracker in the dashboard. Thursday, you realize the tracker is misconfigured because the PM didn't know about the edge cases engineers handled during implementation.
 
-Version-controlled trackers collapse this timeline. When you ship a new feature, the insight tracker that monitors it ships in the same pull request:
+Version-controlled trackers collapse this timeline. When you ship a feature, the insight tracker ships in the same pull request:
 
 ```bash
 # PR: Add team collaboration feature
@@ -228,29 +209,27 @@ src/
   team-collaboration-adoption.yml
 ```
 
-The developer who built the feature writes the tracker. They know which events matter, which edge cases to consider, and what "success" looks like for this particular flow. That knowledge gets encoded directly into the tracker specification, reviewed alongside the feature code, and deployed simultaneously. No follow-up tickets. No knowledge transfer. No lag between shipping features and understanding their impact.
+The developer who built the feature writes the tracker. They know which events matter, which edge cases to consider, and what "success" looks like. That knowledge gets encoded into the tracker specification, reviewed alongside the feature code, and deployed simultaneously. No follow-up tickets. No lag between shipping features and understanding their impact.
 
 ### Deployment is Automatic
 
-Traditional analytics tools create a coordination problem. You deploy your application code through CI/CD, but you configure your analytics through a dashboard. These two workflows operate independently, creating constant synchronization issues.
+Traditional analytics create a coordination problem: deploy application code through CI/CD, configure analytics through a dashboard. Two workflows operating independently, creating constant synchronization issues.
 
-Did someone remember to update the tracker after the deployment? Did the tracker configuration change while the feature was in code review? Is staging configured the same way as production? These questions disappear with version-controlled trackers.
+Did someone remember to update the tracker after deployment? Did the tracker configuration change while the feature was in code review? Is staging configured like production? These questions disappear with version-controlled trackers.
 
-Push your branch, and your insights deploy automatically. The same Git workflow that manages your application code manages your analytics configuration. Trackers stay synchronized with your application without manual intervention, because they're deployed by the same process that deploys your code.
+Push your branch—insights deploy automatically. The same Git workflow that manages application code manages analytics configuration. Trackers stay synchronized with your application because they're deployed by the same process.
 
 ## Real-World Workflow
 
-Here's how version-controlled trackers fit into a typical development cycle:
+Launching a new onboarding flow:
 
-### Scenario: Launching a New Onboarding Flow
-
-**1. Feature branch**
+**1. Create feature branch**
 
 ```bash title="Terminal"
 git checkout -b feature/new-onboarding-flow
 ```
 
-**2. Implement the feature + tracker together**
+**2. Implement feature + tracker**
 
 ```yaml title=".journium/trackers/onboarding-v2-analysis.yml"
 apiVersion: journium.app/v0Alpha
@@ -278,92 +257,28 @@ spec:
     maxEvents: 1000
 ```
 
-**3. Open pull request**
+**3. Open pull request**—Team reviews feature and tracker. Someone suggests increasing `maxEvents`. You update the YAML. Everyone approves.
 
-Your team reviews both the feature code and the insight tracker. Someone suggests increasing `maxEvents` to capture more data. You update the YAML. Everyone approves.
-
-**4. Merge to main**
+**4. Merge and deploy**
 
 ```bash title="Terminal"
 git merge feature/new-onboarding-flow
 git push origin main
 ```
 
-**5. Automatic deployment**
+Application code deploys via CI/CD. Tracker deploys via Journium's automatic sync. Insights start flowing.
 
-- Application code deploys via your existing CI/CD
-- Tracker deploys via Journium's automatic sync
-- Insights start flowing the next day
-
-**6. Monitor results**
-
-Journium analyzes your new onboarding flow daily and delivers insights automatically. No dashboard hunting. No manual queries.
-
-**7. Iterate based on insights**
-
-If the tracker reveals issues, you adjust the onboarding flow and update the tracker in the same commit. The analytics evolve with the product.
+**5. Iterate**—If the tracker reveals issues, adjust the onboarding flow and update the tracker in the same commit. Analytics evolve with the product.
 
 ## Advanced Patterns
 
-### Scheduled vs. Manual Trackers
+**Scheduled vs. Manual**: Run some trackers continuously (`mode: automatic, schedule: hourly`), trigger others on-demand (`mode: manual`). Manual trackers are useful for exploratory analysis or expensive operations.
 
-Run some trackers continuously, trigger others on-demand:
+**Custom Cron Schedules**: Use cron expressions for precise timing (`cron: "0 9 * * 1"` for Monday 9 AM).
 
-```yaml title=".journium/trackers/continuous-monitor.yml"
-spec:
-  trigger:
-    mode: automatic
-    schedule: hourly
-```
+**Event Filtering**: Focus trackers on specific user journeys (list specific events) or track everything (`events: "*"`).
 
-```yaml title=".journium/trackers/manual-analysis.yml"
-spec:
-  trigger:
-    mode: manual
-```
-
-Manual trackers are useful for exploratory analysis or expensive operations you don't want running continuously.
-
-### Custom Cron Schedules
-
-For precise timing, use cron expressions:
-
-```yaml title=".journium/trackers/weekly-report.yml"
-spec:
-  trigger:
-    mode: automatic
-    schedule:
-      cron: "0 9 * * 1"
-```
-
-### Event Filtering Strategies
-
-Focus trackers on specific user journeys:
-
-```yaml title=".journium/trackers/purchase-events.yml"
-data:
-  events:
-    - product_viewed
-    - cart_updated
-    - checkout_started
-    - purchase_completed
-  maxEvents: 500
-```
-
-```yaml title=".journium/trackers/all-events.yml"
-data:
-  events: "*"
-  maxEvents: 1000
-```
-
-### Multi-Environment Deployments
-
-Use separate branches for staging and production trackers:
-
-- **Staging**: Deploy from `develop` branch to test new trackers
-- **Production**: Deploy from `main` branch for stable insights
-
-Same workflow as your application deployments.
+**Multi-Environment**: Deploy from `develop` branch for staging, `main` for production. Same workflow as application deployments.
 
 ## Comparison: UI vs. Git-Based Trackers
 
@@ -377,93 +292,27 @@ Same workflow as your application deployments.
 | **Team visibility** | ⚠️ Dashboard only | ✅ Git log + PRs |
 | **Editor tooling** | ❌ None | ✅ VS Code extension |
 
-Both approaches work with Journium. Choose the UI for quick experiments. Choose Git for production trackers.
+Both approaches work. Choose the UI for quick experiments. Choose Git for production trackers.
 
 ## Getting Started
 
-<section id="getting-started-section">
-<div className="fd-steps [&_h3]:fd-step">
+Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=Journium.journium) for validation and auto-completion. Add `.journium/trackers/` to your repository with tracker YAML files. Link your repository in the Journium dashboard (Developers → Insight Trackers → Link Git Repository). Push to your deployment branch—Journium validates and deploys automatically.
 
-### Install the VS Code Extension
+See the [tracker repositories documentation](https://journium.app/docs/concepts/insight_trackers/tracker_repositories) for detailed setup.
 
-Search "Journium" in your editor's extensions marketplace, or install directly:
+Version-controlled trackers are live. We're expanding with enhanced CI validation, tracker dependencies for composing complex analyses, Terraform provider for infrastructure management, and webhook integrations for custom workflows.
 
-- **VS Code**: [Marketplace link](https://marketplace.visualstudio.com/items?itemName=Journium.journium)
-- **Cursor**: [Open VSX Registry](https://open-vsx.org/extension/Journium/journium)
-
-### Create Your First Tracker
-
-Add `.journium/trackers/` to your repository and create a YAML file:
-
-```yaml title=".journium/trackers/my-first-tracker.yml"
-apiVersion: journium.app/v0Alpha
-kind: InsightTracker
-metadata:
-  name: my-first-tracker
-  displayName: User Engagement Monitor
-  description: Track daily active user patterns
-spec:
-  type: LLM
-  trigger:
-    mode: automatic
-    schedule: daily
-  llmPrompt: |
-    Analyze user engagement patterns and identify:
-    - Daily active user trends
-    - Peak usage times
-    - Drop-offs or anomalies
-  data:
-    events: "*"
-    maxEvents: 500
-```
-
-### Link Your Repository
-
-In the Journium dashboard:
-
-1. Navigate to **Developers → Insight Trackers → Link Git Repository**
-2. Install the GitHub App and authorize repository access
-3. Select your repository and deployment branch
-4. Save
-
-### Push and Deploy
-
-```bash title="Terminal"
-git add .journium/trackers/my-first-tracker.yml
-git commit -m "Add user engagement tracker"
-git push origin main
-```
-
-Journium deploys your tracker automatically. Check the deployment history in the dashboard to confirm.
-
-
-### View Insights
-
-Your tracker runs on its schedule and delivers insights automatically. You can view the insights in the dashboard.
-
-</div>
-</section>
-
-## What's Next
-
-Version-controlled trackers are live today. We're actively expanding this foundation:
-
-- **Enhanced validation** with more detailed error messages in CI
-- **Tracker dependencies** to compose complex analyses from simpler building blocks
-- **Terraform provider** for managing Journium resources as infrastructure
-- **Webhook integrations** to trigger deployments from custom workflows
-
-If you have feedback or feature requests, [reach out](https://journium.app/contact). We're building this with you.
+Feedback? [Reach out](https://journium.app/contact).
 
 ## The Bigger Picture
 
-Over the past decade, software teams have systematically eliminated manual configuration in favor of declarative, version-controlled definitions. Infrastructure as Code replaced manual server provisioning. Policy as Code replaced security checklists maintained in wikis. Observability as Code replaced ad-hoc monitoring setups configured through vendor dashboards.
+Over the past decade, software teams systematically eliminated manual configuration in favor of declarative, version-controlled definitions. Infrastructure as Code replaced manual server provisioning. Policy as Code replaced security checklists. Observability as Code replaced ad-hoc monitoring setups.
 
-Each shift followed the same pattern: take something critical that was previously managed through UIs, clicks, and tribal knowledge, and move it into version control where it can be reviewed, tested, and deployed like code.
+Each shift followed the same pattern: take something critical previously managed through UIs and tribal knowledge, and move it into version control where it can be reviewed, tested, and deployed like code.
 
-Version-controlled trackers complete this arc for product analytics. Your insight definitions now live in Git, subject to the same rigorous workflow as everything else you build. When you deploy infrastructure changes, you review Terraform configs. When you deploy policy changes, you review OPA rules. When you deploy observability changes, you review SLO definitions. And now, when you deploy analytics changes, you review tracker specifications.
+Version-controlled trackers complete this arc for product analytics. Your insight definitions now live in Git, subject to the same rigorous workflow as everything else you build. When you deploy infrastructure, you review Terraform configs. When you deploy policy, you review OPA rules. When you deploy observability, you review SLO definitions. When you deploy analytics, you review tracker specifications.
 
-The result isn't just better analytics—it's product intelligence that ships with your product, not weeks after it. When a feature goes live, the insights that monitor it go live simultaneously. When you rollback a deployment, your analytics rollback too. Your product and your understanding of it stay synchronized, because they're managed by the same workflow.
+The result: product intelligence that ships with your product, not weeks after it. Features and the insights that monitor them go live simultaneously. Rollbacks include analytics. Your product and your understanding of it stay synchronized, managed by the same workflow.
 
 ---
 
