@@ -197,11 +197,6 @@ nx docker-run docs-mcp
 
 The project includes GitHub Actions workflow for automated deployment. See `.github/workflows/deploy-docs-mcp.yml`.
 
-## Documentation
-
-- **DEPLOYMENT.md** - Complete AWS ECS setup and deployment guide
-- **MIGRATION.md** - Summary of changes and architecture decisions
-- **KEEP_ALIVE.md** - Keep-alive, ping, and connection health documentation
 
 ## Notes
 

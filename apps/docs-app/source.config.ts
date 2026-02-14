@@ -1,4 +1,5 @@
 import { defineDocs, defineConfig, defineCollections, frontmatterSchema } from 'fumadocs-mdx/config';
+import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins';
@@ -32,7 +33,7 @@ export const blog = defineCollections({
 export default defineConfig({
   plugins: [lastModified()],
   mdxOptions: {
-    remarkPlugins: [remarkMath, remarkMdxMermaid],
+    remarkPlugins: [remarkMath, remarkMdxMermaid, remarkMdxFiles],
     // Place it at first, it should be executed before the syntax highlighter
     rehypePlugins: (v) => [rehypeKatex, ...v],
     rehypeCodeOptions: {

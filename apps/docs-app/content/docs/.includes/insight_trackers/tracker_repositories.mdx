@@ -6,15 +6,48 @@ description: Learn how to version control your trackers in a Git repository.
 icon: TrackerRepository
 ---
 
+## Tracker location
+
 As a best practice, it is recommended to use a Git repository to store your trackers. You can connect a repository to your application instance
 to deploy and manage your trackers.
 When you push your changes to the deployment branch, the trackers will be synced to your application instance.
 You can select any branch as the deployment branch. By default, the deployment branch is the default branch of the repository.
 
-<Callout>
-**Note**: Your tracker yaml files should be in the <span className="font-mono text-primary">.journium/trackers</span> directory in your repository.
-For example, if your repository is `https://github.com/my-org/my-repo`, your tracker yaml files should be in the `https://github.com/my-org/my-repo/.journium/trackers` directory.
+
+<Callout type="info" title="Good to know">
+<span className="leading-6">
+  Your tracker yaml files should be in the `.journium/trackers` directory in your repository. 
+  For example, if your repository is `https://github.com/my-org/my-repo`, your tracker yaml 
+  files should be in the `https://github.com/my-org/my-repo/.journium/trackers` directory.
+  </span>
 </Callout>
+
+### Recommended Layout
+
+You can colocate your trackers in your source code repository (recommended) or in a seperate repository as well. 
+Here's how your repository should look like for the best practice:
+
+<Files>
+  <Folder name="repository root" defaultOpen>
+    <Folder name=".journium" defaultOpen>
+      <Folder name="trackers" defaultOpen>
+        <File name="user-signup.yaml" />
+        <File name="api-requests.yaml" />
+        <File name="page-views.yaml" />
+      </Folder>
+    </Folder>
+    <Folder name="src" defaultOpen={false}>
+      <File name="index.js" />
+      <Folder name="utils" defaultOpen>
+        <File name="helper.js" />
+      </Folder>
+    </Folder>
+    <File name="package.json" />
+  </Folder>
+</Files>
+
+
+## Linking a Git Repository
 
 Follw the steps below to to link a git repository containing tracker yaml files to your application instance.
 

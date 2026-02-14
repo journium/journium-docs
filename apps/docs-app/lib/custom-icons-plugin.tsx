@@ -1,5 +1,7 @@
 import { ShopifyIcon } from '@/components/icons/shopify';
 import { WordPressIcon } from '@/components/icons/wordpress';
+import { JrVscodeIcon } from '@/components/icons/jr-vscode';
+import { JrMcpIcon } from '@/components/icons/jr-mcp';
 import type { LoaderPlugin } from 'fumadocs-core/source';
 import { createElement, type ReactNode } from 'react';
 
@@ -11,6 +13,8 @@ export function customIconsPlugin(): LoaderPlugin {
   const icons: Record<string, React.ComponentType> = {
     ShopifyIcon,
     WordPressIcon,
+    JrVscodeIcon,
+    JrMcpIcon,
   };
 
   const replaceIcon = (iconValue: ReactNode): ReactNode => {

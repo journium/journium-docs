@@ -2,7 +2,8 @@
     "title": "Concepts",
     "description": "Concepts documentation",
     "root": false,
-    "defaultOpen": true,
+    "icon": "BookOpen",
+    "defaultOpen": false,
     "pages": [
       "application",
       "events",
