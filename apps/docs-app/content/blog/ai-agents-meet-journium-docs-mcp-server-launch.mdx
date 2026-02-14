@@ -1,0 +1,156 @@
+---
+title: AI Agents Meet Journium Docs
+description: The Journium MCP server is now live. Your AI assistant can search documentation, 
+             retrieve pages, and answer questions about Journium—without leaving your IDE.
+date: 2026-02-14
+author: Arun Patra
+---
+
+We're excited to announce the **Journium MCP server**—a live endpoint that connects AI agents directly to Journium documentation. Your AI assistant can now search our docs, retrieve pages, and answer questions about Journium without leaving your editor.
+
+## The Problem: Documentation and AI Don't Talk
+
+You're integrating Journium into your Next.js app. You ask your AI assistant: "How do I set up an insight tracker in Journium?"
+
+The assistant responds with outdated information from its training data. Maybe it references an API that changed six months ago. 
+Maybe it suggests a configuration pattern we deprecated. Maybe it just makes something up that sounds plausible.
+
+You open a browser. Search for "Journium tracker setup." Click through docs. Copy code. Switch back to your editor. 
+Paste it in. Ask the AI to adapt it to your use case. The AI, still working from stale training data, suggests 
+modifications that don't actually work with the current API.
+
+This loop—AI gives outdated answer → you find real docs → you correct the AI → AI still doesn't have full context—happens constantly. 
+The AI wants to help, but it's working from a snapshot of knowledge that gets staler every day. Your documentation exists, 
+but it's unreachable from inside the AI conversation.
+
+## The Solution: Real-Time Documentation Access via MCP
+
+The Journium MCP server connects AI agents directly to live documentation through the [Model Context Protocol](https://modelcontextprotocol.io)—an open standard that lets AI assistants access external tools and data sources.
+
+When you ask your AI assistant a question about Journium, it queries the MCP server in real-time, retrieves current documentation, and responds with accurate information. No stale training data. No hallucinated APIs.
+
+## How It Works
+
+<section id="how-it-works-section">
+<div className="fd-steps [&_h3]:fd-step">
+
+### Add MCP Server to Your IDE
+
+Add the Journium MCP server to your AI-powered IDE:
+
+```json title="~/.cursor/mcp.json"
+{
+  "mcpServers": {
+    "mcp-journium": {
+      "type": "http",
+      "url": "https://mcp.journium.app/mcp"
+    }
+  }
+}
+```
+
+Works with Cursor, Claude Desktop, Cline, and any MCP-compatible tool. No authentication required.
+
+### Ask Questions
+
+Your AI assistant automatically uses the MCP server for Journium-related questions. Ask "How do I track custom events?" and the AI queries `docs_search()`, retrieves current documentation, and responds with accurate code examples.
+
+When we update our docs, your AI has immediate access. No model retraining. No stale information.
+
+</div>
+</section>
+
+## What the MCP Server Provides
+
+**Semantic search** via `docs_search`—understands intent, not just keywords. Ask "how to identify users" and get documentation about user identification, session management, and the `identify()` method.
+
+**Full page retrieval** via `docs_getPage`—fetches complete documentation with code examples and metadata. Comprehensive answers with full context, not fragments.
+
+**Structure navigation** via `docs_listRoutes`—explores documentation architecture. Ask "what integrations exist?" and the agent lists routes under `/docs/integrations/`, then retrieves relevant pages.
+
+## Why This Matters
+
+### AI Assistance That Actually Helps
+
+AI coding assistants work from training data that's months or years old—helpful for general programming, unreliable for specific tools where APIs evolve constantly.
+
+The MCP server changes this. When working with Journium's SDK or configuring trackers, the AI reads current, authoritative documentation in real-time. It's not guessing from stale training data—it's consulting the same source you would.
+
+Fewer "that API doesn't exist anymore" moments. Fewer corrections. The AI becomes genuinely helpful because it's working from truth, not probability.
+
+### Documentation That Meets You Where You Work
+
+Traditional documentation requires context switching: editor → browser → search → read → copy → editor → paste → adjust.
+
+With the MCP server, documentation comes to your editor. Ask the question. Get the answer, the code, the explanation—right there in the conversation. No browser. No tab juggling.
+
+This preserves cognitive context. You don't leave your editor, don't reconstruct your mental model after reading docs, and stay in flow longer.
+
+### Future-Proof Integration Pattern
+
+Model Context Protocol is an open standard supported by Anthropic (Claude), Cursor, Cline, and a growing ecosystem of AI tools. As more IDEs adopt MCP, the Journium server works seamlessly—no proprietary integrations needed.
+
+We're investing in a protocol, not a specific tool.
+
+## Before and After
+
+**Before**: "How do I version-control Journium trackers?" → AI gives general Git advice → You search docs → Copy YAML → Ask AI to adapt it → AI suggests changes that break the schema.
+
+**After**: "How do I version-control Journium trackers?" → AI queries MCP → Retrieves tracker repositories documentation → Responds with accurate `.journium/trackers/` structure, YAML schema, deployment configuration, and working examples.
+
+The difference isn't speed—it's accuracy. AI suggestions work because they're based on current documentation, not guesses.
+
+## Getting Started
+
+
+Add the Journium MCP server to your MCP-compatible tool (Cursor, Claude Desktop, Cline):
+
+```json title="Configuration"
+{
+  "mcpServers": {
+    "mcp-journium": {
+      "type": "http",
+      "url": "https://mcp.journium.app/mcp"
+    }
+  }
+}
+```
+
+Restart your editor. Start asking Journium questions. Your AI queries the MCP server and responds with current documentation.
+
+See the [full setup guide](https://journium.app/docs/tools/mcp-server) for tool-specific paths.
+
+## What's Next
+
+The MCP server is live and stable today. We're actively expanding what it can do:
+
+- **Interactive examples**: Retrieving runnable code snippets you can execute directly
+- **Contextual workflows**: Multi-step guidance for complex integration scenarios
+- **Error resolution**: Connecting runtime errors to relevant documentation automatically
+- **SDK source access**: Reading actual implementation details when docs aren't enough
+
+Model Context Protocol is young, but it's quickly becoming the standard way AI agents access external knowledge. 
+We're building Journium's MCP capabilities alongside the protocol's evolution.
+
+## Technical Details
+
+**Open standard**: MCP is an [open protocol](https://modelcontextprotocol.io) developed by Anthropic. The Journium server implements standard HTTP transport, compatible with any MCP-compliant agent.
+
+**No authentication**: Read-only access to public documentation. No API keys, no rate limits.
+
+**Privacy**: The server never sees your code, questions, or conversation history. AI assistants retrieve documentation and process responses locally.
+
+## The Bigger Picture
+
+Documentation has always been passive—you search it, read it, apply what you learned. The MCP server makes documentation active. It responds to questions, provides context, and participates directly in your development workflow through AI.
+
+This mirrors what happened with infrastructure, testing, and observability. We stopped manually checking server status and started using proactive monitoring. We stopped manually running tests and started using CI. Now we're moving from manually searching docs to having AI fetch documentation contextually as we build.
+
+When documentation is accessible from inside AI-assisted development, it becomes part of the conversation instead of something you consult separately.
+
+---
+
+**Ready to connect your AI assistant to Journium docs?** Check out the 
+[MCP server setup guide](https://journium.app/docs/tools/mcp-server) for configuration instructions for your IDE.
+
+*Questions about MCP integration? [Let us know](https://journium.app/contact). We'd love to hear how you're using the server.*
