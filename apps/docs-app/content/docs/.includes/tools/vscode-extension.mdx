@@ -1,7 +1,115 @@
 ---
-title: "VSCode Extension"
-description: "VSCode extension for Journium"
+title: "VS Code Extension"
+description: "Validate and manage Journium trackers directly in your editor"
 icon: JrVscodeIcon
 ---
 
-TODO: VSCode extension for Journium.
+The Journium VS Code extension provides real-time validation, auto-completion, and tooling for insight tracker files. Works with VS Code and VS Code-compatible editors like Cursor.
+
+## Installation
+
+### Recommended: Install from Your IDE
+
+The quickest way to install is directly from your editor's Extensions view:
+
+1. Open your editor (VS Code, Cursor, or other compatible IDE)
+2. Go to the Extensions view (`Cmd+Shift+X` / `Ctrl+Shift+X`)
+3. Search for "Journium"
+4. Click Install
+
+### Alternative: Direct Download
+
+You can also install directly from these registries:
+
+- **VS Code users**: [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=Journium.journium)
+- **Cursor and other editors**: [Open VSX Registry](https://open-vsx.org/extension/Journium/journium)
+
+Many VS Code-compatible editors like Cursor use the Open VSX Registry as their extension source.
+
+## Features
+
+### Automatic Activation
+
+The extension activates automatically when it detects tracker files in `.journium/trackers/` within your workspace. No manual configuration required.
+
+### Real-time Schema Validation
+
+Get instant feedback as you write tracker YAML files. The extension validates all files under `.journium/trackers/` against the Journium insight tracker schema, catching errors before deployment.
+
+### IntelliSense Support
+
+Benefit from auto-completion, hover documentation, and inline schema hints while editing tracker files. Write trackers faster with contextual suggestions.
+
+### Monorepo Ready
+
+Works seamlessly with monorepos and nested folder structures. The extension detects tracker files at any depth within your workspace.
+
+## Getting Started
+
+Once installed, the extension works automatically:
+
+1. Create or open a workspace containing a `.journium/trackers/` folder
+2. Add YAML files to define your trackers
+3. Start editing—validation and IntelliSense activate automatically
+
+The extension activates when it detects files matching `**/.journium/trackers/**/*.yml` or `**/.journium/trackers/**/*.yaml`.
+
+## How It Works
+
+The extension configures the [Red Hat YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) to validate tracker files using the Journium schema. When activated, it adds this configuration to your workspace settings:
+
+```json
+{
+  "yaml.schemas": {
+    "https://journium.app/schemas/journium-insight-tracker.schema.json": [
+      "**/.journium/trackers/**/*.yml",
+      "**/.journium/trackers/**/*.yaml"
+    ]
+  }
+}
+```
+
+This configuration:
+- Only affects files under `.journium/trackers/`—other YAML files remain unchanged
+- Persists across sessions
+- Can be committed to version control to share with your team
+
+## Manual Configuration
+
+If you need to manually trigger configuration, use the Command Palette:
+
+1. Open Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`)
+2. Run: **Journium: Enable schema validation for this workspace**
+
+This is useful for setting up validation before creating tracker files.
+
+## Requirements
+
+- VS Code 1.105.0 or higher (or compatible editor like Cursor)
+- Red Hat YAML extension (installed automatically as a dependency)
+
+## Privacy & Performance
+
+**Local validation**: All schema validation happens within your editor—no data is sent to external servers.
+
+**Zero overhead**: The extension uses VS Code's built-in file index to detect tracker folders without additional file system scans.
+
+## Troubleshooting
+
+### Validation Not Working
+
+If validation isn't working:
+
+1. Verify your tracker files are under `.journium/trackers/`
+2. Check that files have `.yml` or `.yaml` extensions
+3. Run the manual configuration command from the Command Palette
+4. Reload the window (`Developer: Reload Window`)
+
+### Removing Validation
+
+To remove schema validation from your workspace:
+
+1. Open `.vscode/settings.json` in your workspace
+2. Remove the `yaml.schemas` entry for `journium-insight-tracker.schema.json`
+3. Save the file
+
