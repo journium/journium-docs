@@ -6,74 +6,111 @@ author: Journium Team
 ---
 
 
-We're excited to announce that **Journium is now generally available**.
+**Journium is now generally available.**
 
-After months of working closely with teams during private preview, we're opening access to everyone. Journium transforms how product teams understand user behavior—moving from reactive dashboard hunting to proactive, continuous intelligence delivered automatically.
-
-For a limited time, we're offering **free access to early adopters** who want to experience analytics that work like the rest of their modern stack: declarative, version-controlled, and automated.
+After months of private preview with product teams across SaaS, e-commerce, and developer tools, we're opening access to everyone. For early adopters who sign up now, we're offering free access to the platform.
 
 <SignUpForFree message="Join Journium today and get free access." />
 
-## The Problem with Traditional Analytics
+## The problem with traditional analytics
 
-Modern applications generate vast amounts of telemetry. Yet despite this abundance, most teams still discover critical insights too late—or not at all.
+It's Tuesday morning. Your conversion rate dropped 15% yesterday, but nobody noticed until the weekly business review. By the time you investigate, you discover that enterprise users have been abandoning your onboarding flow at step three for the past week. The change coincided with a seemingly unrelated backend update that increased API latency by 200ms—just enough to make the integration step feel broken.
 
-The traditional model is broken:
+You have the data. You have the dashboards. But you only found out after a week of lost conversions.
 
-**Telemetry → Storage → Queries → Dashboards → Hope**
+This pattern repeats across product teams: instrument events, build warehouses, create dashboards, then hope someone notices when something changes. Manual exploration demands constant vigilance. Interpretation requires deep domain expertise. By the time you spot the pattern, you've already lost the window to act decisively.
 
-Teams instrument events, build data warehouses, create dashboards, and then hope someone notices when something important changes. This approach demands constant manual exploration, requires deep domain expertise to interpret correctly, and operates reactively—by the time you spot a pattern, the moment to act may have already passed.
+Modern applications generate vast amounts of telemetry, yet most teams discover critical insights too late—or not at all.
 
-The result? Organizations drowning in data but starving for insight.
+## Analytics that speak first
 
-## Analytics That Speak First
+Journium inverts this model. Instead of waiting for you to ask the right questions, it continuously monitors behavioral patterns and tells you what changed—before you look for it.
 
-Journium inverts this model entirely.
+When enterprise users start abandoning onboarding at step three, Journium detects the shift, correlates it with segment characteristics and timing, performs root-cause analysis, and delivers a plain-language insight: "Enterprise segment abandoning onboarding at step 3 due to integration complexity, down 23% since Monday's deployment."
 
-Instead of waiting for humans to ask the right questions, Journium continuously monitors your application's behavioral patterns, detects meaningful changes automatically, performs root-cause analysis on shifts in user behavior, and delivers concise, narrative insights in plain language.
+Not a chart. Not a dashboard alert. A complete analysis that arrives while you can still act on it.
 
-**Telemetry → Meaning → Action**
+This is the shift from reactive dashboards to proactive intelligence. Your analytics system works like a data analyst who never sleeps—one that understands context, spots anomalies, and explains what matters in terms you can act on immediately.
 
-Think of it as an analytics system that acts like a data analyst working 24/7—one that tells you *"users from enterprise segment are abandoning onboarding at step 3 due to integration complexity, down 23% this week"* instead of showing you a chart and hoping you notice.
+## Insights as Code: The foundation
 
-## Insights as Code: The Foundation
+At Journium's core is **Insights as Code**—treating product intelligence as version-controlled artifacts that live in your repository.
 
-At the core of Journium is **Insights as Code**—a paradigm shift that treats product intelligence as first-class, version-controlled artifacts.
+Define what matters using YAML specifications. Your insights deploy with your application. They run continuously. Changes go through pull request reviews. You get the same reproducibility and transparency for analytics that Infrastructure as Code brought to operations.
 
-Just as Infrastructure as Code transformed how we manage servers, Insights as Code transforms how we manage product understanding:
+Here's what a tracker looks like:
 
-- **Define what matters declaratively** using simple YAML specifications
-- **Version control your insights** alongside your application code
-- **Deploy intelligence continuously** as part of your standard workflow
-- **Trust automated analysis** backed by transparent data and reproducible logic
+```yaml title=".journium/trackers/onboarding-completion.yml"
+apiVersion: journium.app/v0Alpha
+kind: InsightTracker
+metadata:
+  name: onboarding-completion
+  displayName: Onboarding Completion Analysis
+spec:
+  description: Track completion rates across onboarding steps
+  schedule: daily
+  trackingGoal: >
+    Analyze user progression through onboarding steps.
+    Identify drop-off points and segment-specific patterns.
+    Flag significant changes in completion rates.
+```
 
-Your insights live in your repository. They're reviewed in pull requests. They deploy with your application. They run continuously.
+That's it. Commit this file, deploy your application, and Journium continuously monitors the pattern you defined. When behavior shifts, you get an insight explaining what changed and why.
 
-No more context-switching to dashboard tools. No more wondering what changed while you weren't looking.
+No context-switching to dashboard tools. No manual queries to check status. The tracker runs automatically, and insights arrive when they matter.
 
-## What Early Teams Are Seeing
+## What early teams discovered
 
-During private preview, we worked closely with product teams across SaaS, e-commerce, and developer tools. Here's what we learned:
+During private preview, we saw consistent patterns emerge:
 
-**Faster time to insight.** Teams report discovering critical behavioral shifts days or weeks earlier than they would have with traditional dashboards—often before the impact becomes visible in high-level metrics.
+**Time to insight dropped dramatically.** Teams discovered behavioral shifts days or weeks earlier than they would have with dashboard-driven workflows. Often before the impact became visible in aggregate metrics. One team caught a payment flow regression within hours of deployment—their dashboard would have shown it the next day, after hundreds of failed transactions.
 
-**Reduced analytics overhead.** Engineering and product teams spend less time building and maintaining data pipelines, modeling warehouses, and interpreting charts. Journium handles continuous evaluation automatically.
+**Analytics overhead decreased.** Engineering teams spent less time building data pipelines and modeling warehouses. Product teams spent less time interpreting charts and scheduling analysis sessions. Journium handles continuous evaluation automatically. The barrier to trying a new analysis becomes remarkably low—just define a tracker and let the system watch.
 
-**Better decision velocity.** When insights arrive proactively with clear explanations, teams can act immediately instead of scheduling analysis sessions to understand what dashboards are showing.
+**Decision velocity improved.** When insights arrive proactively with clear explanations, teams act immediately instead of waiting for the next analytics review. One early adopter described it as "analytics that respect my attention instead of demanding it."
 
-One early adopter described it as "analytics that respect my attention instead of demanding it."
+The shift isn't just operational—it's cultural. Analytics becomes something your codebase does, not something you context-switch to a different tool to check.
 
-## How Journium Works
+## How it works
 
-Getting started is straightforward:
+Getting started takes three steps:
 
-1. **Integrate the SDK** into your application (React, Next.js, or vanilla JavaScript)
-2. **Define insight trackers** in YAML that specify what behavioral patterns matter
-3. **Receive insights automatically** as your users interact with your product
+**Integrate the SDK.** Add Journium to your React, Next.js, or vanilla JavaScript application. The SDK captures user interactions and sends behavioral data to the Journium platform.
 
-Journium handles the rest: continuous monitoring across all user journeys, AI-powered pattern detection and analysis, automatic insight generation when behavior shifts, and delivery directly to Slack, email, or your dashboard.
+```bash title="Terminal"
+npm install @journium/sdk
+```
 
-The barrier to trying a new analysis becomes remarkably low—just define a new tracker and let the system watch continuously.
+```typescript title="app/layout.tsx"
+import { JourniumProvider } from '@journium/sdk';
+
+export default function RootLayout({ children }) {
+  return (
+    <JourniumProvider apiKey={process.env.JOURNIUM_API_KEY}>
+      {children}
+    </JourniumProvider>
+  );
+}
+```
+
+**Define insight trackers.** Create YAML files that specify what behavioral patterns matter to your product. Trackers live in your repository alongside your application code.
+
+```yaml title=".journium/trackers/feature-adoption.yml"
+apiVersion: journium.app/v0Alpha
+kind: InsightTracker
+metadata:
+  name: feature-adoption
+  displayName: Feature Adoption Tracker
+spec:
+  description: Monitor adoption of new features across user segments
+  schedule: daily
+  trackingGoal: >
+    Track feature usage by segment and cohort.
+    Identify adoption patterns and barriers.
+    Flag unexpected changes in engagement.
+```
+
+**Receive insights automatically.** As users interact with your product, Journium evaluates your trackers continuously. When behavior shifts meaningfully, you get insights delivered to Slack, email, or your Journium dashboard—complete with analysis explaining what changed, why it matters, and which segments are affected.
 
 <div className="not-prose flex justify-start my-6">
   <Button
@@ -88,41 +125,31 @@ The barrier to trying a new analysis becomes remarkably low—just define a new 
   </Button>
 </div>
 
-## Built for Modern Development Teams
+## Built for modern development teams
 
-Journium is designed for teams that already treat infrastructure, testing, and observability as code. Now you can apply the same engineering rigor to product analytics:
+Journium is designed for teams that already treat infrastructure, testing, and observability as code. The same engineering rigor now applies to product analytics.
 
-- **Developer-first integration** with first-class TypeScript support
-- **Declarative configuration** that lives in your repository
-- **CI/CD-friendly** deployment alongside your application
-- **Transparent and verifiable** insights backed by data and code
+Developer-first integration with TypeScript support means no fighting with configuration or deployment. Declarative specifications that live in your repository ensure reproducibility and transparency. CI/CD-friendly deployment alongside your application eliminates separate analytics infrastructure. Every insight is backed by verifiable data and traceable logic—no black boxes.
 
-This isn't analytics bolted onto your workflow. It's analytics that works like the rest of your stack.
+This isn't analytics bolted onto your workflow. It works like the rest of your stack: declarative, version-controlled, automated.
 
-## Pricing and Early Access
+## Pricing and early access
 
-Journium is generally available today. For a limited time, we're offering **free access to early adopters** who sign up now.
-
-This is your opportunity to experience analytics that shift left—bringing product intelligence into developer workflows where it can drive decisions at the speed of development, not the speed of dashboard queries.
+Journium is generally available today with free access for early adopters who sign up now. This is your opportunity to experience analytics that shift left—bringing product intelligence into developer workflows where decisions happen at the speed of deployment, not dashboard queries.
 
 As we scale, pricing will reflect usage. Early adopters lock in current access terms.
 
-## What's Next
+## What's next
 
-General availability is just the beginning. We're actively building:
+General availability is the beginning. We're building deeper integrations with data warehouses and analytics platforms, enhanced collaboration features for teams managing insights at scale, expanded AI capabilities for more sophisticated behavioral analysis, and real-time alerting for critical pattern changes that demand immediate attention.
 
-- **Deeper integrations** with popular data warehouses and analytics tools
-- **Enhanced collaboration features** for teams managing insights at scale
-- **Expanded AI capabilities** for more sophisticated behavioral analysis
-- **Real-time alerting** for critical pattern changes that demand immediate attention
+The goal is consistent: transform product analytics from a passive reporting system into an active intelligence layer that helps teams learn faster and build better products.
 
-We're committed to transforming product analytics from a passive reporting system into an active intelligence layer that helps teams learn faster and build better products.
+## Join us
 
-## Join Us
+The future of product analytics isn't more dashboards. It's intelligence that arrives before you go looking for it.
 
-The future of product analytics isn't more dashboards. It's fewer questions left unanswered, discovered early enough to act.
-
-If you're building products and believe that analytics should work like the rest of your modern stack—declarative, automated, and proactive—we built Journium for you.
+If you're building products and believe that analytics should work like the rest of your modern stack—declarative, automated, and proactive—Journium was built for you.
 
 
 <SignUpForFree message="Join Journium today and experience Insights as Code." />
