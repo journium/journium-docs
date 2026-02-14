@@ -13,17 +13,15 @@ This isn't a convenience feature. It's the complete implementation of Insights a
 
 ## The Problem: Analytics Configuration Trapped in UIs
 
-Most analytics tools force you to configure everything through dashboards. Click through forms. Configure dropdowns. Hope you remember what you changed last week.
+Most analytics tools force you to configure everything through dashboards. Click through forms. Configure dropdowns. Hope you remember what you changed last week. This approach works fine for exploration, but it breaks down when analytics become critical infrastructure.
 
-This creates real problems:
+Consider what happens when a tracker starts producing incorrect insights. Who modified it? What was the configuration before? Why did they make that change? The answers usually require checking with multiple people, hoping someone remembers the context, and manually reconstructing the previous state from memory.
 
-- **No change history**: Who modified this tracker? What was it before? Why did it change?
-- **No review process**: Changes go live immediately without peer review or validation
-- **No rollback**: If something breaks, good luck reconstructing what worked before
-- **Context switching**: Leave your IDE, open a browser, navigate through menus, repeat
-- **Team friction**: Changes to analytics logic don't follow the same workflow as code changes
+Or imagine shipping a feature and realizing two weeks later that nobody configured analytics for it. By the time you add tracking, you've lost two weeks of data about user behavior during the critical launch period.
 
-For teams treating infrastructure, testing, and observability as code, this workflow feels broken.
+These aren't edge cases. They're the inevitable result of treating analytics configuration as separate from code—something that lives in dashboards instead of version control, changes without review, and deploys independently of the features it monitors.
+
+For teams that already treat infrastructure, testing, and observability as code, this workflow feels fundamentally broken. Your servers are managed with Terraform. Your tests run in CI. Your monitoring alerts live in Git. But your analytics? Those still require clicking through a dashboard.
 
 ## The Solution: Trackers as YAML in Git
 
@@ -111,14 +109,9 @@ No manual syncing. No dashboard clicks. Push your branch, and your insights depl
 
 ### Real-Time Validation in Your Editor
 
-Install the [Journium VS Code extension](https://marketplace.visualstudio.com/items?itemName=Journium.journium) to get:
+The [Journium VS Code extension](https://marketplace.visualstudio.com/items?itemName=Journium.journium) brings the same level of tooling to tracker configuration that you expect for code. As you type, the extension validates your YAML against the tracker schema, catching errors before you commit. Auto-completion suggests valid values for every property. Hover over any field to see inline documentation explaining what it does.
 
-- **Schema validation** as you type
-- **Auto-completion** for all tracker properties
-- **Inline documentation** on hover
-- **Error detection** before you commit
-
-Works in VS Code, Cursor, and any VS Code-compatible editor.
+This means you can write trackers with the same confidence you write code—knowing that invalid configurations are caught immediately, not after deployment. Works in VS Code, Cursor, and any VS Code-compatible editor.
 
 ```yaml title=".journium/trackers/example.yml"
 spec:
@@ -163,7 +156,7 @@ Your trackers instantly revert to the previous working state. No dashboard archa
 
 ### CI/CD Integration
 
-Validate trackers in CI before they reach production:
+Because trackers are just YAML files in your repository, you can validate them in CI before they reach production. Add a validation step to your GitHub Actions workflow:
 
 ```yaml title=".github/workflows/validate-trackers.yml"
 name: Validate Trackers
@@ -183,24 +176,25 @@ jobs:
             -d ".journium/trackers/*.yaml"
 ```
 
-Broken trackers fail CI. They never merge. Your analytics stay reliable.
+Now broken trackers fail CI and never merge. Your analytics stay reliable because they're subject to the same quality gates as your application code.
 
 ## Why This Matters
 
-### 1. Insights Become Reviewable
+### Insights Become Reviewable
 
-Analytics logic is no longer hidden in dashboard configuration. It's explicit, readable, and reviewable:
+Three months after launch, you discover that a critical onboarding insight tracker has been quietly misconfigured. It's been analyzing the wrong events. Nobody noticed because the change happened in a dashboard somewhere, and there's no record of who made it or why.
 
-- **What** are we tracking? (Event selection)
-- **Why** does it matter? (Tracker description and prompt)
-- **When** does it run? (Trigger mode and schedule)
-- **How much** data does it analyze? (Event limits)
+This scenario plays out constantly in organizations using traditional analytics tools. Analytics logic lives in dashboard configurations—hidden from view, unversioned, unreviewable. When something breaks or produces misleading results, there's no paper trail. Just a guess about what might have changed.
 
-Teammates review these decisions in pull requests, not after deployment.
+Version-controlled trackers eliminate this problem entirely. Every tracker is a YAML file in your repository. What events are we tracking? Why does this analysis matter? When should it run? How much data should it consider? These decisions are explicit, readable, and subject to the same review process as your application code.
 
-### 2. Change History is Preserved
+When someone proposes changing a tracker's event selection from 100 to 500 samples, that change appears in a pull request. Your team discusses whether the larger sample size is worth the additional processing cost. Someone points out that the tracker already struggles to complete within its time window. The change gets refined before it merges. The insight logic improves through peer review, not trial-and-error in production.
 
-Every modification to your analytics is captured in Git history:
+### Change History is Preserved
+
+Six months ago, your purchase funnel tracker was producing reliable insights. Today, it's generating noise. What changed?
+
+With version-controlled trackers, the answer is immediate:
 
 ```bash title="Terminal"
 git log --oneline .journium/trackers/
@@ -210,11 +204,15 @@ f2e9d8a Add new tracker for feature-adoption analysis
 c4b1a6e Update onboarding-dropoff to run daily instead of weekly
 ```
 
-You have a complete audit trail of who changed what, when, and why.
+Every modification to your analytics is captured in Git history with full context. You can see exactly who changed what, when they changed it, what the commit message explains, and what the code review discussion revealed. This audit trail doesn't just help with debugging—it creates institutional knowledge about why your analytics are configured the way they are.
 
-### 3. Analytics Logic Lives Near Code
+When a new team member asks "why does this tracker only analyze 100 events?", the answer isn't lost in someone's memory or buried in Slack. It's in the Git history, often with a link to the original discussion about performance tradeoffs.
 
-When you ship a new feature, the insight tracker that monitors it ships in the same pull request:
+### Analytics Logic Lives Near Code
+
+Here's a common pattern that version-controlled trackers eliminate: Your team ships a new collaboration feature on Monday. On Tuesday, someone files a ticket to "add analytics for the new feature." On Wednesday, a product manager configures a tracker in the dashboard. By Thursday, you realize the tracker is misconfigured because the PM didn't know about the edge cases the engineers handled during implementation.
+
+Version-controlled trackers collapse this timeline. When you ship a new feature, the insight tracker that monitors it ships in the same pull request:
 
 ```bash
 # PR: Add team collaboration feature
@@ -230,13 +228,15 @@ src/
   team-collaboration-adoption.yml
 ```
 
-The behavior tracking ships with the feature. No follow-up tickets. No context loss.
+The developer who built the feature writes the tracker. They know which events matter, which edge cases to consider, and what "success" looks like for this particular flow. That knowledge gets encoded directly into the tracker specification, reviewed alongside the feature code, and deployed simultaneously. No follow-up tickets. No knowledge transfer. No lag between shipping features and understanding their impact.
 
-### 4. Deployment is Automatic
+### Deployment is Automatic
 
-No manual dashboard configuration. No "remember to update the tracker after you deploy." Push your branch, and your insights deploy automatically.
+Traditional analytics tools create a coordination problem. You deploy your application code through CI/CD, but you configure your analytics through a dashboard. These two workflows operate independently, creating constant synchronization issues.
 
-**Trackers stay synchronized with your application without manual intervention.**
+Did someone remember to update the tracker after the deployment? Did the tracker configuration change while the feature was in code review? Is staging configured the same way as production? These questions disappear with version-controlled trackers.
+
+Push your branch, and your insights deploy automatically. The same Git workflow that manages your application code manages your analytics configuration. Trackers stay synchronized with your application without manual intervention, because they're deployed by the same process that deploys your code.
 
 ## Real-World Workflow
 
@@ -457,16 +457,13 @@ If you have feedback or feature requests, [reach out](https://journium.app/conta
 
 ## The Bigger Picture
 
-Version-controlled trackers complete the vision of Insights as Code:
+Over the past decade, software teams have systematically eliminated manual configuration in favor of declarative, version-controlled definitions. Infrastructure as Code replaced manual server provisioning. Policy as Code replaced security checklists maintained in wikis. Observability as Code replaced ad-hoc monitoring setups configured through vendor dashboards.
 
-- **Infrastructure as Code** → Manage servers declaratively
-- **Policy as Code** → Encode security and compliance rules
-- **Observability as Code** → Define SLOs and alerts in Git
-- **Insights as Code** → Version-control product intelligence
+Each shift followed the same pattern: take something critical that was previously managed through UIs, clicks, and tribal knowledge, and move it into version control where it can be reviewed, tested, and deployed like code.
 
-Your analytics now follow the same rigorous workflow as everything else you build.
+Version-controlled trackers complete this arc for product analytics. Your insight definitions now live in Git, subject to the same rigorous workflow as everything else you build. When you deploy infrastructure changes, you review Terraform configs. When you deploy policy changes, you review OPA rules. When you deploy observability changes, you review SLO definitions. And now, when you deploy analytics changes, you review tracker specifications.
 
-The result? **Product intelligence that ships with your product, not weeks after it.**
+The result isn't just better analytics—it's product intelligence that ships with your product, not weeks after it. When a feature goes live, the insights that monitor it go live simultaneously. When you rollback a deployment, your analytics rollback too. Your product and your understanding of it stay synchronized, because they're managed by the same workflow.
 
 ---
 
