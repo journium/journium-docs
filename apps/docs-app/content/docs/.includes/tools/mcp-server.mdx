@@ -1,8 +1,192 @@
 ---
 title: MCP Server
-description: MCP server for Journium
+description: Integrate Journium with AI agents via Model Context Protocol"
 icon: JrMcpIcon
 ---
 
+The Journium MCP server enables AI agents to interact with Journium documentation, search for information, and access tools directly from your IDE. Built on the [Model Context Protocol](https://modelcontextprotocol.io), it provides seamless integration with AI-powered development environments.
 
-TODO: MCP server for Journium.
+## What is MCP?
+
+Model Context Protocol (MCP) is an open standard that allows AI agents to securely connect to external tools and data sources. The Journium MCP server exposes documentation search, page retrieval, and workflow prompts to compatible AI assistants.
+
+## Server Endpoint
+
+```
+https://mcp.journium.app/mcp
+```
+
+## Available Tools
+
+The MCP server provides the following capabilities:
+
+### `docs_search`
+Search through Journium documentation using semantic search. Returns relevant pages with excerpts showing matched content.
+
+### `docs_getPage`
+Retrieve the full content of a specific documentation page by its route or file path. Returns MDX content, plain text, and frontmatter metadata.
+
+### `docs_listRoutes`
+Get a list of all available documentation routes. Optionally filter by prefix to explore specific sections.
+
+## IDE Setup
+
+<Tabs groupId="mcp-ide" items={['Cursor', 'Claude Desktop', 'Cline (VS Code)', 'Other Tools']} defaultIndex={0}>
+  <Tab value="Cursor">
+    Cursor has built-in MCP support. Add the Journium MCP server to your configuration:
+
+    **Option 1: Using Settings UI**
+
+    1. Open **Cursor Settings**
+    2. Navigate to **Tools & MCP** → **New MCP Server**
+    3. Add a new MCP server with these details:
+       - **Name**: `mcp-journium`
+       - **Type**: `http`
+       - **URL**: `https://mcp.journium.app/mcp`
+
+    **Option 2: Edit Configuration File**
+
+    **macOS/Linux**: `~/.cursor/mcp.json`  
+    **Windows**: `%APPDATA%\Cursor\mcp.json`
+
+    ```json title="mcp.json"
+    {
+      "mcpServers": {
+        "mcp-journium": {
+          "type": "http",
+          "url": "https://mcp.journium.app/mcp"
+        }
+      }
+    }
+    ```
+
+    Restart Cursor after saving the configuration.
+  </Tab>
+
+  <Tab value="Claude Desktop">
+    Add the server to your Claude Desktop configuration file:
+
+    **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
+    **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+    ```json title="claude_desktop_config.json"
+    {
+      "mcpServers": {
+        "mcp-journium": {
+          "type": "http",
+          "url": "https://mcp.journium.app/mcp"
+        }
+      }
+    }
+    ```
+
+    Restart Claude Desktop after saving the configuration.
+  </Tab>
+
+  <Tab value="Cline (VS Code)">
+    Cline supports MCP servers through VS Code settings:
+
+    1. Open VS Code Settings (`Cmd+,` / `Ctrl+,`)
+    2. Search for "Cline MCP"
+    3. Edit `cline.mcpServers` in `settings.json`:
+
+    ```json title="settings.json"
+    {
+      "cline.mcpServers": {
+        "mcp-journium": {
+          "type": "http",
+          "url": "https://mcp.journium.app/mcp"
+        }
+      }
+    }
+    ```
+
+    Reload VS Code after saving the configuration.
+  </Tab>
+
+  <Tab value="Other Tools">
+    For other tools that support the Model Context Protocol, consult their documentation for adding HTTP-based MCP servers.
+
+    **Server Configuration**:
+    - **Type**: `HTTP`
+    - **URL**: `https://mcp.journium.app/mcp`
+
+    Most MCP-compatible tools accept configuration in a similar JSON format:
+
+    ```json
+    {
+      "mcpServers": {
+        "mcp-journium": {
+          "type": "http",
+          "url": "https://mcp.journium.app/mcp"
+        }
+      }
+    }
+    ```
+
+    Refer to your tool's documentation for the specific configuration file location and format.
+  </Tab>
+</Tabs>
+
+## Usage
+
+Once configured, your AI agent can:
+
+- **Search documentation**: Ask questions about Journium features, APIs, or concepts
+- **Retrieve pages**: Get full documentation content for specific topics
+- **Explore structure**: Discover available documentation routes and sections
+
+The agent will automatically use the MCP server when answering Journium-related questions.
+
+### Example Queries
+
+With the MCP server configured, try asking your AI assistant:
+
+- "How do I set up a tracker in Journium?"
+- "Show me the Journium Next.js SDK documentation"
+- "How to integrate Journium in my Shopify store?"
+- "How to identify a user in Journium?"
+
+The agent will search the Journium documentation and provide accurate, up-to-date answers.
+
+## Benefits
+
+**Always up-to-date**: The MCP server provides real-time access to the latest documentation—no stale training data.
+
+**Contextual assistance**: AI agents can search, retrieve, and reference official documentation while helping you build.
+
+**Seamless workflow**: Get answers without leaving your editor or switching to a browser.
+
+## Privacy & Security
+
+**Read-only access**: The MCP server provides read-only access to public documentation. It cannot modify data or access private information.
+
+**No authentication required**: The server is publicly accessible and does not require API keys or authentication.
+
+**Secure connection**: All requests are made over HTTPS to ensure data integrity and privacy.
+
+## Troubleshooting
+
+### Server Not Responding
+
+If the MCP server isn't working:
+
+1. Verify the URL is correct: `https://mcp.journium.app/mcp`
+2. Check your internet connection
+3. Restart your IDE or AI assistant
+4. Ensure your MCP configuration file has valid JSON syntax
+
+### AI Agent Not Using MCP Tools
+
+If your AI agent isn't using the MCP server:
+
+1. Confirm the server is properly configured in your tool's settings
+2. Restart the application after adding the configuration
+3. Try explicitly asking questions about Journium to trigger MCP usage
+4. Check your tool's documentation for MCP-specific requirements
+
+## Resources
+
+- [Model Context Protocol Specification](https://modelcontextprotocol.io)
+- [GitHub Repository](https://github.com/journium/journium-docs/tree/main/apps/docs-mcp)
+- [Report Issues](https://github.com/journium/journium-docs/issues)
