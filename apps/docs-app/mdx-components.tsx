@@ -11,6 +11,7 @@ import * as ButtonComponents from '@/components/ui/button';
 import * as LucideIconComponents from 'lucide-react';
 import { TypeTable } from '@/components/type-table';
 import { Files , Folder, File } from 'fumadocs-ui/components/files';
+import { Video } from '@/components/video';
 
 
 // Filter out non-component exports from lucide-react (like createLucideIcon, Icon, etc.)
@@ -37,5 +38,6 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Files,
     Folder,
     File,
+    Video,
   };
 }
