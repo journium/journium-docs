@@ -11,10 +11,36 @@ to deploy and manage your trackers.
 When you push your changes to the deployment branch, the trackers will be synced to your application instance.
 You can select any branch as the deployment branch. By default, the deployment branch is the default branch of the repository.
 
-<Callout>
-**Note**: Your tracker yaml files should be in the <span className="font-mono text-primary">.journium/trackers</span> directory in your repository.
-For example, if your repository is `https://github.com/my-org/my-repo`, your tracker yaml files should be in the `https://github.com/my-org/my-repo/.journium/trackers` directory.
+
+<Callout type="info" title="Good to know">
+<span className="leading-6">
+  Your tracker yaml files should be in the `.journium/trackers` directory in your repository. 
+  For example, if your repository is `https://github.com/my-org/my-repo`, your tracker yaml 
+  files should be in the `https://github.com/my-org/my-repo/.journium/trackers` directory.
+  </span>
 </Callout>
+
+You can keep your trackers in your source code repository or in a seperate repository as well. Here's how your repository should look like. :
+
+<Files>
+  <Folder name="repository root" defaultOpen>
+    <Folder name=".journium" defaultOpen>
+      <Folder name="trackers" defaultOpen>
+        <File name="user-signup.yaml" />
+        <File name="api-requests.yaml" />
+        <File name="page-views.yaml" />
+      </Folder>
+    </Folder>
+    <Folder name="src" defaultOpen={false}>
+      <File name="index.js" />
+      <Folder name="utils" defaultOpen>
+        <File name="helper.js" />
+      </Folder>
+    </Folder>
+    <File name="package.json" />
+  </Folder>
+</Files>
+
 
 Follw the steps below to to link a git repository containing tracker yaml files to your application instance.
 
