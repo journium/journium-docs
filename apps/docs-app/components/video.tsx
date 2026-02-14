@@ -81,11 +81,13 @@ type ExternalVideoProps = {
    */
   src: string;
   /**
-   * Width of the iframe
+   * Width used for aspect ratio calculation (video will be responsive)
+   * @default 560
    */
   width?: number | string;
   /**
-   * Height of the iframe
+   * Height used for aspect ratio calculation (video will be responsive)
+   * @default 315
    */
   height?: number | string;
   /**
@@ -101,7 +103,7 @@ type ExternalVideoProps = {
    */
   loading?: 'eager' | 'lazy';
   /**
-   * Additional CSS classes
+   * Additional CSS classes applied to the wrapper div
    */
   className?: string;
 };
@@ -151,6 +153,8 @@ function getVimeoId(url: string): string {
 /**
  * Video component that supports both self-hosted and externally embedded videos
  * 
+ * External embeds (YouTube, Vimeo) are automatically responsive and maintain their aspect ratio.
+ * 
  * @example Self-hosted video
  * ```tsx
  * <Video 
@@ -184,7 +188,7 @@ function getVimeoId(url: string): string {
  * />
  * ```
  * 
- * @example YouTube video
+ * @example YouTube video (responsive)
  * ```tsx
  * <Video 
  *   type="youtube"
@@ -194,7 +198,7 @@ function getVimeoId(url: string): string {
  * />
  * ```
  * 
- * @example Vimeo video
+ * @example Vimeo video (responsive)
  * ```tsx
  * <Video 
  *   type="vimeo"
@@ -216,7 +220,7 @@ export function Video(props: VideoProps) {
       allowFullScreen = true,
       title = 'Video player',
       loading = 'lazy',
-      className,
+      className = '',
     } = externalProps;
 
     let embedUrl = '';
@@ -235,17 +239,25 @@ export function Video(props: VideoProps) {
         break;
     }
 
+    // Calculate aspect ratio from width and height
+    const aspectRatio = typeof width === 'number' && typeof height === 'number' 
+      ? (height / width) * 100 
+      : 56.25; // Default to 16:9 ratio (315/560 * 100)
+
     return (
-      <iframe
-        src={embedUrl}
-        width={width}
-        height={height}
-        allowFullScreen={allowFullScreen}
-        title={title}
-        loading={loading}
-        className={className}
-        style={{ border: 0 }}
-      />
+      <div 
+        className={`relative w-full overflow-hidden ${className}`}
+        style={{ paddingBottom: `${aspectRatio}%` }}
+      >
+        <iframe
+          src={embedUrl}
+          allowFullScreen={allowFullScreen}
+          title={title}
+          loading={loading}
+          className="absolute top-0 left-0 w-full h-full"
+          style={{ border: 0 }}
+        />
+      </div>
     );
   }
 
