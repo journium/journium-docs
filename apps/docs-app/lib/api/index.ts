@@ -13,4 +13,4 @@ export {
 } from './blog-api';
 
 // Docs API
-export { submitPageFeedback } from './docs-api';
+export { submitPageFeedback, updatePageFeedbackMessage } from './docs-api';

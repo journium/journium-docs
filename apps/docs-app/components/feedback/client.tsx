@@ -43,11 +43,14 @@ const blockFeedbackResult = z.extend(blockFeedback, {
  */
 export function Feedback({
   onSendAction,
+  onUpdateMessage,
 }: {
-  onSendAction: (feedback: PageFeedback) => Promise<ActionResponse>;
+  onSendAction: (feedback: PageFeedback) => Promise<{ id: string } & ActionResponse>;
+  onUpdateMessage: (id: string, message: string) => Promise<ActionResponse>;
 }) {
   const url = usePathname();
   const [opinion, setOpinion] = useState<'good' | 'bad' | null>(null);
+  const [feedbackId, setFeedbackId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [isPending, startTransition] = useTransition();
   const [showTextArea, setShowTextArea] = useState(false);
@@ -63,7 +66,11 @@ export function Feedback({
       };
 
       try {
-        await onSendAction(feedback);
+        const response = await onSendAction(feedback);
+        // Store the feedback ID for later updates
+        if (response.id) {
+          setFeedbackId(response.id);
+        }
       } catch (error) {
         // Fail gracefully
         console.warn('Failed to submit feedback:', error);
@@ -72,20 +79,15 @@ export function Feedback({
   }
 
   function submitMessage(e?: SyntheticEvent) {
-    if (opinion == null) return;
+    if (!feedbackId || !message.trim()) return;
 
     startTransition(async () => {
-      const feedback: PageFeedback = {
-        url,
-        opinion,
-        message,
-      };
-
       try {
-        await onSendAction(feedback);
+        // Use PATCH to update the existing feedback with the message
+        await onUpdateMessage(feedbackId, message);
       } catch (error) {
         // Fail gracefully
-        console.warn('Failed to submit feedback:', error);
+        console.warn('Failed to update feedback message:', error);
       }
       
       setMessage('');

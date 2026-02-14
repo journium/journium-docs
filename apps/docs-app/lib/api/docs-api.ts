@@ -12,7 +12,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
  */
 export async function submitPageFeedback(
   feedback: PageFeedback
-): Promise<ActionResponse> {
+): Promise<{ id: string } & ActionResponse> {
   const response = await fetch(`${API_URL}/api/v1/docs/feedback/page`, {
     method: 'POST',
     headers: {
@@ -26,6 +26,31 @@ export async function submitPageFeedback(
       .json()
       .catch(() => ({ error: 'Failed to submit feedback' }));
     throw new Error(errorData.error || 'Failed to submit feedback');
+  }
+
+  return response.json();
+}
+
+/**
+ * Update page feedback message by ID
+ */
+export async function updatePageFeedbackMessage(
+  id: string,
+  message: string
+): Promise<ActionResponse> {
+  const response = await fetch(`${API_URL}/api/v1/docs/feedback/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ message }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response
+      .json()
+      .catch(() => ({ error: 'Failed to update feedback' }));
+    throw new Error(errorData.error || 'Failed to update feedback');
   }
 
   return response.json();
