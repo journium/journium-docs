@@ -4,6 +4,7 @@ import "./globals.css";
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import CustomSearchDialog from "@/components/ui/search";
 import { AISearch } from "@/components/ai/ai-search";
+import { Analytics } from '@vercel/analytics/react';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -102,6 +103,7 @@ export default function RootLayout({
             {children}
           </RootProvider>
         </AISearch>
+        <Analytics />
       </body>
     </html>
   );
