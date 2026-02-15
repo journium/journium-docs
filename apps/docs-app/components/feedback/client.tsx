@@ -16,11 +16,11 @@ import type { FeedbackBlockProps } from 'fumadocs-core/mdx-plugins/remark-feedba
 import {
   actionResponse,
   blockFeedback,
-  type ActionResponse,
   type BlockFeedback,
   type PageFeedback,
 } from './schema';
 import { z } from 'zod/mini';
+import { submitPageFeedback, updatePageFeedbackMessage, submitBlockFeedback } from '@/lib/api/docs-api';
 
 const rateButtonVariants = cva(
   'inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-medium border text-sm [&_svg]:size-4 disabled:cursor-not-allowed cursor-pointer',
@@ -40,14 +40,11 @@ const blockFeedbackResult = z.extend(blockFeedback, {
 
 /**
  * A feedback component to be attached at the end of page
+ * 
+ * NOTE: This component makes direct API calls instead of using Server Actions
+ * to avoid CSRF issues when accessed via rewrites (journium.app/docs -> docs.journium.app).
  */
-export function Feedback({
-  onSendAction,
-  onUpdateMessage,
-}: {
-  onSendAction: (feedback: PageFeedback) => Promise<{ id: string } & ActionResponse>;
-  onUpdateMessage: (id: string, message: string) => Promise<ActionResponse>;
-}) {
+export function Feedback() {
   const url = usePathname();
   const [opinion, setOpinion] = useState<'good' | 'bad' | null>(null);
   const [feedbackId, setFeedbackId] = useState<string | null>(null);
@@ -66,7 +63,7 @@ export function Feedback({
       };
 
       try {
-        const response = await onSendAction(feedback);
+        const response = await submitPageFeedback(feedback);
         // Store the feedback ID for later updates
         if (response.id) {
           setFeedbackId(response.id);
@@ -84,7 +81,7 @@ export function Feedback({
     startTransition(async () => {
       try {
         // Use PATCH to update the existing feedback with the message
-        await onUpdateMessage(feedbackId, message);
+        await updatePageFeedbackMessage(feedbackId, message);
       } catch (error) {
         // Fail gracefully
         console.warn('Failed to update feedback message:', error);
@@ -194,14 +191,15 @@ export function Feedback({
  * A feedback component for each content block in page, should be used with `remark-feedback-block`.
  *
  * See https://fumadocs.dev/docs/integrations/feedback.
+ * 
+ * NOTE: This component makes direct API calls instead of using Server Actions
+ * to avoid CSRF issues when accessed via rewrites (journium.app/docs -> docs.journium.app).
  */
 export function FeedbackBlock({
   id,
   body,
-  onSendAction,
   children,
-}: FeedbackBlockProps & {
-  onSendAction: (feedback: BlockFeedback) => Promise<ActionResponse>;
+}: Omit<FeedbackBlockProps, 'onSendAction'> & {
   children: ReactNode;
 }) {
   const url = usePathname();
@@ -224,12 +222,17 @@ export function FeedbackBlock({
         message,
       };
 
-      const response = await onSendAction(feedback);
-      setPrevious({
-        response,
-        ...feedback,
-      });
-      setMessage('');
+      try {
+        const response = await submitBlockFeedback(feedback);
+        setPrevious({
+          response,
+          ...feedback,
+        });
+        setMessage('');
+      } catch (error) {
+        // Fail gracefully
+        console.warn('Failed to submit block feedback:', error);
+      }
     });
 
     e?.preventDefault();
