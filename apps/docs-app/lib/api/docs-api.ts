@@ -1,10 +1,15 @@
 /**
  * Docs API Client
  * Handles all documentation-related API calls
+ * 
+ * NOTE: These functions are called directly from client components.
+ * They use fetch() instead of Server Actions to avoid CSRF issues
+ * when accessed via rewrites (journium.app/docs -> docs.journium.app).
  */
 
 import type { PageFeedback, BlockFeedback, ActionResponse } from '@/components/feedback/schema';
 
+// Use runtime environment variable (available in browser via NEXT_PUBLIC_)
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
 /**

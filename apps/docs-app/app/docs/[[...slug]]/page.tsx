@@ -13,7 +13,6 @@ import * as Twoslash from 'fumadocs-twoslash/ui';
 import { LLMCopyButton, ViewOptions } from '@/components/page-actions';
 import { DocsIndexPage } from '@/components/docs-index-page';
 import { Feedback } from '@/components/feedback/client';
-import { submitPageFeedback, updatePageFeedbackMessage } from '@/lib/api/docs-api';
 
 interface PageProps {
   params: Promise<{ slug?: string[] }>;
@@ -104,16 +103,7 @@ export default async function Page(props: PageProps) {
           })}
         />
       </DocsBody>
-      <Feedback 
-        onSendAction={async (feedback) => {
-          'use server';
-          return await submitPageFeedback(feedback);
-        }}
-        onUpdateMessage={async (id, message) => {
-          'use server';
-          return await updatePageFeedbackMessage(id, message);
-        }}
-      />
+      <Feedback />
       {lastModifiedTime && <PageLastUpdate date={lastModifiedTime} />}
     </DocsPage>
   );
