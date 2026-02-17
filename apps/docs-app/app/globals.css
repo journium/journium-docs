@@ -114,3 +114,56 @@ html {
   overflow: hidden;
 }
 
+/* Custom List component - similar to fumadocs Steps but for numbered lists */
+.fd-list {
+  counter-reset: list-item;
+  position: relative;
+  padding-left: 1.25rem; /* Reduced spacing between number and text */
+  margin-left: 0.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .fd-list {
+    margin-left: 1rem;
+    padding-left: 1.5rem; /* Reduced spacing between number and text */
+  }
+}
+
+/* Support for explicit ListItem components */
+.fd-list-item {
+  position: relative;
+  margin-bottom: -1rem; /* Reduced from 2rem */
+  margin-top: -1rem;
+  padding-left: 0;
+}
+
+.fd-list-item:last-child {
+  margin-bottom: 0;
+}
+
+.fd-list-item::before {
+  background-color: var(--color-fd-secondary);
+  color: var(--color-fd-secondary-foreground);
+  content: counter(list-item);
+  counter-increment: list-item;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.75rem; /* 12px - smaller font */
+  line-height: 1rem;
+  font-weight: 500;
+  position: absolute;
+  width: 1.5rem; /* 24px */
+  height: 1.5rem; /* 24px */
+  border-radius: 9999px;
+  left: -1.75rem; /* Closer to text */
+  top: 0.125rem; /* Slight vertical adjustment */
+}
+
+@media (min-width: 640px) {
+  .fd-list-item::before {
+    left: -2rem; /* Closer to text on larger screens */
+  }
+}
