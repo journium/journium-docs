@@ -25,23 +25,39 @@ represents one attempt to analyze your data and generate insights.
 
 Jobs execute the Insight Tracker workflow in a series of steps:
 
-1. **Configuration Loading**: The job picks up the configuration from its associated tracker, 
-   including event filters, instructions, and execution parameters
+<List>
+<ListItem>
+**Configuration Loading**: The job picks up the configuration from its associated tracker, 
+including event filters, instructions, and execution parameters
+</ListItem>
 
-2. **Data Collection**: The job collects relevant events from your application based on the 
-   tracker's event selection criteria
+<ListItem>
+**Data Collection**: The job collects relevant events from your application based on the 
+tracker's event selection criteria
+</ListItem>
 
-3. **Execution History Review**: The job examines previous execution history to understand 
-   context and avoid redundant analysis
+<ListItem>
+**Execution History Review**: The job examines previous execution history to understand 
+context and avoid redundant analysis
+</ListItem>
 
-4. **Event Processing**: Relevant events are filtered and prepared for analysis according to 
-   the tracker's configuration
+<ListItem>
+**Event Processing**: Relevant events are filtered and prepared for analysis according to 
+the tracker's configuration
+</ListItem>
 
-5. **Instruction Execution**: The tracker's instructions are executed step by step, analyzing 
-   the collected data
+<ListItem>
+**Instruction Execution**: The tracker's instructions are executed step by step, analyzing 
+the collected data
+</ListItem>
 
-6. **Insight Generation**: If adequate data is available, insights are generated and stored. 
-   If insufficient data exists, the job completes as a no-op without generating insights
+<ListItem>
+**Insight Generation**: If adequate data is available, insights are generated and stored. 
+If insufficient data exists, the job completes as a no-op without generating insights
+
+</ListItem>
+
+</List>
 
 ## Job Execution Modes
 
@@ -152,20 +168,32 @@ there isn't enough data to generate insights yet.
 
 When working with Jobs:
 
-1. **Monitor During Development**: Regularly check job details when developing new trackers 
-   to ensure they're working as expected
+<List>
+<ListItem>
+**Monitor During Development**: Regularly check job details when developing new trackers 
+to ensure they're working as expected
+</ListItem>
 
-2. **Review Execution Logs**: Use job output to understand how your tracker processes data 
-   and identify potential improvements
+<ListItem>
+**Review Execution Logs**: Use job output to understand how your tracker processes data 
+and identify potential improvements
+</ListItem>
 
-3. **Check Job History**: Review past job executions to understand patterns in data availability 
-   and insight generation
+<ListItem>
+**Check Job History**: Review past job executions to understand patterns in data availability 
+and insight generation
+</ListItem>
 
-4. **Use Manual Execution for Testing**: Trigger jobs manually when testing tracker 
-   configurations before enabling scheduled execution
+<ListItem>
+**Use Manual Execution for Testing**: Trigger jobs manually when testing tracker 
+configurations before enabling scheduled execution
+</ListItem>
 
-5. **Understand No-ops**: Don't be concerned about no-op jobs—they're normal when data is 
-   insufficient and indicate your tracker is running correctly
+<ListItem>
+**Understand No-ops**: Don't be concerned about no-op jobs—they're normal when data is 
+insufficient and indicate your tracker is running correctly
+</ListItem>
+</List>
 
 <Callout>
 **Job Monitoring**: The job details page provides real-time updates during execution, 

@@ -223,13 +223,17 @@ Push your branch—insights deploy automatically. The same Git workflow that man
 
 Launching a new onboarding flow:
 
-**1. Create feature branch**
+<List>
+<ListItem>
+**Create feature branch**
 
 ```bash title="Terminal"
 git checkout -b feature/new-onboarding-flow
 ```
+</ListItem>
 
-**2. Implement feature + tracker**
+<ListItem>
+**Implement feature + tracker**
 
 ```yaml title=".journium/trackers/onboarding-v2-analysis.yml"
 apiVersion: journium.app/v0Alpha
@@ -256,10 +260,14 @@ spec:
       - onboarding_v2_completed
     maxEvents: 1000
 ```
+</ListItem>
 
-**3. Open pull request**—Team reviews feature and tracker. Someone suggests increasing `maxEvents`. You update the YAML. Everyone approves.
+<ListItem>
+**Open pull request**—Team reviews feature and tracker. Someone suggests increasing `maxEvents`. You update the YAML. Everyone approves.
+</ListItem>
 
-**4. Merge and deploy**
+<ListItem>
+**Merge and deploy**
 
 ```bash title="Terminal"
 git merge feature/new-onboarding-flow
@@ -267,8 +275,12 @@ git push origin main
 ```
 
 Application code deploys via CI/CD. Tracker deploys via Journium's automatic sync. Insights start flowing.
+</ListItem>
 
-**5. Iterate**—If the tracker reveals issues, adjust the onboarding flow and update the tracker in the same commit. Analytics evolve with the product.
+<ListItem>
+**Iterate**—If the tracker reveals issues, adjust the onboarding flow and update the tracker in the same commit. Analytics evolve with the product.
+</ListItem>
+</List>
 
 ## Advanced Patterns
 
