@@ -6,8 +6,17 @@ import { BlogSubscribe } from '@/components/ui/blog-subscribe';
 import { JourniumIcon } from '@/components/ui/journium-icon';
 
 export const metadata: Metadata = {
-  title: 'Journium Blog',
-  description: 'Latest announcements and insights from Journium.',
+  title: 'Journium Blog — AI Product Analytics Insights',
+  description: 'Latest insights on AI product analytics, automated product insights, user journey analytics, and why teams are switching from Mixpanel and Amplitude to Journium.',
+  keywords: [
+    'AI product analytics',
+    'automated product insights',
+    'product analytics tool',
+    'Mixpanel alternative',
+    'Amplitude alternative',
+    'actionable product insights',
+    'user journey analytics',
+  ],
 };
 
 function getName(path: string) {
@@ -57,8 +66,8 @@ export default function Page() {
             </h1>
             
             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-              Latest announcements, insights, and stories from Journium. 
-              Discover how we&apos;re transforming telemetry into proactive intelligence.
+              Latest announcements, insights, and stories from Journium.  
+              Discover how we&apos;re delivering automated product insights — without dashboards or data analysts.
             </p>
 
             {/* Optional: Add search or CTA */}
