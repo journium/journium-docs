@@ -41,8 +41,34 @@ export default async function Page(props: PageProps) {
     );
   }
 
+  const pageKeywords = (page.data as unknown as Record<string, unknown>).keywords as string | undefined;
+  const techArticleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: page.data.title,
+    description: page.data.description,
+    keywords: pageKeywords,
+    url: `https://journium.app${page.url}`,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Journium',
+      url: 'https://journium.app',
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://journium.app${page.url}`,
+    },
+  };
+
   // Render normal MDX page
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(techArticleSchema).replace(/</g, '\\u003c'),
+        }}
+      />
     <DocsPage 
     toc={page.data.toc} 
     tableOfContent={{
@@ -61,7 +87,6 @@ export default async function Page(props: PageProps) {
       }}
     full={page.data.full}
     >
-      
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6">
@@ -106,6 +131,7 @@ export default async function Page(props: PageProps) {
       <Feedback />
       {lastModifiedTime && <PageLastUpdate date={lastModifiedTime} />}
     </DocsPage>
+    </>
   );
 }
 
@@ -147,6 +173,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
       ? page.data.title  // Will use root template: "Journium Docs | Journium"
       : { absolute: `${page.data.title} | Journium Docs` },
     description: page.data.description,
+    keywords: (page.data as unknown as Record<string, unknown>).keywords as string | string[] | undefined,
     openGraph: {
       images: getDocsPageImage(page).url,
     },

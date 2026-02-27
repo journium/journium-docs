@@ -18,7 +18,37 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
   if (!page) notFound();
   const { body: Mdx, toc } = await page.data.load();
 
+  const blogPostingSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: page.data.title,
+    description: page.data.description,
+    datePublished: page.data.date ? new Date(page.data.date).toISOString() : undefined,
+    author: {
+      '@type': 'Person',
+      name: page.data.author,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Journium',
+      url: 'https://journium.app',
+    },
+    keywords: page.data.keywords?.join(', '),
+    url: `https://journium.app/blog/${params.slug}`,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://journium.app/blog/${params.slug}`,
+    },
+  };
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(blogPostingSchema).replace(/</g, '\\u003c'),
+        }}
+      />
     <article className="flex flex-col mx-auto w-full max-w-[800px] px-4 py-8">
       <BlogAuthor
         author={page.data.author}
@@ -48,6 +78,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
         <Mdx components={getMDXComponents()} />
       </div>
     </article>
+    </>
   );
 }
 
@@ -62,6 +93,7 @@ export async function generateMetadata(props: PageProps<'/blog/[slug]'>): Promis
       absolute: `${page.data.title} | Journium Blog`,
     },
     description: page.data.description ?? 'Latest announcements and insights from Journium.',
+    keywords: page.data.keywords,
     openGraph: {
       images: getBlogPageImage(page).url,
     },
