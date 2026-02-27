@@ -42,13 +42,14 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
   };
 
   return (
-    <article className="flex flex-col mx-auto w-full max-w-[800px] px-4 py-8">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(blogPostingSchema),
+          __html: JSON.stringify(blogPostingSchema).replace(/</g, '\\u003c'),
         }}
       />
+    <article className="flex flex-col mx-auto w-full max-w-[800px] px-4 py-8">
       <BlogAuthor
         author={page.data.author}
         date={page.data.date ?? path.basename(page.path, path.extname(page.path))}
@@ -77,6 +78,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
         <Mdx components={getMDXComponents()} />
       </div>
     </article>
+    </>
   );
 }
 

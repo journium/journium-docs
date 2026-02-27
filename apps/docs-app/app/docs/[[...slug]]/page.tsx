@@ -62,6 +62,13 @@ export default async function Page(props: PageProps) {
 
   // Render normal MDX page
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(techArticleSchema).replace(/</g, '\\u003c'),
+        }}
+      />
     <DocsPage 
     toc={page.data.toc} 
     tableOfContent={{
@@ -80,12 +87,6 @@ export default async function Page(props: PageProps) {
       }}
     full={page.data.full}
     >
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(techArticleSchema),
-        }}
-      />
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6">
@@ -130,6 +131,7 @@ export default async function Page(props: PageProps) {
       <Feedback />
       {lastModifiedTime && <PageLastUpdate date={lastModifiedTime} />}
     </DocsPage>
+    </>
   );
 }
 
