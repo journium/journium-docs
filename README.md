@@ -228,9 +228,6 @@ pnpm run nx <command>
 4. Commit and push
 5. Create pull request
 
-## License
-
-[Add your license]
 
 ## Links
 
