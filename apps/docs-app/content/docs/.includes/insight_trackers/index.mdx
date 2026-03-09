@@ -30,7 +30,7 @@ freeform raw-event queries and produces higher-quality, more consistent insights
 
 Insight Trackers transform raw telemetry data into human-readable insights through an AI-driven pipeline:
 
-1. **Query Compilation**: Journium translates your `analysis` config into optimised ClickHouse queries for your chosen `window` period
+1. **Query Compilation**: Journium compiles your `analysis` config into optimised analytical queries for the chosen `window` period
 2. **Data Retrieval**: The compiled queries run against your event data and return structured results (conversion rates, cohort tables, anomaly scores, etc.)
 3. **Payload Building**: The structured results are mapped to named template variables and injected into your `llm.promptTemplate`
 4. **Insight Generation**: The LLM synthesises the data into a concise, natural-language insight backed by verifiable numbers
