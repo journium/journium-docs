@@ -1,0 +1,43 @@
+## What is an Insight?
+
+An Insight is a concise, AI-generated analysis of your application's event data, produced each
+time an [Insight Tracker](/docs/concepts/insight_trackers) runs. The LLM synthesises the
+structured query results into a natural-language summary using your configured `promptTemplate` —
+giving you an actionable, human-readable answer to the question your tracker is asking.
+
+Insights appear on your application instance's
+[Insights](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/insights) page,
+ordered newest-first.
+
+## What Each Insight Contains
+
+| Field | Description |
+|---|---|
+| **Tracker** | The Insight Tracker that produced this insight |
+| **Generated at** | Timestamp of the job execution |
+| **Analysis window** | The time range analysed, e.g. "last 7 days" |
+| **Insight text** | The LLM-generated natural-language summary |
+
+## How Insights are Generated
+
+Insights are produced by running a tracker — either on a schedule (`trigger.mode: automatic`) or
+on-demand (`trigger.mode: manual`). Each run goes through four steps:
+
+1. **Query compilation** — Journium compiles the `analysis` config into analytical queries for the configured `window`
+2. **Data retrieval** — queries run against your application's event data and return structured results
+3. **Prompt rendering** — results are mapped to template variables and injected into `llm.promptTemplate`
+4. **LLM synthesis** — the LLM generates the insight text, which is persisted and displayed
+
+See [Insight Trackers](/docs/concepts/insight_trackers) to learn how to configure the trackers
+that power your insights.
+
+## Triggering an Insight
+
+- **Scheduled** — trackers with `trigger.mode: automatic` run on the configured `schedule` (hourly, daily, weekly, or a cron expression). Each run produces a new insight.
+- **Manual** — trigger a run at any time from the tracker detail page in the dashboard, or via the API.
+
+## Insight History
+
+Every run appends a new insight to the history — previous insights are never overwritten.
+Deactivating or deleting a tracker does not remove past insights; the history is retained for
+reference.
