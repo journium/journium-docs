@@ -1,22 +1,19 @@
 ---
-title: Custom Analysis (Deprecated)
-description: Legacy v0Alpha raw-event analysis — for migration only.
+title: Custom Analysis
+description: Pass raw matching events to the LLM for freeform analysis.
 icon: Archive
 ---
 
-<Callout type="warn">
-**Deprecated — for v0Alpha migration only.** The `custom` analysis type is not available in the
-NL Builder or the YAML editor for new trackers. It exists only to ease migration of existing
-v0Alpha trackers. Migrate to a structured analysis type as soon as practical — structured types
-produce higher-quality, more consistent insights.
+<Callout type="info">
+Custom analysis is not available in the AI-assisted tracker builder. Create custom trackers using the YAML editor.
 </Callout>
 
 ## Overview
 
-The `custom` analysis type is a compatibility bridge that preserves the v0Alpha behaviour of
-sending a raw list of matching events to the LLM for freeform analysis. It does not run any
-structured queries and does not inject pre-computed metrics — only the raw event list and the
-universal base variables are available.
+The `custom` analysis type passes a filtered list of raw events directly to the LLM for freeform
+analysis. Unlike structured types, it does not run pre-computed queries or inject metric variables
+— only the matching events and universal base variables are available. Use `custom` when none of
+the structured types fit your use case.
 
 ## Configuration Reference
 
@@ -77,15 +74,15 @@ universal base variables are available.
 | `{{dataAsJson}}` | Raw event list serialised as JSON |
 | `{{executedAt}}` | ISO 8601 execution timestamp |
 
-## Example (v0Alpha Compatibility)
+## Example
 
-```yaml title=".journium/trackers/user-engagement-legacy.yml"
+```yaml title=".journium/trackers/user-engagement.yml"
 apiVersion: journium.app/v0Beta
 kind: InsightTracker
 metadata:
-  name: user-engagement-legacy
-  displayName: User Engagement (Legacy)
-  description: Migrated from v0Alpha — pending structured type migration
+  name: user-engagement
+  displayName: User Engagement
+  description: Tracks engagement patterns via raw event inspection
 spec:
   type: LLM
   trigger:
@@ -110,21 +107,3 @@ spec:
     maxOutputTokens: 200
 ```
 
-## Migration Guide
-
-Replace `custom` with the structured type that best matches your intent:
-
-| If your old prompt was asking about…                         | Use type          |
-|--------------------------------------------------------------|-------------------|
-| Multi-step user flow with drop-off at each step              | `funnel`          |
-| Whether users return over time after signup                  | `retention`       |
-| How quickly new users reach a key action                     | `activation`      |
-| Users who haven't been active recently                       | `churn`           |
-| What fraction of users have used a feature                   | `featureAdoption` |
-| Unusual spikes or drops in event volume                      | `anomaly`         |
-| Simple ratio of users doing A then B                         | `conversion`      |
-| Comparing behaviour across different user groups             | `cohort`          |
-| How event counts or unique users change over time            | `trend`           |
-
-After choosing a type, update your `spec.analysis` block accordingly and replace any freeform
-prompt references with the structured `{{variables}}` documented on the target type's page.

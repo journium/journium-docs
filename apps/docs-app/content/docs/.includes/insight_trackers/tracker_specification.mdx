@@ -1,23 +1,18 @@
 ---
 title: Tracker Specification
-description: Complete reference for the Journium Insight Tracker v0Beta YAML specification.
+description: Complete reference for the Journium Insight Tracker YAML specification.
 icon: InsightTracker
 ---
 
 A Journium InsightTracker is defined using a structured YAML format that follows the
-[Journium InsightTracker v0Beta schema](https://journium.app/schemas/journium-insight-tracker.v0Beta.schema.json).
-
-<Callout type="info">
-**v0Beta is the current schema version.** If you have trackers using `apiVersion: journium.app/v0Alpha`
-(with `data.events` and `llmPrompt` fields), see the [migration note](#migrating-from-v0alpha) below.
-</Callout>
+[InsightTracker schema](https://journium.app/schemas/journium-insight-tracker.schema.json).
 
 ## Top-Level Properties
 
 <TypeTable
   type={{
     apiVersion: {
-      description: 'The schema version. Must be `journium.app/v0Beta` for current trackers.',
+      description: 'Resource type identifier. Must be `journium.app/v0Beta`.',
       type: 'string',
       typeDescription: '`"journium.app/v0Beta"`',
       required: true,
@@ -75,7 +70,7 @@ A Journium InsightTracker is defined using a structured YAML format that follows
 <TypeTable
   type={{
     type: {
-      description: 'Spec type discriminator. Must be `LLM` for all v0Beta trackers.',
+      description: 'Spec type discriminator. Must be `LLM`.',
       type: 'string',
       typeDescription: '`"LLM"`',
       required: true,
@@ -231,7 +226,7 @@ and injects different template variables into your `llm.promptTemplate`.
 | [`conversion`](./analysis_types/conversion) | Simple numerator / denominator conversion rate |
 | [`cohort`](./analysis_types/cohort) | Compare a metric across cohorts by join date or property |
 | [`trend`](./analysis_types/trend) | Count events or unique users per time period |
-| [`custom`](./analysis_types/custom) | *(Deprecated — v0Alpha migration only)* Raw event list |
+| [`custom`](./analysis_types/custom) | Raw event list analysis — not available in the NL Builder |
 
 See the [Analysis Types overview](./analysis_types) for per-type configuration reference and examples.
 
@@ -353,20 +348,3 @@ spec:
       - userId
 ```
 
----
-
-## Migrating from v0Alpha
-
-If you have existing trackers using `apiVersion: journium.app/v0Alpha`, they use the old
-`data.events` + `llmPrompt` fields. To migrate to v0Beta:
-
-1. Replace `apiVersion: journium.app/v0Alpha` with `apiVersion: journium.app/v0Beta`
-2. Remove the `spec.data` block and `spec.llmPrompt` field
-3. Add a `spec.window` block with the time period you previously implied in your prompt
-4. Add a `spec.analysis` block — choose the type that best matches what your old prompt was computing (see [Analysis Types](./analysis_types))
-5. Move your LLM instructions into `spec.llm.promptTemplate`, replacing free-form data references with the structured `{{variables}}` for your chosen analysis type
-6. Optionally add a `spec.privacy` block for any PII fields
-
-<Callout type="warn">
-The `custom` analysis type provides a compatibility bridge for v0Alpha prompts that don't map cleanly to a structured type. However, `custom` is deprecated and not available in the NL Builder or for new trackers. Migrate to a structured type as soon as practical.
-</Callout>

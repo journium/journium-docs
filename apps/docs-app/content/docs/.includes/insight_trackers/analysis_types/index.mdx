@@ -1,11 +1,11 @@
 ---
 title: Analysis Types
-description: Reference documentation for all v0Beta Insight Tracker analysis types.
+description: Reference documentation for all Insight Tracker analysis types.
 icon: LayoutGrid
 ---
 
-Journium v0Beta trackers use a structured `analysis` block that selects one of nine active
-analysis algorithms (plus one legacy type). Each type determines:
+Journium trackers use a structured `analysis` block that selects one of
+nine structured analysis algorithms, plus Custom analysis. Each type determines:
 
 - **What queries are compiled** against your event data
 - **Which template variables** are injected into your `llm.promptTemplate`
@@ -41,8 +41,8 @@ analysis algorithms (plus one legacy type). Each type determines:
   <Card title="Trend / Growth" href="./analysis_types/trend" icon={<TrendingUpIcon />}>
     Count events or unique users per time period — daily, weekly, monthly.
   </Card>
-  <Card title="Custom (Deprecated)" href="./analysis_types/custom" icon={<ArchiveIcon />}>
-    Legacy v0Alpha raw-event analysis. Deprecated — migration only.
+  <Card title="Custom Analysis" href="./analysis_types/custom" icon={<ArchiveIcon />}>
+    Pass raw matching events to the LLM — not available in the NL Builder.
   </Card>
 </Cards>
 
@@ -59,7 +59,7 @@ analysis algorithms (plus one legacy type). Each type determines:
 | Compute a simple event-A-to-event-B conversion rate                | `conversion`      |
 | Compare engagement or revenue across cohort groups                 | `cohort`          |
 | Plot event counts, DAU, or sums over time                          | `trend`           |
-| Migrate a v0Alpha tracker that uses raw events + freeform prompt   | `custom`          |
+| Analyze matching events without pre-computed metrics               | `custom`          |
 
 ## Universal Template Variables
 
