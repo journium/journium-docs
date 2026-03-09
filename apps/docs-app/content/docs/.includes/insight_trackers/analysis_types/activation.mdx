@@ -1,0 +1,117 @@
+
+
+## Overview
+
+Activation Analysis measures the "aha moment" rate — what percentage of users who completed a
+start event (e.g., signed up) also completed a key value action within a defined time window.
+It tells you how effective your onboarding is at guiding new users to first value.
+
+<Callout type="info">
+**When to use activation**: "What % of signups create a project within 24 hours?", "Are new users
+finding value quickly enough?", "What is our activation rate for trial users?" — any question
+about the rate at which new users reach a meaningful milestone.
+
+**When NOT to use activation**: If you want historical cohort return-rate curves, use
+[`retention`](./retention). If you want to identify currently inactive users, use
+[`churn`](./churn).
+</Callout>
+
+## Configuration Reference
+
+<TypeTable
+  type={{
+    type: {
+      description: 'Analysis type discriminant.',
+      type: 'string',
+      typeDescription: '`"activation"`',
+      required: true,
+    },
+    entity: {
+      description: 'The user identifier to link start and aha events.',
+      type: 'string',
+      typeDescription: '`"person_id"`. Default: `"person_id"`',
+      required: false,
+    },
+    startEvent: {
+      description: 'The entry event that marks a "new user". Only users who fired this event within the analysis window are counted.',
+      type: 'string',
+      typeDescription: 'Event name, e.g. `"user_signed_up"`',
+      required: true,
+    },
+    ahaEvent: {
+      description: 'The "aha moment" event. Users who fire this event within `activationWindow` after `startEvent` are counted as activated.',
+      type: 'string',
+      typeDescription: 'Event name, e.g. `"project_created"`',
+      required: true,
+    },
+    activationWindow: {
+      description: 'Maximum time after `startEvent` in which the user must fire `ahaEvent` to be counted as activated.',
+      type: 'string',
+      typeDescription: 'Duration string, e.g. `"24h"`, `"7d"`, `"48h"`',
+      required: true,
+    },
+    compareWindow: {
+      description: 'If set, also computes activation rate for the equivalent previous period and provides delta metrics.',
+      type: 'string',
+      typeDescription: '`"previous_period"`',
+      required: false,
+    },
+    breakdowns: {
+      description: 'Optional property dimensions to segment activation results by.',
+      type: 'array',
+      typeDescription: 'Array of `BreakdownDef`',
+      required: false,
+    },
+  }}
+/>
+
+## Available Template Variables
+
+| Variable | Description |
+|---|---|
+| `{{newUsers}}` | Number of users who fired `startEvent` in the window |
+| `{{activated}}` | Number of users who also fired `ahaEvent` within `activationWindow` |
+| `{{activationRatePct}}` | Percentage of new users who activated |
+| `{{avgHoursToAha}}` | Average hours from `startEvent` to `ahaEvent` for activated users |
+| `{{hasComparison}}` | `true` if `compareWindow` was set and previous-period data is available |
+| `{{prevActivationRatePct}}` | Activation rate in the previous period (when `hasComparison` is true) |
+| `{{activationDeltaPct}}` | Percentage-point change vs. previous period (when `hasComparison` is true) |
+| `{{windowPeriod}}` | Human-readable analysis window, e.g. `"last 14 days"` |
+| `{{dataAsJson}}` | Full structured result as JSON |
+| `{{executedAt}}` | ISO 8601 execution timestamp |
+
+## Example
+
+```yaml title=".journium/trackers/signup-to-project.yml"
+apiVersion: journium.app/v0Beta
+kind: InsightTracker
+metadata:
+  name: signup-to-project
+  displayName: Signup → First Project (24h Activation)
+  description: What % of new signups create a project within 24 hours
+spec:
+  type: LLM
+  trigger:
+    mode: automatic
+    schedule: daily
+  window:
+    period: last_14d
+  analysis:
+    type: activation
+    entity: person_id
+    startEvent: user_signed_up
+    ahaEvent: project_created
+    activationWindow: 24h
+    compareWindow: previous_period
+  llm:
+    promptTemplate: |
+      Analyze activation for {{windowPeriod}}.
+      {{newUsers}} new users signed up. {{activated}} activated ({{activationRatePct}}%).
+      Average time to aha moment: {{avgHoursToAha}} hours.
+      {{#if hasComparison}}
+      Previous period activation: {{prevActivationRatePct}}% ({{activationDeltaPct}}pp change).
+      {{/if}}
+      Full data: {{dataAsJson}}
+      Identify the biggest friction points preventing activation and suggest one targeted fix.
+    maxOutputTokens: 400
+```

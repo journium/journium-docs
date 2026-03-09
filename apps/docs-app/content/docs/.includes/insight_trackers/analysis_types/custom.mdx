@@ -1,0 +1,105 @@
+
+
+<Callout type="info">
+Custom analysis is not available in the AI-assisted tracker builder. Create custom trackers using the YAML editor.
+</Callout>
+
+## Overview
+
+The `custom` analysis type passes a filtered list of raw events directly to the LLM for freeform
+analysis. Unlike structured types, it does not run pre-computed queries or inject metric variables
+— only the matching events and universal base variables are available. Use `custom` when none of
+the structured types fit your use case.
+
+## Configuration Reference
+
+<TypeTable
+  type={{
+    type: {
+      description: 'Analysis type discriminant.',
+      type: 'string',
+      typeDescription: '`"custom"`',
+      required: true,
+    },
+    rawEvents: {
+      description: 'Raw event selection and limits for the LLM payload.',
+      type: 'object',
+      typeDescription: 'See `RawEventsConfig` below',
+      required: true,
+    },
+  }}
+/>
+
+### `RawEventsConfig` Properties
+
+<TypeTable
+  type={{
+    events: {
+      description: 'Events to include. Use `"*"` for all events, or provide an explicit allowlist.',
+      type: 'string | string[]',
+      typeDescription: '`"*"` or an array of event names, e.g. `["signup_completed", "habit_created"]`',
+      required: true,
+    },
+    maxEvents: {
+      description: 'Maximum number of raw events to pass to the LLM. Hard cap: 50 events.',
+      type: 'integer',
+      typeDescription: 'Range: 1–50. Default: 50',
+      required: false,
+    },
+    minEvents: {
+      description: 'Minimum number of events required for the tracker to run. If fewer events are available, execution is skipped.',
+      type: 'integer',
+      typeDescription: 'Minimum: 1. Default: 1',
+      required: false,
+    },
+    excludeFields: {
+      description: 'List of event fields to strip before passing to the LLM.',
+      type: 'string[]',
+      required: false,
+    },
+  }}
+/>
+
+## Available Template Variables
+
+`custom` analysis only has access to the universal base variables — no pre-computed metrics:
+
+| Variable | Description |
+|---|---|
+| `{{windowPeriod}}` | Human-readable analysis window, e.g. `"last 7 days"` |
+| `{{dataAsJson}}` | Raw event list serialised as JSON |
+| `{{executedAt}}` | ISO 8601 execution timestamp |
+
+## Example
+
+```yaml title=".journium/trackers/user-engagement.yml"
+apiVersion: journium.app/v0Beta
+kind: InsightTracker
+metadata:
+  name: user-engagement
+  displayName: User Engagement
+  description: Tracks engagement patterns via raw event inspection
+spec:
+  type: LLM
+  trigger:
+    mode: automatic
+    schedule: daily
+  window:
+    period: last_7d
+  analysis:
+    type: custom
+    rawEvents:
+      events:
+        - signup_completed
+        - habit_created
+        - session_started
+      minEvents: 1
+      maxEvents: 50
+  llm:
+    promptTemplate: |
+      Analyze user engagement for {{windowPeriod}}.
+      Event data: {{dataAsJson}}
+      Generate a one-sentence insight summarizing engagement patterns.
+    maxOutputTokens: 200
+```
+

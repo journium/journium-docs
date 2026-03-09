@@ -1,0 +1,152 @@
+
+
+## Overview
+
+Cohort Analysis groups users into cohorts — either by **when they first did something** (time-based)
+or by a **static property value** (e.g. plan tier) — and then compares a metric across those
+cohorts. Use it to answer "do users who joined in January behave differently to February
+signups?" or "how does purchase frequency differ across plan tiers?"
+
+<Callout type="info">
+**When to use cohort**: "Do users who signed up in January spend more than February signups?",
+"Compare engagement by plan tier", "Show LTV curves by acquisition month."
+
+**When NOT to use cohort**: If you want period-by-period return rates for a single cohort, use
+[`retention`](./retention). If you want a plain time-series count, use [`trend`](./trend).
+</Callout>
+
+## Configuration Reference
+
+<TypeTable
+  type={{
+    type: {
+      description: 'Analysis type discriminant.',
+      type: 'string',
+      typeDescription: '`"cohort"`',
+      required: true,
+    },
+    entity: {
+      description: 'The user identifier to assign to cohorts.',
+      type: 'string',
+      typeDescription: '`"person_id"`. Default: `"person_id"`',
+      required: false,
+    },
+    cohortDefinition: {
+      description: 'Defines how users are grouped into cohorts. Either time-based (by first event) or property-based.',
+      type: 'object',
+      typeDescription: 'One of `CohortByFirstEvent` or `CohortByProperty` — see below',
+      required: true,
+    },
+    metric: {
+      description: 'The metric to compute for each cohort.',
+      type: 'object',
+      typeDescription: '`{ event: string, aggregation: CohortAggregation, intervals?: number[] }`',
+      required: true,
+    },
+    maxCohorts: {
+      description: 'Maximum number of cohorts to include. For time-based cohorts, the most recent cohorts are preferred.',
+      type: 'integer',
+      typeDescription: 'Default: 12',
+      required: false,
+    },
+  }}
+/>
+
+### `CohortByFirstEvent` Properties
+
+Groups users by the calendar period of their first occurrence of a specific event.
+
+<TypeTable
+  type={{
+    firstEvent: {
+      description: 'The event that marks cohort entry.',
+      type: 'string',
+      typeDescription: 'Event name, e.g. `"user_signed_up"`',
+      required: true,
+    },
+    period: {
+      description: 'Time bucket for grouping cohorts.',
+      type: 'string',
+      typeDescription: '`"day"` | `"week"` | `"month"`. Default: `"week"`',
+      required: false,
+    },
+  }}
+/>
+
+### `CohortByProperty` Properties
+
+Groups users by a static event property value (e.g. their plan at signup).
+
+<TypeTable
+  type={{
+    property: {
+      description: 'The event property to group users by.',
+      type: 'string',
+      typeDescription: 'e.g. `"plan"`, `"acquisition_channel"`',
+      required: true,
+    },
+    values: {
+      description: 'The specific property values to include as cohorts.',
+      type: 'string[]',
+      typeDescription: 'e.g. `["free", "pro", "enterprise"]`',
+      required: true,
+    },
+  }}
+/>
+
+### `CohortAggregation` values
+
+| Value | Meaning |
+|---|---|
+| `"count"` | Total event occurrences in the cohort |
+| `"uniqueUsers"` | Unique users in the cohort who fired the metric event |
+| `"avg"` | Average value of a numeric property (requires `sumProperty`) |
+| `"sum"` | Sum of a numeric property (requires `sumProperty`) |
+
+## Available Template Variables
+
+| Variable | Description |
+|---|---|
+| `{{cohortCount}}` | Number of cohorts included in the analysis |
+| `{{avgCohortSize}}` | Average number of users per cohort |
+| `{{cohortSummary}}` | Per-cohort metric table (cohort label, size, metric value) |
+| `{{windowPeriod}}` | Human-readable analysis window, e.g. `"last 90 days"` |
+| `{{dataAsJson}}` | Full structured result as JSON |
+| `{{executedAt}}` | ISO 8601 execution timestamp |
+
+## Example
+
+```yaml title=".journium/trackers/weekly-cohort-purchases.yml"
+apiVersion: journium.app/v0Beta
+kind: InsightTracker
+metadata:
+  name: weekly-cohort-purchases
+  displayName: Weekly Signup Cohort → Purchase Comparison
+  description: Compare purchase rates across weekly signup cohorts
+spec:
+  type: LLM
+  trigger:
+    mode: automatic
+    schedule: weekly
+  window:
+    period: last_90d
+  analysis:
+    type: cohort
+    entity: person_id
+    cohortDefinition:
+      firstEvent: user_signed_up
+      period: week
+    metric:
+      event: purchase_completed
+      aggregation: uniqueUsers
+    maxCohorts: 12
+  llm:
+    promptTemplate: |
+      Weekly cohort analysis for {{windowPeriod}}.
+      {{cohortCount}} cohorts included. Average cohort size: {{avgCohortSize}} users.
+      Cohort comparison:
+      {{cohortSummary}}
+      Full data: {{dataAsJson}}
+      Identify which signup cohorts have the highest purchase rates and what might explain the difference.
+    maxOutputTokens: 400
+```

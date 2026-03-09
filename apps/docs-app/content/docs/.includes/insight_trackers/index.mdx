@@ -1,39 +1,53 @@
----
-title: Insight Trackers
-description: Insight Trackers use AI-driven analytics to automatically transform raw event data 
-             into actionable insights. Configure trackers in the dashboard to continuously monitor your 
-             application and surface meaningful patterns.
-icon: InsightTracker
----
-
-
 
 ## What are Insight Trackers?
 
-Insight Trackers are the core of Journium's **Insights as Code** approach. Instead of manually 
-querying data or building dashboards, you define what you want to know about your application, 
-and Journium's AI-driven analytics engine automatically analyzes your event data to generate 
+Insight Trackers are the core of Journium's **Insights as Code** approach. Instead of manually
+querying data or building dashboards, you define what you want to know about your application,
+and Journium's AI-driven analytics engine automatically analyzes your event data to generate
 concise, actionable insights.
 
 Think of an Insight Tracker as a continuous data analyst that:
-- Monitors specific events in your application
-- Analyzes patterns, trends, and anomalies using AI
-- Generates natural language insights explaining what's happening and why
+- Runs a **structured analysis** against your events (funnel, retention, churn, trend, and more)
+- Synthesizes findings into a natural-language insight using an LLM with your custom prompt
 - Runs automatically on a schedule or on-demand
+- Surfaces results on your application's Insights page
+
+Each tracker's `analysis` block selects one of nine structured analysis types — covering funnel
+drop-off, cohort retention, activation rates, churn risk, feature adoption, anomaly detection,
+conversion rates, cohort comparisons, and trend/growth analysis. This structured approach replaces
+freeform raw-event queries and produces higher-quality, more consistent insights.
 
 ## How Insight Trackers Work
 
 Insight Trackers transform raw telemetry data into human-readable insights through an AI-driven pipeline:
 
-1. **Event Collection**: The tracker focuses on specific events you've configured (e.g., `purchase_started`, `user_signup`, `error_occurred`)
-2. **Data Analysis**: Journium's AI engine analyzes the event data, looking for patterns, correlations, anomalies, and trends
-3. **Insight Generation**: The AI synthesizes findings into concise, natural language insights (typically 1-3 sentences) backed by verifiable data
-4. **Delivery**: Insights are displayed in your Journium dashboard on the application instance's 
-   insights page [Insights](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/insights)
+1. **Query Compilation**: Journium compiles your `analysis` config into optimised analytical queries for the chosen `window` period
+2. **Data Retrieval**: The compiled queries run against your event data and return structured results (conversion rates, cohort tables, anomaly scores, etc.)
+3. **Payload Building**: The structured results are mapped to named template variables and injected into your `llm.promptTemplate`
+4. **Insight Generation**: The LLM synthesises the data into a concise, natural-language insight backed by verifiable numbers
+5. **Delivery**: Insights appear on your application instance's [Insights](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/insights) page
 
-This process eliminates the need for manual data exploration, SQL queries, or dashboard interpretation. 
-The AI does the heavy lifting of data crunching and pattern finding, delivering insights that are both interesting and trustworthy.
+This process eliminates the need for manual data exploration, SQL queries, or dashboard interpretation.
 
-You can list an application instance's insight trackers at 
+You can list an application instance's insight trackers at
 [Developers | Insight Trackers](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/insight-trackers)
 from your application instance page.
+
+## Choosing an Analysis Type
+
+The `analysis.type` field determines what Journium computes and which template variables are
+available in your prompt. Choose the type that best matches the question you want to answer:
+
+| If you want to…                                              | Use type          |
+|--------------------------------------------------------------|-------------------|
+| See where users drop off across ordered steps                | `funnel`          |
+| Track cohort return rates over time (D1 / D7 / D30)         | `retention`       |
+| Measure what % of new users reach the first value moment     | `activation`      |
+| Identify users who have gone silent and are at churn risk    | `churn`           |
+| Know what fraction of active users have tried a feature      | `featureAdoption` |
+| Detect unusual spikes or dips vs. a statistical baseline     | `anomaly`         |
+| Compute a simple A → B conversion rate                       | `conversion`      |
+| Compare a metric across cohorts defined by join date or tier | `cohort`          |
+| Plot event counts or unique users per time period            | `trend`           |
+
+See [Analysis Types](/docs/concepts/insight_trackers/analysis_types) for the full reference for each type.

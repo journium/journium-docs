@@ -1,0 +1,18 @@
+{
+    "title": "Analysis Types",
+    "description": "Reference for all analysis types",
+    "root": false,
+    "defaultOpen": false,
+    "pages": [
+      "funnel",
+      "retention",
+      "activation",
+      "churn",
+      "feature_adoption",
+      "anomaly",
+      "conversion",
+      "cohort",
+      "trend",
+      "custom"
+    ]
+  }

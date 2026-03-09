@@ -1,0 +1,123 @@
+
+
+## Overview
+
+Churn Risk Analysis finds users who were active during a lookback period but have not performed
+any qualifying activity within the inactivity threshold. These users are flagged as "at churn
+risk". The analysis gives you an actionable count today — not a historical trend.
+
+<Callout type="info">
+**When to use churn**: "Which users haven't logged in for 2 weeks?", "How many active users are
+at churn risk right now?", "Who do I need to reach out to before they leave?" — any question
+about currently at-risk users.
+
+**When NOT to use churn**: If you want historical retention trend curves over cohorts, use
+[`retention`](./retention). If you want a time-series activity count, use [`trend`](./trend).
+</Callout>
+
+## Configuration Reference
+
+<TypeTable
+  type={{
+    type: {
+      description: 'Analysis type discriminant.',
+      type: 'string',
+      typeDescription: '`"churn"`',
+      required: true,
+    },
+    entity: {
+      description: 'The user identifier to track activity for.',
+      type: 'string',
+      typeDescription: '`"person_id"`. Default: `"person_id"`',
+      required: false,
+    },
+    activeEvent: {
+      description: 'The event(s) that count as "activity". A user is considered active if they fired this event. Use `"*"` to count any event as activity.',
+      type: 'string | string[]',
+      typeDescription: '`"*"` (any event), a single event name, or an array of event names, e.g. `["session_started", "api_call"]`',
+      required: true,
+    },
+    inactivityThreshold: {
+      description: 'A user is considered at churn risk if they have not fired `activeEvent` within this duration up to the current time.',
+      type: 'string',
+      typeDescription: 'Duration string, e.g. `"7d"`, `"14d"`, `"30d"`',
+      required: true,
+    },
+    lookbackPeriod: {
+      description: 'How far back to look to establish that a user was "active" before the inactivity threshold. Users who have never been active are excluded.',
+      type: 'string',
+      typeDescription: 'Duration string, e.g. `"90d"`, `"180d"`. Defaults to the analysis window.',
+      required: false,
+    },
+    segments: {
+      description: 'Optional property dimensions to segment the at-risk user count by.',
+      type: 'array',
+      typeDescription: 'Array of `{ property: string }`',
+      required: false,
+    },
+    metrics: {
+      description: 'Optional set of additional metrics to compute.',
+      type: 'string[]',
+      typeDescription: '`"atRiskCount"` | `"atRiskRate"` | `"segmentBreakdown"` | `"timeSeriesTrend"`',
+      required: false,
+    },
+  }}
+/>
+
+### `activeEvent` values
+
+| Value | Meaning |
+|---|---|
+| `"*"` | Any event fired by the user counts as activity |
+| `"session_started"` | Only this specific event counts as activity |
+| `["session_started", "api_call"]` | Any event in this list counts as activity |
+
+## Available Template Variables
+
+| Variable | Description |
+|---|---|
+| `{{activeBase}}` | Total number of users who were active during the lookback period |
+| `{{atRiskCount}}` | Number of users currently at churn risk |
+| `{{atRiskRatePct}}` | Percentage of the active base that is at churn risk |
+| `{{churnSummary}}` | Segment breakdown of at-risk users (when `segments` are configured) |
+| `{{windowPeriod}}` | Human-readable analysis window, e.g. `"last 30 days"` |
+| `{{dataAsJson}}` | Full structured result as JSON |
+| `{{executedAt}}` | ISO 8601 execution timestamp |
+
+## Example
+
+```yaml title=".journium/trackers/churn-risk-14d.yml"
+apiVersion: journium.app/v0Beta
+kind: InsightTracker
+metadata:
+  name: churn-risk-14d
+  displayName: Churn Risk (14-day Inactivity)
+  description: Users who were active in the last 90 days but silent for 14+ days
+spec:
+  type: LLM
+  trigger:
+    mode: automatic
+    schedule: daily
+  window:
+    period: last_30d
+  analysis:
+    type: churn
+    entity: person_id
+    activeEvent: session_started
+    inactivityThreshold: 14d
+    lookbackPeriod: 90d
+    segments:
+      - property: plan
+    metrics:
+      - atRiskCount
+      - atRiskRate
+      - segmentBreakdown
+  llm:
+    promptTemplate: |
+      Churn risk analysis for {{windowPeriod}}.
+      Active user base: {{activeBase}}. At-risk users: {{atRiskCount}} ({{atRiskRatePct}}%).
+      Segment breakdown: {{churnSummary}}
+      Full data: {{dataAsJson}}
+      Summarize the churn risk situation and recommend one re-engagement action.
+    maxOutputTokens: 400
+```

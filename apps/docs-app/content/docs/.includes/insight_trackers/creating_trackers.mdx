@@ -1,163 +1,171 @@
----
-title: Creating Insight Trackers
-description: Learn how to create Insight Trackers in Journium. You can use a UI based wizard, 
-             or create them manually using the tracker specification YAML.
-icon: InsightTracker
----
 
-Trackers can be created in two ways. For creating one quickly, you can use the UI based wizard. 
-For more control, you can create them manually using the tracker specification YAML, and version control them in a Git repository.
-Irrespective of the method you use, you can always edit the tracker specification YAML to change the tracker configuration. 
 
-Trackers are specific to an application instance. Trackers configured for an application instance are not shared with other application instances.
+Trackers can be created in three ways. The **NL Builder** lets you describe what you want to
+track in plain English and generates a fully-configured tracker for you. The **YAML Editor**
+gives you direct control over the tracker specification. **Git Repository** sync lets you version
+control your tracker files and deploy them automatically on push.
 
-## UI Based Wizard
+Irrespective of the method you use, the result is always a YAML tracker specification file that
+you can inspect and edit at any time.
 
-You can create a new tracker using the UI based wizard. This will guide you through the process of creating a new tracker.
+Trackers are specific to an application instance. Trackers configured for one application instance
+are not shared with other instances.
 
-You can create a new tracker for your application instance at 
-[Developers | Insight Trackers | Create New](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/insight-trackers/new).
-Choose the **UI Based Wizard** option to create a new tracker using the UI wizard.
+## Describe in English (NL Builder)
 
-<ThemedImage 
-  srcLight="/images/tracker_creation_using_ui_light.png" 
-  srcDark="/images/tracker_creation_using_ui_dark.png" 
-  alt="Tracker Creation Using UI" 
-  width={1000} 
-  height={1000} 
+The NL Builder is the fastest way to create a new tracker. Describe what you want to measure in
+plain English — Journium's AI assistant will choose the right analysis type, configure the fields,
+and generate a complete tracker spec for you.
+
+You can access the NL Builder from
+[Developers | Insight Trackers | Create New](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/insight-trackers/new)
+by selecting the **Describe in English** option.
+
+The NL Builder walks you through four steps:
+
+### 1. Describe Your Goal
+
+Type a natural-language description of the insight you want. Be as specific as you like — include
+event names, time windows, and any segmentation properties you care about. Examples:
+
+- *"Track how many users drop off during checkout — from cart viewed through order completed, broken down by plan."*
+- *"Show me 30-day retention after signup, with weekly cohort groups."*
+- *"Alert me when error event rates spike more than 2 standard deviations above the 14-day rolling average."*
+
+### 2. Clarify (if needed)
+
+If your description is ambiguous, Journium may ask a small number of clarifying questions
+(e.g. which events to treat as the start and end of an activation window). Answer them in the
+same text field — the builder will update its draft accordingly.
+
+### 3. Review the Draft
+
+Once the pipeline completes, you'll see a full YAML tracker spec in the editor along with
+**instrumentation notes** — a checklist of any new events or properties your tracker requires that
+haven't been seen in your app yet.
+
+Review the spec, make any manual adjustments in the YAML editor, and decide on a status:
+- **Save as Draft** — saves the tracker in draft status (no scheduled runs)
+- **Save & Activate** — saves and activates the tracker immediately
+
+### 4. Instrument Your Events (if required)
+
+If the instrumentation notes list events or properties your app doesn't currently send, follow the
+instrumentation guide for your SDK to start capturing them before activating the tracker.
+
+<Callout>
+**Test Data**: The NL Builder also generates a sample test-events file (downloadable from the
+tracker detail page) so you can verify the tracker's analysis logic before real events arrive.
+</Callout>
+
+## Using YAML Editor
+
+You can create a new tracker manually using the tracker specification YAML. This gives you full
+control over every configuration field.
+
+Go to
+[Developers | Insight Trackers | Create New](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/insight-trackers/new)
+and choose the **Use YAML Editor** option.
+
+<ThemedImage
+  srcLight="/images/tracker_creation_using_yaml_editor_light.png"
+  srcDark="/images/tracker_creation_using_yaml_editor_dark.png"
+  alt="Tracker Creation Using YAML Editor"
+  width={1000}
+  height={1000}
 />
 
-Each tracker is configured using the UI wizard as follows:
+The editor is pre-filled with a sample tracker specification. Edit the YAML to match your
+requirements.
 
-### Status
-
-Tracker Status can be **Draft** or **Active**. Flip the toggle switch to change the status. 
-Scheduled execution won't be done on Draft trackers, but you can manually trigger an analysis.
-
-<ThemedImage 
-  srcLight="/images/tracker_status_light.png" 
-  srcDark="/images/tracker_status_dark.png" 
-  alt="Tracker Status" 
-  width={1000} 
-  height={1000} 
+<ThemedImage
+  srcLight="/images/tracker_yaml_editor_light.png"
+  srcDark="/images/tracker_yaml_editor_dark.png"
+  alt="Tracker YAML Editor"
+  width={1000}
+  height={1000}
 />
 
-### Basic Info
+The editor provides a validation status badge to indicate the validity of the YAML. If errors
+exist, they are shown in the gutter. Hover over the error to see the message. You can save only
+when the YAML is valid.
 
-This section captures the **Name** and **Description** of the tracker. 
-The name should be descriptive and identify what the tracker monitors 
-(e.g., "User Engagement Tracker", "Purchase Funnel Analysis", "Error Rate Monitor"). 
-The description provides a clear explanation of what the tracker analyzes and what 
-insights you're looking for, helping the AI understand the context and focus of the analysis.
+### Example YAML
 
-<ThemedImage 
-  srcLight="/images/tracker_basic_info_light.png" 
-  srcDark="/images/tracker_basic_info_dark.png" 
-  alt="Tracker Basic Info" 
-  width={1000} 
-  height={1000} 
-/>
+```yaml title=".journium/trackers/checkout-funnel.yml"
+apiVersion: journium.app/v0Beta
+kind: InsightTracker
+metadata:
+  name: checkout-funnel
+  displayName: Checkout Funnel Analysis
+  description: Track drop-off across the 4-step checkout flow
+spec:
+  type: LLM
+  trigger:
+    mode: automatic
+    schedule: daily
+  window:
+    period: last_7d
+    granularity: day
+  analysis:
+    type: funnel
+    entity: person_id
+    steps:
+      - event: cart_viewed
+        label: Viewed Cart
+      - event: checkout_started
+        label: Started Checkout
+      - event: payment_entered
+        label: Entered Payment
+      - event: order_completed
+        label: Completed Order
+    conversionWindow: 2h
+  llm:
+    promptTemplate: |
+      Analyze this checkout funnel for {{windowPeriod}}.
+      {{totalEntrants}} users entered. Overall conversion: {{overallConversionPct}}%.
+      Step breakdown: {{stepsSummary}}
+      Worst step: {{worstStep}} ({{worstStepCvr}}% CVR, {{worstStepLoss}} users lost).
+      Data: {{dataAsJson}}
+      Give 2-3 concrete optimization recommendations.
+    maxOutputTokens: 500
+```
 
-### Configuration
-
-This section captures **Max Events**, **Instruction**, and **Trigger Mode**. 
-
-- **Max Events**: Set the maximum number of events to analyze
-- **Instruction**: Provide specific instructions to guide the AI analysis
-- **Trigger Mode**: Select from the dropdown - either **Manual** or **Scheduled**
-  - **Manual**: The tracker runs only when you explicitly trigger it from the dashboard. Useful for ad-hoc analysis or testing.
-  - **Scheduled**: The tracker runs automatically on a schedule. If scheduled, specify 
-    the schedule (e.g., `daily`, `weekly`, `hourly`). Ideal for continuous monitoring and proactive insight generation.
-
-<ThemedImage 
-  srcLight="/images/tracker_configuration_light.png" 
-  srcDark="/images/tracker_configuration_dark.png" 
-  alt="Tracker Configuration" 
-  width={1000} 
-  height={1000} 
-/>
-
-### Events
-
-Either select all events using the toggle switch, or specify individual events to consider. 
-When selecting specific events, choose the event types you want the tracker to analyze 
-(e.g., only `purchase_started` and `purchase_completed`). The tracker will only analyze the 
-events you specify, allowing you to create focused trackers for different aspects of your application.
-
-<ThemedImage 
-  srcLight="/images/tracker_events_light.png" 
-  srcDark="/images/tracker_events_dark.png" 
-  alt="Tracker Events" 
-  width={1000} 
-  height={1000} 
-/>
-
+See the [Tracker Specification](/docs/concepts/insight_trackers/tracker_specification) reference for the complete list of fields.
 
 ### Best Practices
 
-When creating Insight Trackers:
+When authoring tracker YAML directly:
 
-1. **Be Specific**: Focus each tracker on a particular question or area of interest rather than trying to analyze everything at once
-2. **Choose Relevant Events**: Select events that are meaningful for the insight you're seeking
-3. **Use Descriptive Names**: Name trackers clearly so team members understand what they monitor
-4. **Set Appropriate Schedules**: Use scheduled execution for trackers that need continuous monitoring, and manual execution for exploratory analysis
-5. **Iterate**: Start with broad trackers and refine them based on the insights you receive
+1. **Choose the right analysis type**: Match the `analysis.type` to the question you're asking — see [Analysis Types](/docs/concepts/insight_trackers/analysis_types) for guidance
+2. **Use only valid template variables**: Each analysis type exposes a specific set of `{{variables}}` — using an unsupported variable will be rejected at save time
+3. **Set appropriate schedules**: Use `automatic` with a `schedule` for continuous monitoring; use `manual` for exploratory or ad-hoc analysis
+4. **Keep prompts focused**: One clear question per tracker produces better insights than an open-ended catch-all prompt
+5. **Use `privacy` to protect PII**: List any user-identifying properties in `excludeProperties` or `hashProperties`
 
 <Callout>
 **Default Tracker**: When you create an app in Journium, a default "User Engagement" tracker is automatically created. This tracker helps you test data ingestion and insight generation with your initial events.
 </Callout>
 
-
-
-## Using YAML Editor
-
-You can create a new tracker manually using the tracker specification YAML. This will give you more control over the tracker creation process.
-
-You can create a new tracker for your application instance at 
-[Developers | Insight Trackers | Create New](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/insight-trackers/new).
-Choose the **Use YAML Editor** option to create a new tracker manually using the tracker specification YAML.
-
-<ThemedImage 
-  srcLight="/images/tracker_creation_using_yaml_editor_light.png" 
-  srcDark="/images/tracker_creation_using_yaml_editor_dark.png" 
-  alt="Tracker Creation Using YAML Editor" 
-  width={1000} 
-  height={1000} 
-/>
-
-The YAML editor is pre-filled with a sample tracker specification. You can edit the YAML to change the tracker configuration.
-
-<ThemedImage 
-  srcLight="/images/tracker_yaml_editor_light.png" 
-  srcDark="/images/tracker_yaml_editor_dark.png" 
-  alt="Tracker YAML Editor" 
-  width={1000} 
-  height={1000} 
-/>
-
-The editor provides a validation status badge to indicate the validity of the YAML. If errors exist, they are shown in the gutter.
-Hover over the error to see the error message. You can save only if the YAML is valid.
-
 ## From Git Repository
 
-You can connect a repository to your application instance at 
+You can connect a repository to your application instance at
 [Developers | Insight Trackers | Link Git Repository](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/insight-trackers/new/git).
 Tracker files from your git repository will be synced to your application instance.
 
-<ThemedImage 
-  srcLight="/images/tracker_repository_connection_light.png" 
-  srcDark="/images/tracker_repository_connection_dark.png" 
-  alt="Tracker Repository Connection" 
-  width={1000} 
-  height={1000} 
+<ThemedImage
+  srcLight="/images/tracker_repository_connection_light.png"
+  srcDark="/images/tracker_repository_connection_dark.png"
+  alt="Tracker Repository Connection"
+  width={1000}
+  height={1000}
 />
 
-
-When you push your changes to the deployment branch, the trackers will be synced to your application instance.
-You can select any branch as the deployment branch. By default, the deployment branch is the default branch of the repository.
+When you push your changes to the deployment branch, the trackers will be synced to your
+application instance. You can select any branch as the deployment branch. By default, the
+deployment branch is the default branch of the repository.
 
 <Callout>
-**Note**: Your tracker yaml files should be in the <span className="font-mono text-primary">.journium/trackers</span> directory in your repository.
-For example, if your repository is `https://github.com/my-org/my-repo`, your tracker yaml files should be in the `https://github.com/my-org/my-repo/.journium/trackers` directory.
+**Note**: Your tracker YAML files should be in the <span className="font-mono text-primary">.journium/trackers</span> directory in your repository.
+For example, if your repository is `https://github.com/my-org/my-repo`, your tracker YAML files should be at `https://github.com/my-org/my-repo/tree/main/.journium/trackers`.
 </Callout>
-
