@@ -1,0 +1,122 @@
+---
+title: Retention Analysis
+description: Cohort return-rate curves over time — D1, D7, D30, and beyond.
+icon: RefreshCw
+---
+
+## Overview
+
+Retention Analysis measures what fraction of users who first performed an action (e.g., signed up)
+came back and performed a retention event at specified intervals (Day 1, Day 7, Day 30, etc.).
+It groups users into cohorts by the period they first acted and plots return rates for each cohort.
+
+<Callout type="info">
+**When to use retention**: "Are users coming back?", "How sticky is the product?", "Show me D7
+and D30 retention after signup" — any question about cohort-based return rates over time.
+
+**When NOT to use retention**: If you want to identify who is *currently* inactive or at risk
+today, use [`churn`](./churn). If you want to measure the first-value-moment rate for new users,
+use [`activation`](./activation).
+</Callout>
+
+## Configuration Reference
+
+<TypeTable
+  type={{
+    type: {
+      description: 'Analysis type discriminant.',
+      type: 'string',
+      typeDescription: '`"retention"`',
+      required: true,
+    },
+    entity: {
+      description: 'The user identifier to use for cohort membership.',
+      type: 'string',
+      typeDescription: '`"person_id"`. Default: `"person_id"`',
+      required: false,
+    },
+    cohortEvent: {
+      description: 'The event that defines cohort entry — users who fire this event are placed into a cohort for the period they fired it.',
+      type: 'string',
+      typeDescription: 'Event name, e.g. `"user_signed_up"`',
+      required: true,
+    },
+    retentionEvent: {
+      description: 'The event used to measure return. A user is considered retained at interval N if they fired this event N units after their cohort entry.',
+      type: 'string',
+      typeDescription: 'Event name, e.g. `"session_started"`',
+      required: true,
+    },
+    cohortPeriod: {
+      description: 'Time unit for grouping cohorts.',
+      type: 'string',
+      typeDescription: '`"day"` | `"week"` | `"month"`. Default: `"week"`',
+      required: false,
+    },
+    intervals: {
+      description: 'List of interval offsets (in units of `cohortPeriod`) at which to measure retention.',
+      type: 'integer[]',
+      typeDescription: 'e.g. `[1, 7, 14, 30]` for daily cohorts',
+      required: true,
+    },
+    minCohortSize: {
+      description: 'Minimum number of users a cohort must have to be included in the results. Filters out statistically insignificant cohorts.',
+      type: 'integer',
+      typeDescription: 'Default: 10',
+      required: false,
+    },
+    maxCohorts: {
+      description: 'Maximum number of cohorts to include, ordered most recent first.',
+      type: 'integer',
+      typeDescription: 'Default: 12',
+      required: false,
+    },
+  }}
+/>
+
+## Available Template Variables
+
+| Variable | Description |
+|---|---|
+| `{{cohortCount}}` | Number of cohorts included in the analysis |
+| `{{retentionSummary}}` | Cohort × interval retention matrix (cohort label, size, and return rates at each interval) |
+| `{{windowPeriod}}` | Human-readable analysis window, e.g. `"last 90 days"` |
+| `{{dataAsJson}}` | Full structured result as JSON |
+| `{{executedAt}}` | ISO 8601 execution timestamp |
+
+## Example
+
+```yaml title=".journium/trackers/signup-retention.yml"
+apiVersion: journium.app/v0Beta
+kind: InsightTracker
+metadata:
+  name: signup-retention
+  displayName: Signup Retention (D1 / D7 / D30)
+  description: Weekly cohort retention after signup
+spec:
+  type: LLM
+  trigger:
+    mode: automatic
+    schedule: weekly
+  window:
+    period: last_90d
+  analysis:
+    type: retention
+    entity: person_id
+    cohortEvent: user_signed_up
+    retentionEvent: session_started
+    cohortPeriod: week
+    intervals: [1, 7, 14, 30]
+    minCohortSize: 20
+    maxCohorts: 12
+  llm:
+    promptTemplate: |
+      Analyze signup retention for {{windowPeriod}}.
+      {{cohortCount}} weekly cohorts included.
+      Retention matrix:
+      {{retentionSummary}}
+      Full data: {{dataAsJson}}
+      Identify the cohorts with the best and worst D7 retention, and suggest one actionable
+      improvement for early-session engagement.
+    maxOutputTokens: 400
+```

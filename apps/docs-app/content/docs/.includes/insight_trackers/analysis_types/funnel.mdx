@@ -1,0 +1,124 @@
+---
+title: Funnel Analysis
+description: Track ordered step completion and identify where users drop off.
+icon: GitMerge
+---
+
+## Overview
+
+Funnel Analysis tracks how users progress through an **ordered series of steps** and shows exactly
+where they drop off. Use it whenever the key question is "how many users made it from step A to
+step B (to step C …)?" and you need to see intermediate drop-off at each stage.
+
+<Callout type="info">
+**When to use funnel**: Checkout flows, onboarding wizards, trial-to-paid flows, signup sequences,
+feature setup journeys — any multi-step process where order matters and drop-off location is the
+insight you care about.
+
+**When NOT to use funnel**: If you only need a single A → B rate without step ordering, use
+[`conversion`](./conversion). If you want a time-series count of step completions, use
+[`trend`](./trend).
+</Callout>
+
+## Configuration Reference
+
+<TypeTable
+  type={{
+    type: {
+      description: 'Analysis type discriminant.',
+      type: 'string',
+      typeDescription: '`"funnel"`',
+      required: true,
+    },
+    entity: {
+      description: 'The user identifier to use for matching steps across events.',
+      type: 'string',
+      typeDescription: '`"person_id"` | `"session_id"` | `"device_id"`. Default: `"person_id"`',
+      required: false,
+    },
+    steps: {
+      description: 'Ordered list of funnel steps. Each step must be completed in sequence for the user to be counted as progressing.',
+      type: 'array',
+      typeDescription: 'Array of `{ event: string, label: string, filters?: PropertyFilter[] }`. Minimum 2 steps.',
+      required: true,
+    },
+    conversionWindow: {
+      description: 'Maximum time a user has to complete all funnel steps after entering the first step. Uses duration notation.',
+      type: 'string',
+      typeDescription: 'e.g. `"1h"`, `"2h"`, `"24h"`, `"7d"`. Default: `"24h"`',
+      required: false,
+    },
+    breakdowns: {
+      description: 'Optional property dimensions to segment funnel results by.',
+      type: 'array',
+      typeDescription: 'Array of `BreakdownDef`',
+      required: false,
+    },
+    globalFilters: {
+      description: 'Optional filters applied to every step in the funnel.',
+      type: 'array',
+      typeDescription: 'Array of `PropertyFilter`',
+      required: false,
+    },
+  }}
+/>
+
+## Available Template Variables
+
+| Variable | Description |
+|---|---|
+| `{{totalEntrants}}` | Number of users who completed the first funnel step |
+| `{{overallConversionPct}}` | Percentage of entrants who completed the final step |
+| `{{stepsSummary}}` | Step-by-step conversion table (label, count, CVR%) |
+| `{{worstStep}}` | Label of the step with the highest absolute user loss |
+| `{{worstStepCvr}}` | Conversion rate (%) at the worst step |
+| `{{worstStepLoss}}` | Number of users lost at the worst step |
+| `{{hasBreakdown}}` | `true` if breakdown data is present |
+| `{{breakdownSummary}}` | Breakdown results table (only present when `hasBreakdown` is true) |
+| `{{windowPeriod}}` | Human-readable analysis window, e.g. `"last 7 days"` |
+| `{{dataAsJson}}` | Full structured result as JSON |
+| `{{executedAt}}` | ISO 8601 execution timestamp |
+
+## Example
+
+```yaml title=".journium/trackers/checkout-funnel.yml"
+apiVersion: journium.app/v0Beta
+kind: InsightTracker
+metadata:
+  name: checkout-funnel
+  displayName: Checkout Funnel Analysis
+  description: Track drop-off across the 4-step checkout flow
+spec:
+  type: LLM
+  trigger:
+    mode: automatic
+    schedule: daily
+  window:
+    period: last_7d
+  analysis:
+    type: funnel
+    entity: person_id
+    steps:
+      - event: cart_viewed
+        label: Viewed Cart
+      - event: checkout_started
+        label: Started Checkout
+      - event: payment_entered
+        label: Entered Payment
+      - event: order_completed
+        label: Completed Order
+    conversionWindow: 2h
+    breakdowns:
+      - property: plan
+        maxCardinality: 5
+  llm:
+    promptTemplate: |
+      Analyze this checkout funnel for {{windowPeriod}}.
+      {{totalEntrants}} users entered the funnel. Overall conversion: {{overallConversionPct}}%.
+      Step breakdown:
+      {{stepsSummary}}
+      Worst step: {{worstStep}} ({{worstStepCvr}}% CVR, {{worstStepLoss}} users lost).
+      Full data: {{dataAsJson}}
+      Provide 2-3 actionable recommendations to improve conversion at the weakest step.
+    maxOutputTokens: 500
+```

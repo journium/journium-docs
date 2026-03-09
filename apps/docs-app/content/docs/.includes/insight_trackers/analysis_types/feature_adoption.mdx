@@ -1,0 +1,134 @@
+---
+title: Feature Adoption
+description: What fraction of active users have tried a specific feature.
+icon: ToggleRight
+---
+
+## Overview
+
+Feature Adoption measures what percentage of your **active users** have tried a specific feature
+at least once during the analysis window. The adoption rate is `unique feature users ÷ total
+active users in the period`. This is distinct from a raw usage count — it tells you about feature
+discovery and uptake relative to your active user base.
+
+<Callout type="info">
+**When to use featureAdoption**: "How many active users have tried the new AI assistant?", "What
+is the adoption rate of the export feature?", "Is v2 dashboard adoption growing month over month?"
+
+**When NOT to use featureAdoption**: If you want a raw time-series count of feature usage, use
+[`trend`](./trend). If you want a simple rate not tied to the active user base, use
+[`conversion`](./conversion).
+</Callout>
+
+## Configuration Reference
+
+<TypeTable
+  type={{
+    type: {
+      description: 'Analysis type discriminant.',
+      type: 'string',
+      typeDescription: '`"featureAdoption"`',
+      required: true,
+    },
+    entity: {
+      description: 'The user identifier to use for counting unique adopters.',
+      type: 'string',
+      typeDescription: '`"person_id"`. Default: `"person_id"`',
+      required: false,
+    },
+    featureEvents: {
+      description: 'List of events that count as "using" the feature. A user counts as an adopter if they fire any of these events at least once.',
+      type: 'array',
+      typeDescription: 'Array of `{ event: string, label?: string, filters?: PropertyFilter[] }`',
+      required: true,
+    },
+    activeUserBaseline: {
+      description: 'Defines what counts as an "active user" for the denominator of the adoption rate.',
+      type: 'object',
+      typeDescription: '`{ event: string, period?: string }` — the event that marks a user as active, and an optional look-back period',
+      required: true,
+    },
+    breakdowns: {
+      description: 'Optional property dimensions to segment adoption results by.',
+      type: 'array',
+      typeDescription: 'Array of `BreakdownDef`',
+      required: false,
+    },
+    metrics: {
+      description: 'Optional set of additional metrics to compute.',
+      type: 'string[]',
+      typeDescription: '`"uniqueAdopters"` | `"adoptionRate"` | `"avgUsesPerAdopter"` | `"weekOverWeekDelta"` | `"monthOverMonthDelta"`',
+      required: false,
+    },
+    compareWindow: {
+      description: 'If set, also computes adoption rate for the equivalent previous period.',
+      type: 'string',
+      typeDescription: '`"previous_period"`',
+      required: false,
+    },
+  }}
+/>
+
+## Available Template Variables
+
+| Variable | Description |
+|---|---|
+| `{{activeBaseCount}}` | Total active users in the analysis window |
+| `{{uniqueAdopters}}` | Users who fired at least one feature event |
+| `{{adoptionRatePct}}` | Percentage of active users who adopted the feature |
+| `{{avgUsesPerAdopter}}` | Average number of feature interactions per adopter |
+| `{{hasComparison}}` | `true` if `compareWindow` was set and previous-period data is available |
+| `{{prevAdoptionRatePct}}` | Adoption rate in the previous period (when `hasComparison` is true) |
+| `{{adoptionDeltaPct}}` | Percentage-point change vs. previous period (when `hasComparison` is true) |
+| `{{windowPeriod}}` | Human-readable analysis window, e.g. `"last 30 days"` |
+| `{{dataAsJson}}` | Full structured result as JSON |
+| `{{executedAt}}` | ISO 8601 execution timestamp |
+
+## Example
+
+```yaml title=".journium/trackers/ai-assistant-adoption.yml"
+apiVersion: journium.app/v0Beta
+kind: InsightTracker
+metadata:
+  name: ai-assistant-adoption
+  displayName: AI Assistant Feature Adoption
+  description: What fraction of active users have tried the AI assistant
+spec:
+  type: LLM
+  trigger:
+    mode: automatic
+    schedule: weekly
+  window:
+    period: last_30d
+  analysis:
+    type: featureAdoption
+    entity: person_id
+    featureEvents:
+      - event: ai_assistant_opened
+        label: Opened AI Assistant
+      - event: ai_suggestion_accepted
+        label: Accepted AI Suggestion
+    activeUserBaseline:
+      event: session_started
+      period: 30d
+    breakdowns:
+      - property: plan
+        maxCardinality: 5
+    metrics:
+      - adoptionRate
+      - avgUsesPerAdopter
+      - weekOverWeekDelta
+    compareWindow: previous_period
+  llm:
+    promptTemplate: |
+      AI assistant adoption analysis for {{windowPeriod}}.
+      Active user base: {{activeBaseCount}}.
+      Adopters: {{uniqueAdopters}} ({{adoptionRatePct}}%).
+      Average uses per adopter: {{avgUsesPerAdopter}}.
+      {{#if hasComparison}}
+      Previous period: {{prevAdoptionRatePct}}% ({{adoptionDeltaPct}}pp change).
+      {{/if}}
+      Full data: {{dataAsJson}}
+      Describe whether adoption is healthy and suggest one action to increase it.
+    maxOutputTokens: 400
+```

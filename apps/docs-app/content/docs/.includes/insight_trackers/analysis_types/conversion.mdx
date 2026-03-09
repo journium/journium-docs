@@ -1,0 +1,120 @@
+---
+title: Conversion Rate
+description: Simple numerator / denominator rate — percentage of group A that does B.
+icon: ArrowRightLeft
+---
+
+## Overview
+
+Conversion Rate computes a simple two-event rate: what percentage of users who performed event A
+also performed event B within the analysis window. This is a single ratio — there are no
+intermediate steps and no drop-off ordering. Use it for binary conversion questions.
+
+<Callout type="info">
+**When to use conversion**: "What is our trial-to-paid conversion rate?", "What % of visitors
+sign up?", "What is the lead-to-close rate in the last 30 days?"
+
+**When NOT to use conversion**: If you need 3 or more ordered steps with intermediate drop-off
+analysis, use [`funnel`](./funnel). If you want a time-series count, use [`trend`](./trend).
+</Callout>
+
+## Configuration Reference
+
+<TypeTable
+  type={{
+    type: {
+      description: 'Analysis type discriminant.',
+      type: 'string',
+      typeDescription: '`"conversion"`',
+      required: true,
+    },
+    entity: {
+      description: 'The user identifier to link denominator and numerator events.',
+      type: 'string',
+      typeDescription: '`"person_id"` | `"session_id"`. Default: `"person_id"`',
+      required: false,
+    },
+    numeratorEvent: {
+      description: 'The event that represents the conversion (the "did B" event).',
+      type: 'string',
+      typeDescription: 'Event name, e.g. `"subscription_started"`',
+      required: true,
+    },
+    denominatorEvent: {
+      description: 'The event that defines the population to convert (the "did A" event).',
+      type: 'string',
+      typeDescription: 'Event name, e.g. `"trial_started"`',
+      required: true,
+    },
+    conversionWindow: {
+      description: 'Maximum time after `denominatorEvent` in which the user must fire `numeratorEvent` to be counted as converted.',
+      type: 'string',
+      typeDescription: 'Duration string, e.g. `"7d"`, `"30d"`. Defaults to the full analysis window.',
+      required: false,
+    },
+    breakdowns: {
+      description: 'Optional property dimensions to segment conversion results by.',
+      type: 'array',
+      typeDescription: 'Array of `BreakdownDef`',
+      required: false,
+    },
+    compareWindow: {
+      description: 'If set, also computes the conversion rate for the equivalent previous period.',
+      type: 'string',
+      typeDescription: '`"previous_period"`',
+      required: false,
+    },
+  }}
+/>
+
+## Available Template Variables
+
+| Variable | Description |
+|---|---|
+| `{{denominatorCount}}` | Number of users who fired `denominatorEvent` in the window |
+| `{{numeratorCount}}` | Number of those users who also fired `numeratorEvent` |
+| `{{conversionRatePct}}` | Conversion rate as a percentage |
+| `{{hasComparison}}` | `true` if `compareWindow` was set and previous-period data is available |
+| `{{prevConversionRatePct}}` | Conversion rate in the previous period (when `hasComparison` is true) |
+| `{{conversionDeltaPct}}` | Percentage-point change vs. previous period (when `hasComparison` is true) |
+| `{{windowPeriod}}` | Human-readable analysis window, e.g. `"last 30 days"` |
+| `{{dataAsJson}}` | Full structured result as JSON |
+| `{{executedAt}}` | ISO 8601 execution timestamp |
+
+## Example
+
+```yaml title=".journium/trackers/trial-to-paid.yml"
+apiVersion: journium.app/v0Beta
+kind: InsightTracker
+metadata:
+  name: trial-to-paid
+  displayName: Trial → Paid Conversion Rate
+  description: Percentage of trial starts that convert to a paid subscription within 30 days
+spec:
+  type: LLM
+  trigger:
+    mode: automatic
+    schedule: weekly
+  window:
+    period: last_30d
+  analysis:
+    type: conversion
+    entity: person_id
+    denominatorEvent: trial_started
+    numeratorEvent: subscription_started
+    conversionWindow: 30d
+    breakdowns:
+      - property: plan
+        maxCardinality: 5
+    compareWindow: previous_period
+  llm:
+    promptTemplate: |
+      Trial-to-paid conversion for {{windowPeriod}}.
+      {{denominatorCount}} trials started. {{numeratorCount}} converted ({{conversionRatePct}}%).
+      {{#if hasComparison}}
+      Previous period: {{prevConversionRatePct}}% ({{conversionDeltaPct}}pp change).
+      {{/if}}
+      Full data: {{dataAsJson}}
+      Identify the primary driver of the conversion rate and recommend one improvement.
+    maxOutputTokens: 400
+```

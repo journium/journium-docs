@@ -6,6 +6,7 @@
     "pages": [
       "creating_trackers",
       "tracker_specification",
-      "tracker_repositories"
+      "tracker_repositories",
+      "analysis_types"
     ]
   }

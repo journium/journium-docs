@@ -1,0 +1,130 @@
+---
+title: Custom Analysis (Deprecated)
+description: Legacy v0Alpha raw-event analysis — for migration only.
+icon: Archive
+---
+
+<Callout type="warn">
+**Deprecated — for v0Alpha migration only.** The `custom` analysis type is not available in the
+NL Builder or the YAML editor for new trackers. It exists only to ease migration of existing
+v0Alpha trackers. Migrate to a structured analysis type as soon as practical — structured types
+produce higher-quality, more consistent insights.
+</Callout>
+
+## Overview
+
+The `custom` analysis type is a compatibility bridge that preserves the v0Alpha behaviour of
+sending a raw list of matching events to the LLM for freeform analysis. It does not run any
+structured queries and does not inject pre-computed metrics — only the raw event list and the
+universal base variables are available.
+
+## Configuration Reference
+
+<TypeTable
+  type={{
+    type: {
+      description: 'Analysis type discriminant.',
+      type: 'string',
+      typeDescription: '`"custom"`',
+      required: true,
+    },
+    rawEvents: {
+      description: 'Raw event selection and limits for the LLM payload.',
+      type: 'object',
+      typeDescription: 'See `RawEventsConfig` below',
+      required: true,
+    },
+  }}
+/>
+
+### `RawEventsConfig` Properties
+
+<TypeTable
+  type={{
+    events: {
+      description: 'Events to include. Use `"*"` for all events, or provide an explicit allowlist.',
+      type: 'string | string[]',
+      typeDescription: '`"*"` or an array of event names, e.g. `["signup_completed", "habit_created"]`',
+      required: true,
+    },
+    maxEvents: {
+      description: 'Maximum number of raw events to pass to the LLM. Hard cap: 50 events.',
+      type: 'integer',
+      typeDescription: 'Range: 1–50. Default: 50',
+      required: false,
+    },
+    minEvents: {
+      description: 'Minimum number of events required for the tracker to run. If fewer events are available, execution is skipped.',
+      type: 'integer',
+      typeDescription: 'Minimum: 1. Default: 1',
+      required: false,
+    },
+    excludeFields: {
+      description: 'List of event fields to strip before passing to the LLM.',
+      type: 'string[]',
+      required: false,
+    },
+  }}
+/>
+
+## Available Template Variables
+
+`custom` analysis only has access to the universal base variables — no pre-computed metrics:
+
+| Variable | Description |
+|---|---|
+| `{{windowPeriod}}` | Human-readable analysis window, e.g. `"last 7 days"` |
+| `{{dataAsJson}}` | Raw event list serialised as JSON |
+| `{{executedAt}}` | ISO 8601 execution timestamp |
+
+## Example (v0Alpha Compatibility)
+
+```yaml title=".journium/trackers/user-engagement-legacy.yml"
+apiVersion: journium.app/v0Beta
+kind: InsightTracker
+metadata:
+  name: user-engagement-legacy
+  displayName: User Engagement (Legacy)
+  description: Migrated from v0Alpha — pending structured type migration
+spec:
+  type: LLM
+  trigger:
+    mode: automatic
+    schedule: daily
+  window:
+    period: last_7d
+  analysis:
+    type: custom
+    rawEvents:
+      events:
+        - signup_completed
+        - habit_created
+        - session_started
+      minEvents: 1
+      maxEvents: 50
+  llm:
+    promptTemplate: |
+      Analyze user engagement for {{windowPeriod}}.
+      Event data: {{dataAsJson}}
+      Generate a one-sentence insight summarizing engagement patterns.
+    maxOutputTokens: 200
+```
+
+## Migration Guide
+
+Replace `custom` with the structured type that best matches your intent:
+
+| If your old prompt was asking about…                         | Use type          |
+|--------------------------------------------------------------|-------------------|
+| Multi-step user flow with drop-off at each step              | `funnel`          |
+| Whether users return over time after signup                  | `retention`       |
+| How quickly new users reach a key action                     | `activation`      |
+| Users who haven't been active recently                       | `churn`           |
+| What fraction of users have used a feature                   | `featureAdoption` |
+| Unusual spikes or drops in event volume                      | `anomaly`         |
+| Simple ratio of users doing A then B                         | `conversion`      |
+| Comparing behaviour across different user groups             | `cohort`          |
+| How event counts or unique users change over time            | `trend`           |
+
+After choosing a type, update your `spec.analysis` block accordingly and replace any freeform
+prompt references with the structured `{{variables}}` documented on the target type's page.

@@ -1,0 +1,74 @@
+---
+title: Analysis Types
+description: Reference documentation for all v0Beta Insight Tracker analysis types.
+icon: LayoutGrid
+---
+
+Journium v0Beta trackers use a structured `analysis` block that selects one of nine active
+analysis algorithms (plus one legacy type). Each type determines:
+
+- **What queries are compiled** against your ClickHouse event data
+- **Which template variables** are injected into your `llm.promptTemplate`
+- **What computed metrics** are surfaced in the insight
+
+## Choosing the Right Type
+
+<Cards>
+  <Card title="Funnel Analysis" href="./analysis_types/funnel" icon="GitMerge">
+    Track ordered step completion and identify where users drop off.
+  </Card>
+  <Card title="Retention Analysis" href="./analysis_types/retention" icon="RefreshCw">
+    Cohort return-rate curves over time — D1, D7, D30, and beyond.
+  </Card>
+  <Card title="Activation Analysis" href="./analysis_types/activation" icon="Zap">
+    Measure what percentage of new users reach the first value moment.
+  </Card>
+  <Card title="Churn Risk Analysis" href="./analysis_types/churn" icon="UserMinus">
+    Identify users who were active but have since gone silent.
+  </Card>
+  <Card title="Feature Adoption" href="./analysis_types/feature_adoption" icon="ToggleRight">
+    What fraction of active users have tried a specific feature.
+  </Card>
+  <Card title="Anomaly Detection" href="./analysis_types/anomaly" icon="AlertTriangle">
+    Automated spike and dip detection vs. a statistical baseline.
+  </Card>
+  <Card title="Conversion Rate" href="./analysis_types/conversion" icon="ArrowRightLeft">
+    Simple numerator / denominator rate — percentage of group A that does B.
+  </Card>
+  <Card title="Cohort Analysis" href="./analysis_types/cohort" icon="Users">
+    Compare a metric across cohorts defined by join date or a property value.
+  </Card>
+  <Card title="Trend / Growth" href="./analysis_types/trend" icon="TrendingUp">
+    Count events or unique users per time period — daily, weekly, monthly.
+  </Card>
+  <Card title="Custom (Deprecated)" href="./analysis_types/custom" icon="Archive">
+    Legacy v0Alpha raw-event analysis. Deprecated — migration only.
+  </Card>
+</Cards>
+
+## Quick Selection Guide
+
+| If you want to…                                                    | Use type          |
+|--------------------------------------------------------------------|-------------------|
+| See where users drop off across an ordered multi-step flow         | `funnel`          |
+| Track what fraction of cohorts return at D1 / D7 / D30            | `retention`       |
+| Measure the aha-moment rate for new users                          | `activation`      |
+| Find users who went quiet and are at risk of churning              | `churn`           |
+| Know what fraction of active users have adopted a feature          | `featureAdoption` |
+| Get alerted when a metric spikes or dips anomalously               | `anomaly`         |
+| Compute a simple event-A-to-event-B conversion rate                | `conversion`      |
+| Compare engagement or revenue across cohort groups                 | `cohort`          |
+| Plot event counts, DAU, or sums over time                          | `trend`           |
+| Migrate a v0Alpha tracker that uses raw events + freeform prompt   | `custom`          |
+
+## Universal Template Variables
+
+All analysis types inject these variables into `llm.promptTemplate`:
+
+| Variable | Description |
+|---|---|
+| `{{windowPeriod}}` | Human-readable description of the analysis window, e.g. `"last 7 days"` |
+| `{{dataAsJson}}` | Full structured analysis result serialised as JSON |
+| `{{executedAt}}` | ISO 8601 timestamp of when this execution started |
+
+Each analysis type also provides its own type-specific variables. See the individual type pages for details.

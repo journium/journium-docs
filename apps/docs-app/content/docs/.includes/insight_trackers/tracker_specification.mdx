@@ -1,41 +1,46 @@
 ---
 title: Tracker Specification
-description: Learn about the Journium Insight Tracker specification. Irrespective of how a tracker is created or maintained, 
-             it is always stored as a YAML file.
+description: Complete reference for the Journium Insight Tracker v0Beta YAML specification.
 icon: InsightTracker
 ---
 
-A Journium InsightTracker is defined using a structured YAML format that follows the [Journium InsightTracker schema](https://journium.app/schemas/journium-insight-tracker.schema.json).
+A Journium InsightTracker is defined using a structured YAML format that follows the
+[Journium InsightTracker v0Beta schema](https://journium.app/schemas/journium-insight-tracker.v0Beta.schema.json).
+
+<Callout type="info">
+**v0Beta is the current schema version.** If you have trackers using `apiVersion: journium.app/v0Alpha`
+(with `data.events` and `llmPrompt` fields), see the [migration note](#migrating-from-v0alpha) below.
+</Callout>
 
 ## Top-Level Properties
 
 <TypeTable
   type={{
     apiVersion: {
-      description: 'The version of the Journium InsightTracker schema.',
+      description: 'The schema version. Must be `journium.app/v0Beta` for current trackers.',
       type: 'string',
-      typeDescription: 'Currently supported: `journium.app/v0Alpha`',
+      typeDescription: '`"journium.app/v0Beta"`',
       required: true,
     },
     kind: {
-      description: 'The type of the tracker. Must be `InsightTracker` for Journium InsightTrackers.',
+      description: 'The resource kind. Must be `InsightTracker`.',
       type: 'string',
       typeDescription: '`"InsightTracker"`',
       required: true,
     },
     metadata: {
-      description: 'Metadata for the tracker.',
+      description: 'Human-readable identity for this tracker.',
       type: 'object',
       typeDescription: 'Contains `name`, `displayName`, and optional `description`',
       required: true,
       typeDescriptionLink: '#metadata-properties',
     },
     spec: {
-      description: 'Tracker specification.',
+      description: 'Full tracker specification — analysis config, trigger, window, LLM prompt, and privacy settings.',
       type: 'object',
-      typeDescription: 'Defines the tracker type, trigger, LLM prompt, and data selection',
+      typeDescription: 'Contains `type`, `trigger`, `window`, `analysis`, `llm`, and optional `privacy`',
       required: true,
-      typeDescriptionLink: '#spec-properties-llm-tracker',
+      typeDescriptionLink: '#spec-properties',
     },
   }}
 />
@@ -45,32 +50,32 @@ A Journium InsightTracker is defined using a structured YAML format that follows
 <TypeTable
   type={{
     name: {
-      description: 'Unique identifier for this tracker. Must be unique within the application. Use kebab-case (e.g., `signup-to-first-habit`). Trackers may reference other trackers by name.',
+      description: 'Unique identifier for this tracker within the application. Use kebab-case. Trackers may reference each other by name.',
       type: 'string',
-      typeDescription: '3-63 characters, pattern: `^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`',
+      typeDescription: '3–63 characters, pattern: `^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`',
       required: true,
     },
     displayName: {
-      description: 'Human-friendly name shown in the Journium UI (e.g., "Signup to First Habit Dropoff").',
+      description: 'Human-friendly label shown in the Journium dashboard (e.g., "Checkout Funnel Analysis").',
       type: 'string',
-      typeDescription: '1-120 characters',
+      typeDescription: '1–120 characters',
       required: true,
     },
     description: {
-      description: 'Description of the tracker. This is used to describe the tracker in the Journium UI.',
+      description: 'Optional description of what this tracker measures.',
       type: 'string',
-      typeDescription: '1-200 characters',
+      typeDescription: '1–200 characters',
       required: false,
     },
   }}
 />
 
-### `spec` Properties (LLM Tracker)
+### `spec` Properties
 
 <TypeTable
   type={{
     type: {
-      description: 'Spec type discriminator. Must be `LLM` for LLM-based trackers.',
+      description: 'Spec type discriminator. Must be `LLM` for all v0Beta trackers.',
       type: 'string',
       typeDescription: '`"LLM"`',
       required: true,
@@ -82,18 +87,33 @@ A Journium InsightTracker is defined using a structured YAML format that follows
       required: true,
       typeDescriptionLink: '#trigger-properties',
     },
-    llmPrompt: {
-      description: 'LLM prompt used to generate the insight.',
-      type: 'string',
-      typeDescription: '10-5000 characters',
-      required: true,
-    },
-    data: {
-      description: 'Event data selection and limits.',
+    window: {
+      description: 'Defines the time window of data to analyse.',
       type: 'object',
-      typeDescription: 'Controls what event data is available to the tracker',
+      typeDescription: 'Contains `period`, optional `granularity`, and optional `timezone`',
       required: true,
-      typeDescriptionLink: '#data-properties',
+      typeDescriptionLink: '#window-properties',
+    },
+    analysis: {
+      description: 'Structured analysis configuration. The `type` field selects the analysis algorithm and determines which template variables are available.',
+      type: 'object',
+      typeDescription: 'Discriminated union — see Analysis Types',
+      required: true,
+      typeDescriptionLink: '#analysis-types',
+    },
+    llm: {
+      description: 'LLM configuration including the prompt template.',
+      type: 'object',
+      typeDescription: 'Contains `promptTemplate`, optional `systemMessage`, `maxOutputTokens`, and `guardrails`',
+      required: true,
+      typeDescriptionLink: '#llm-properties',
+    },
+    privacy: {
+      description: 'Optional privacy controls — exclude or hash sensitive properties before data reaches the LLM.',
+      type: 'object',
+      typeDescription: 'Contains `excludeProperties` and `hashProperties`',
+      required: false,
+      typeDescriptionLink: '#privacy-properties',
     },
   }}
 />
@@ -103,183 +123,250 @@ A Journium InsightTracker is defined using a structured YAML format that follows
 <TypeTable
   type={{
     mode: {
-      description: 'If `automatic`, Journium runs this tracker on a schedule. If `manual`, it only runs when explicitly triggered.',
+      description: 'If `automatic`, Journium runs this tracker on the configured schedule. If `manual`, it only runs when explicitly triggered from the dashboard or API.',
       type: 'string',
       typeDescription: '`"automatic"` | `"manual"`',
       required: true,
     },
     schedule: {
-      description: 'Required when mode is `automatic`. Either a preset cadence or a cron schedule.',
+      description: 'Required when `mode` is `automatic`. Either a preset cadence or a cron expression object.',
       type: 'string | object',
-      typeDescription: 'Preset: `"hourly"` | `"daily"` | `"weekly"` | `"monthly"` or Cron object: `{ cron: string }`',
+      typeDescription: 'Preset: `"hourly"` | `"daily"` | `"weekly"` | `"monthly"` — or Cron: `{ cron: "<expression>" }`',
       required: false,
     },
   }}
 />
 
-#### `data` Properties
+#### `window` Properties
 
 <TypeTable
   type={{
-    minEvents: {
-      description: 'Optional minimum number of events required to run the tracker.',
-      type: 'integer',
-      typeDescription: 'Minimum value: 1',
-      required: false,
-      default: 1,
-    },
-    maxEvents: {
-      description: 'Optional maximum number of events to consider. If omitted, the execution engine applies a reasonable default.',
-      type: 'integer',
-      typeDescription: 'Range: 1-1000',
-      required: false,
-      default: 1000,
-    },
-    events: {
-      description: 'Events to include. Use `*` for all events, or provide an explicit allowlist of event names.',
-      type: 'string | array',
-      typeDescription: '`"*"` or array of event names (e.g., `["signup_completed", "habit_created"]`)',
+    period: {
+      description: 'The time range of data to include. Use a preset shorthand or an absolute range object.',
+      type: 'string | object',
+      typeDescription: 'Preset: `last_1d` `last_7d` `last_14d` `last_30d` `last_60d` `last_90d` `last_180d` `last_365d` — or `{ start: "<ISO8601>", end: "<ISO8601>" }`',
       required: true,
+    },
+    granularity: {
+      description: 'Optional time-bucket size for time-series analysis types (trend, anomaly). Ignored by non-time-series types.',
+      type: 'string',
+      typeDescription: '`"hour"` | `"day"` | `"week"` | `"month"`',
+      required: false,
+    },
+    timezone: {
+      description: 'Optional IANA timezone used when bucketing time-series data. Defaults to UTC.',
+      type: 'string',
+      typeDescription: 'e.g. `"America/New_York"`, `"Europe/London"`',
+      required: false,
     },
   }}
 />
 
-## Examples
+---
 
-### Full Example
+## Shared Primitives
 
-```yaml title=".journium/trackers/signup-to-first-habit.yml"
-apiVersion: journium.app/v0Alpha
+These types are referenced by multiple analysis configurations.
+
+### `PropertyFilter`
+
+Used to narrow the set of events considered by an analysis step.
+
+<TypeTable
+  type={{
+    property: {
+      description: 'The event property name to filter on.',
+      type: 'string',
+      required: true,
+    },
+    operator: {
+      description: 'Comparison operator.',
+      type: 'string',
+      typeDescription: '`eq` `neq` `in` `not_in` `contains` `not_contains` `gt` `gte` `lt` `lte` `is_null` `is_not_null`',
+      required: true,
+    },
+    value: {
+      description: 'The value to compare against. Not required for `is_null` / `is_not_null`.',
+      type: 'any',
+      required: false,
+    },
+  }}
+/>
+
+### `BreakdownDef`
+
+Segments analysis results by a property dimension.
+
+<TypeTable
+  type={{
+    property: {
+      description: 'The event property to break down by.',
+      type: 'string',
+      required: true,
+    },
+    maxCardinality: {
+      description: 'Maximum number of distinct values to include. Values beyond this limit are grouped into an "Other" bucket.',
+      type: 'integer',
+      typeDescription: 'Default: 10',
+      required: false,
+    },
+  }}
+/>
+
+---
+
+## Analysis Types
+
+The `analysis.type` field selects the analysis algorithm. Each type computes different metrics
+and injects different template variables into your `llm.promptTemplate`.
+
+| Type | Description |
+|---|---|
+| [`funnel`](./analysis_types/funnel) | Ordered step completion — find where users drop off |
+| [`retention`](./analysis_types/retention) | Cohort return-rate curves (D1 / D7 / D30) |
+| [`activation`](./analysis_types/activation) | % of new users who reach the first value moment |
+| [`churn`](./analysis_types/churn) | Users who were active but have gone silent |
+| [`featureAdoption`](./analysis_types/feature_adoption) | Fraction of active users who have tried a feature |
+| [`anomaly`](./analysis_types/anomaly) | Automated spike / dip detection vs. a statistical baseline |
+| [`conversion`](./analysis_types/conversion) | Simple numerator / denominator conversion rate |
+| [`cohort`](./analysis_types/cohort) | Compare a metric across cohorts by join date or property |
+| [`trend`](./analysis_types/trend) | Count events or unique users per time period |
+| [`custom`](./analysis_types/custom) | *(Deprecated — v0Alpha migration only)* Raw event list |
+
+See the [Analysis Types overview](./analysis_types) for per-type configuration reference and examples.
+
+---
+
+## `llm` Properties
+
+<TypeTable
+  type={{
+    promptTemplate: {
+      description: 'Mustache-style template for the user message sent to the LLM. Use `{{variableName}}` placeholders to inject computed values. The set of valid variables depends on the `analysis.type`.',
+      type: 'string',
+      typeDescription: '10–5000 characters',
+      required: true,
+    },
+    systemMessage: {
+      description: 'Optional system-level instruction prepended before the user message. Use to set tone, persona, or output format constraints.',
+      type: 'string',
+      required: false,
+    },
+    maxOutputTokens: {
+      description: 'Optional cap on the number of tokens the LLM may generate. Helps control response length and cost.',
+      type: 'integer',
+      typeDescription: 'e.g. `300`, `500`',
+      required: false,
+    },
+    guardrails: {
+      description: 'Optional flags to guide LLM output quality.',
+      type: 'object',
+      typeDescription: '`{ citeSources?: boolean, noHallucination?: boolean }`',
+      required: false,
+    },
+  }}
+/>
+
+### Universal Template Variables
+
+These variables are always available in `promptTemplate`, regardless of analysis type:
+
+| Variable | Description |
+|---|---|
+| `{{windowPeriod}}` | Human-readable description of the analysis window, e.g. `"last 7 days"` |
+| `{{dataAsJson}}` | Full structured result from the analysis query, serialised as JSON |
+| `{{executedAt}}` | ISO 8601 timestamp of when this execution started |
+
+Type-specific variables are documented on each analysis type's reference page.
+
+---
+
+## `privacy` Properties
+
+<TypeTable
+  type={{
+    excludeProperties: {
+      description: 'List of event property names to strip entirely before the data is sent to the LLM. Use for fields that should never leave your infrastructure.',
+      type: 'string[]',
+      required: false,
+    },
+    hashProperties: {
+      description: 'List of event property names to one-way hash (SHA-256) before the data is sent to the LLM. The LLM sees consistent identifiers without exposing raw values.',
+      type: 'string[]',
+      required: false,
+    },
+  }}
+/>
+
+---
+
+## Full Example
+
+```yaml title=".journium/trackers/checkout-funnel.yml"
+apiVersion: journium.app/v0Beta
 kind: InsightTracker
 metadata:
-  name: signup-to-first-habit
-  displayName: Signup to First Habit Dropoff
-  description: Track how many users sign up but don't complete their first habit
+  name: checkout-funnel
+  displayName: Checkout Funnel Analysis
+  description: Track drop-off across the 4-step checkout flow
 spec:
   type: LLM
   trigger:
     mode: automatic
-  llmPrompt: |
-    You are a helpful assistant that generates insights based on the provided data.
-    The data is a list of events that have occurred in the system.
-    Generate an insight based on the data.
-    The insight should be a single sentence that summarizes the data.
-    The insight should be in the following format:
-    - **[Insight Title]**: [Insight Description]
-  data:
-    events:
-      - signup_completed
-      - habit_created
-    minEvents: 1
-    maxEvents: 100
-```
-
-## Snippets
-
-The following snippets describe each configuration option in the tracker specification.
-
-### Execution schedule
-
-You can configure the schedule for the tracker to run on.
-
-
-#### Preset cadence
-
-Valid presets are: `hourly`, `daily`, `weekly`, `monthly`.
-
-```yaml title=".journium/trackers/my-tracker.yml"
-spec:
-  trigger:
-    mode: automatic
     schedule: daily
-```
-#### Cron expression
-
-In the example below, the tracker will run every 45 minutes.
-The cron expression is a string that follows the format of 
-the [cron](https://en.wikipedia.org/wiki/Cron) expression parser.
-
-
-```yaml title=".journium/trackers/my-tracker.yml"
-spec:
-  trigger:
-    mode: automatic
-    schedule: 
-      cron: "*/45 * * * *"
-```
-
-#### Manual Schedule
-
-For trackers in manual mode, the tracker will not run automatically. It will only run when explicitly triggered. 
-You can trigger a tracker manually from the Journium UI.
-
-```yaml title=".journium/trackers/my-tracker.yml"
-spec:
-  trigger:
-    mode: manual
-``` 
-
-### Event selection and limits
-
-You can specify the events to include in the tracker and the limits on the number of events to process.
-
-#### Process a set of events
-
-The example below will process the `signup_completed` and `habit_created` events.
-```yaml title=".journium/trackers/my-tracker.yml"
-spec:
-  data:
-    events:
-      - signup_completed
-      - habit_created
+  window:
+    period: last_7d
+    granularity: day
+    timezone: America/New_York
+  analysis:
+    type: funnel
+    entity: person_id
+    steps:
+      - event: cart_viewed
+        label: Viewed Cart
+      - event: checkout_started
+        label: Started Checkout
+      - event: payment_entered
+        label: Entered Payment
+      - event: order_completed
+        label: Completed Order
+    conversionWindow: 2h
+    breakdowns:
+      - property: plan
+        maxCardinality: 5
+  llm:
+    promptTemplate: |
+      Analyze this checkout funnel for {{windowPeriod}}.
+      {{totalEntrants}} users entered the funnel with an overall conversion of {{overallConversionPct}}%.
+      Step breakdown: {{stepsSummary}}
+      Worst performing step: {{worstStep}} ({{worstStepCvr}}% CVR, {{worstStepLoss}} users lost).
+      Full data: {{dataAsJson}}
+      Provide 2-3 concrete, actionable recommendations to improve conversion.
+    maxOutputTokens: 500
+    guardrails:
+      citeSources: true
+  privacy:
+    excludeProperties:
+      - email
+      - phone
+    hashProperties:
+      - userId
 ```
 
-#### Process all events
+---
 
-The example below will process all events.
-```yaml title=".journium/trackers/my-tracker.yml"
-spec:
-  data:
-    events: "*"
-```
+## Migrating from v0Alpha
 
-#### Minimum number of events
+If you have existing trackers using `apiVersion: journium.app/v0Alpha`, they use the old
+`data.events` + `llmPrompt` fields. To migrate to v0Beta:
 
-The example below will execute only if at least 50 events are available.
-```yaml title=".journium/trackers/my-tracker.yml"
-spec:
-  data:
-    minEvents: 50
-```
+1. Replace `apiVersion: journium.app/v0Alpha` with `apiVersion: journium.app/v0Beta`
+2. Remove the `spec.data` block and `spec.llmPrompt` field
+3. Add a `spec.window` block with the time period you previously implied in your prompt
+4. Add a `spec.analysis` block — choose the type that best matches what your old prompt was computing (see [Analysis Types](./analysis_types))
+5. Move your LLM instructions into `spec.llm.promptTemplate`, replacing free-form data references with the structured `{{variables}}` for your chosen analysis type
+6. Optionally add a `spec.privacy` block for any PII fields
 
-#### Maximum number of events
-
-The example below will select at most 100 events. Remaining events will be ignored in the current execution.
-```yaml title=".journium/trackers/my-tracker.yml"
-spec:
-  data:
-    maxEvents: 100
-```
-
-
-### LLM Prompt
-
-The LLM prompt is used to generate the insight. As a best practice, you should use the `|` character to define a multi-line string.
-Consider the following example:
-
-```yaml title=".journium/trackers/my-tracker.yml"
-spec: 
-  llmPrompt: |
-    You are a helpful assistant that generates insights based on the provided data.
-    The data is a list of events that have occurred in the system.
-    Generate an insight based on the data.
-    The insight should be a single sentence that summarizes the data.
-    The insight should be in the following format:
-    - **[Insight Title]**: [Insight Description]
-```
-
-#### Best practices
-
-- Consider keeping the LLM prompt concise and to the point.
-- Try to acheive a single goal per tracker.
-- Configure different trackers for different goals.
+<Callout type="warn">
+The `custom` analysis type provides a compatibility bridge for v0Alpha prompts that don't map cleanly to a structured type. However, `custom` is deprecated and not available in the NL Builder or for new trackers. Migrate to a structured type as soon as practical.
+</Callout>

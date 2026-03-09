@@ -1,0 +1,131 @@
+---
+title: Trend / Growth
+description: Count events or unique users per time period — daily, weekly, monthly.
+icon: TrendingUp
+---
+
+## Overview
+
+Trend Analysis computes a time-series of an aggregated metric bucketed by `hour`, `day`,
+`week`, or `month`. It covers all growth and usage-frequency questions. "How many times does
+X happen per period?" is always a trend question.
+
+<Callout type="info">
+**When to use trend**: "How many users are signing up every month?", "Show me daily active users
+over the last 90 days", "What is the weekly trend in purchases over the past quarter?"
+
+**When NOT to use trend**: If you want automated spike/dip alerts, use [`anomaly`](./anomaly).
+If you want cohort return curves, use [`retention`](./retention). If you want to compare groups,
+use [`cohort`](./cohort).
+</Callout>
+
+## Configuration Reference
+
+<TypeTable
+  type={{
+    type: {
+      description: 'Analysis type discriminant.',
+      type: 'string',
+      typeDescription: '`"trend"`',
+      required: true,
+    },
+    entity: {
+      description: 'The user identifier to use when aggregation is `uniqueUsers`.',
+      type: 'string',
+      typeDescription: '`"person_id"` | `"session_id"` | `"device_id"`. Default: `"person_id"`',
+      required: false,
+    },
+    event: {
+      description: 'The event to aggregate per time period.',
+      type: 'string',
+      typeDescription: 'Event name, e.g. `"user_signed_up"`, `"purchase_completed"`',
+      required: true,
+    },
+    aggregation: {
+      description: 'How to aggregate the event within each time bucket.',
+      type: 'string',
+      typeDescription: '`"count"` | `"uniqueUsers"` | `"sum"` | `"avg"`',
+      required: true,
+    },
+    groupBy: {
+      description: 'The time bucket size for the time series.',
+      type: 'string',
+      typeDescription: '`"hour"` | `"day"` | `"week"` | `"month"`',
+      required: true,
+    },
+    sumProperty: {
+      description: 'Required when `aggregation` is `"sum"` or `"avg"` — the numeric event property to aggregate.',
+      type: 'string',
+      required: false,
+    },
+    filters: {
+      description: 'Optional filters to narrow the events counted.',
+      type: 'array',
+      typeDescription: 'Array of `PropertyFilter`',
+      required: false,
+    },
+    compareWindow: {
+      description: 'If set, also fetches the equivalent previous period for comparison.',
+      type: 'string',
+      typeDescription: '`"previous_period"`',
+      required: false,
+    },
+  }}
+/>
+
+## Available Template Variables
+
+| Variable | Description |
+|---|---|
+| `{{metricName}}` | Human-readable name for the metric (derived from `event` + `aggregation`) |
+| `{{periodCount}}` | Number of time buckets in the result |
+| `{{currentPeriodValue}}` | Value in the most recent complete time bucket |
+| `{{peakPeriod}}` | Label of the time bucket with the highest value |
+| `{{peakValue}}` | The value at the peak period |
+| `{{trendDirection}}` | Overall trend direction: `"up"`, `"down"`, or `"flat"` |
+| `{{trendSummary}}` | Human-readable summary of the trend (e.g. "grew 12% week-over-week") |
+| `{{hasComparison}}` | `true` if `compareWindow` data is available |
+| `{{previousPeriodValue}}` | Value in the equivalent previous period (when `hasComparison` is true) |
+| `{{growthRatePct}}` | Percentage change vs. previous period (when `hasComparison` is true) |
+| `{{windowPeriod}}` | Human-readable analysis window, e.g. `"last 90 days"` |
+| `{{dataAsJson}}` | Full structured result as JSON |
+| `{{executedAt}}` | ISO 8601 execution timestamp |
+
+## Example
+
+```yaml title=".journium/trackers/daily-signups-trend.yml"
+apiVersion: journium.app/v0Beta
+kind: InsightTracker
+metadata:
+  name: daily-signups-trend
+  displayName: Daily Signups Trend (WoW)
+  description: Daily signup count with week-over-week comparison
+spec:
+  type: LLM
+  trigger:
+    mode: automatic
+    schedule: daily
+  window:
+    period: last_30d
+    granularity: day
+  analysis:
+    type: trend
+    entity: person_id
+    event: user_signed_up
+    aggregation: uniqueUsers
+    groupBy: day
+    compareWindow: previous_period
+  llm:
+    promptTemplate: |
+      Daily signup trend for {{windowPeriod}}.
+      Metric: {{metricName}} — {{periodCount}} days.
+      Most recent day: {{currentPeriodValue}} signups.
+      Peak day: {{peakPeriod}} ({{peakValue}} signups).
+      Overall trend: {{trendDirection}}. {{trendSummary}}
+      {{#if hasComparison}}
+      Previous period: {{previousPeriodValue}} total. Growth: {{growthRatePct}}%.
+      {{/if}}
+      Full data: {{dataAsJson}}
+      Summarize the signup trend and highlight any days with unusual volume.
+    maxOutputTokens: 400
+```

@@ -1,0 +1,163 @@
+---
+title: Anomaly Detection
+description: Automated spike and dip detection vs. a statistical baseline.
+icon: AlertTriangle
+---
+
+## Overview
+
+Anomaly Detection automatically identifies unusual spikes or dips in a metric compared to a
+statistical baseline. This is alert-mode, not view-mode — the LLM is told **what deviated and
+by how much**, rather than being asked to interpret a time series. Use it for automatic monitoring
+of key metrics where you want to be notified when something unusual happens.
+
+<Callout type="info">
+**When to use anomaly**: "Alert me when error rates spike", "Did anything unusual happen with
+revenue this week?", "Detect and explain anomalies in daily active users."
+
+**When NOT to use anomaly**: If you want to *view* a time-series trend without automated
+detection, use [`trend`](./trend). If you want step-by-step drop-off analysis, use
+[`funnel`](./funnel).
+</Callout>
+
+## Configuration Reference
+
+<TypeTable
+  type={{
+    type: {
+      description: 'Analysis type discriminant.',
+      type: 'string',
+      typeDescription: '`"anomaly"`',
+      required: true,
+    },
+    metrics: {
+      description: 'One or more metrics to monitor for anomalies. Each metric defines the event, aggregation function, and time bucket.',
+      type: 'array',
+      typeDescription: 'Array of `AnomalyMetricDef`. See below.',
+      required: true,
+    },
+    baseline: {
+      description: 'Statistical baseline to compare current values against.',
+      type: 'object',
+      typeDescription: '`{ type: BaselineType, windowDays: number }`',
+      required: true,
+    },
+    threshold: {
+      description: 'Sensitivity configuration — how many standard deviations above/below the baseline constitute an anomaly.',
+      type: 'object',
+      typeDescription: '`{ stdDeviations: number, minAbsoluteChange?: number }`',
+      required: true,
+    },
+    includeTimeSeries: {
+      description: 'If true, the full time-series data is included in `dataAsJson` in addition to the anomaly list.',
+      type: 'boolean',
+      typeDescription: 'Default: `false`',
+      required: false,
+    },
+  }}
+/>
+
+### `AnomalyMetricDef` Properties
+
+<TypeTable
+  type={{
+    event: {
+      description: 'The event to aggregate.',
+      type: 'string',
+      required: true,
+    },
+    aggregation: {
+      description: 'How to aggregate the event within each time bucket.',
+      type: 'string',
+      typeDescription: '`"count"` | `"uniqueUsers"` | `"sum"` | `"avg"`',
+      required: true,
+    },
+    groupBy: {
+      description: 'The time bucket size for the time series.',
+      type: 'string',
+      typeDescription: '`"hour"` | `"day"` | `"week"`',
+      required: true,
+    },
+    label: {
+      description: 'Optional human-readable name for this metric, used in template variable output.',
+      type: 'string',
+      required: false,
+    },
+    sumProperty: {
+      description: 'Required when `aggregation` is `"sum"` or `"avg"` — the numeric event property to aggregate.',
+      type: 'string',
+      required: false,
+    },
+    filters: {
+      description: 'Optional filters to narrow the events counted in this metric.',
+      type: 'array',
+      typeDescription: 'Array of `PropertyFilter`',
+      required: false,
+    },
+  }}
+/>
+
+### `AnomalyBaseline` — `type` values
+
+| Value | Meaning |
+|---|---|
+| `"rolling_average"` | Average of the metric over the last `windowDays` days |
+| `"same_period_last_week"` | Same time period from the previous week |
+| `"same_period_last_month"` | Same time period from the previous month |
+
+## Available Template Variables
+
+| Variable | Description |
+|---|---|
+| `{{metricCount}}` | Number of metrics being monitored |
+| `{{totalAnomalies}}` | Total number of anomalous time buckets detected across all metrics |
+| `{{anomalySummary}}` | Per-metric anomaly details (metric label, deviation magnitude, direction) |
+| `{{windowPeriod}}` | Human-readable analysis window, e.g. `"last 14 days"` |
+| `{{dataAsJson}}` | Full structured result as JSON |
+| `{{executedAt}}` | ISO 8601 execution timestamp |
+
+## Example
+
+```yaml title=".journium/trackers/error-rate-anomaly.yml"
+apiVersion: journium.app/v0Beta
+kind: InsightTracker
+metadata:
+  name: error-rate-anomaly
+  displayName: Error Rate Anomaly Detection
+  description: Alert when error event rates spike above statistical normal
+spec:
+  type: LLM
+  trigger:
+    mode: automatic
+    schedule: daily
+  window:
+    period: last_14d
+    granularity: hour
+  analysis:
+    type: anomaly
+    metrics:
+      - event: error_occurred
+        aggregation: count
+        groupBy: hour
+        label: Error Rate
+      - event: api_call_failed
+        aggregation: count
+        groupBy: hour
+        label: API Failure Rate
+    baseline:
+      type: rolling_average
+      windowDays: 14
+    threshold:
+      stdDeviations: 2.5
+      minAbsoluteChange: 10
+    includeTimeSeries: false
+  llm:
+    promptTemplate: |
+      Error monitoring report for {{windowPeriod}}.
+      {{metricCount}} metrics monitored. {{totalAnomalies}} anomalous periods detected.
+      Anomaly summary:
+      {{anomalySummary}}
+      Full data: {{dataAsJson}}
+      Describe the most significant anomaly, its likely cause, and recommended response.
+    maxOutputTokens: 500
+```
