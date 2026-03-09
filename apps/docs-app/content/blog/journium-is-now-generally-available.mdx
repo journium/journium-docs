@@ -47,18 +47,40 @@ Define what matters using YAML specifications. Your insights deploy with your ap
 Here's what a tracker looks like:
 
 ```yaml title=".journium/trackers/onboarding-completion.yml"
-apiVersion: journium.app/v0Alpha
+apiVersion: journium.app/v0Beta
 kind: InsightTracker
 metadata:
   name: onboarding-completion
   displayName: Onboarding Completion Analysis
+  description: Track completion rates and identify drop-off steps across onboarding.
 spec:
-  description: Track completion rates across onboarding steps
-  schedule: daily
-  trackingGoal: >
-    Analyze user progression through onboarding steps.
-    Identify drop-off points and segment-specific patterns.
-    Flag significant changes in completion rates.
+  type: LLM
+  trigger:
+    mode: automatic
+    schedule: daily
+  window:
+    period: last_7d
+    granularity: day
+  analysis:
+    type: funnel
+    entity: person_id
+    conversionWindow: 48h
+    steps:
+      - event: onboarding_started
+        label: Started Onboarding
+      - event: profile_completed
+        label: Completed Profile
+      - event: team_invited
+        label: Invited Team
+      - event: onboarding_completed
+        label: Completed Onboarding
+  llm:
+    promptTemplate: |
+      Analyze onboarding funnel data (last 7 days).
+      Steps: {{stepsSummary}}
+      Biggest drop-off: {{worstStep}} ({{worstStepLoss}} users lost).
+      In 2-3 sentences: identify the most critical drop-off point and recommend one experiment to improve it.
+    maxOutputTokens: 400
 ```
 
 That's it. Commit this file, deploy your application, and Journium continuously monitors the pattern you defined. When behavior shifts, you get an insight explaining what changed and why.
@@ -102,18 +124,45 @@ export default function RootLayout({ children }) {
 **Define insight trackers.** Create YAML files that specify what behavioral patterns matter to your product. Trackers live in your repository alongside your application code.
 
 ```yaml title=".journium/trackers/feature-adoption.yml"
-apiVersion: journium.app/v0Alpha
+apiVersion: journium.app/v0Beta
 kind: InsightTracker
 metadata:
   name: feature-adoption
   displayName: Feature Adoption Tracker
+  description: Monitor adoption of new features across user segments and cohorts.
 spec:
-  description: Monitor adoption of new features across user segments
-  schedule: daily
-  trackingGoal: >
-    Track feature usage by segment and cohort.
-    Identify adoption patterns and barriers.
-    Flag unexpected changes in engagement.
+  type: LLM
+  trigger:
+    mode: automatic
+    schedule: daily
+  window:
+    period: last_30d
+    granularity: week
+  analysis:
+    type: featureAdoption
+    entity: person_id
+    featureEvents:
+      - event: feature_opened
+        label: Opened Feature
+      - event: feature_action_taken
+        label: Took Action
+    activeUserBaseline:
+      event: session_started
+      period: last_30d
+    breakdowns:
+      - property: plan
+      - property: signup_source
+    metrics:
+      - uniqueAdopters
+      - adoptionRate
+      - weekOverWeekDelta
+    compareWindow: previous_period
+  llm:
+    promptTemplate: |
+      Feature adoption (last 30 days): {{uniqueAdopters}} adopters ({{adoptionRate}}% of active users).
+      WoW change: {{weekOverWeekDelta}}%. By plan: {{planBreakdown}}.
+      In 2-3 sentences: summarize adoption health, identify barriers, and flag unexpected engagement changes.
+    maxOutputTokens: 400
 ```
 
 **Receive insights automatically.** As users interact with your product, Journium evaluates your trackers continuously. When behavior shifts meaningfully, you get insights delivered to Slack, email, or your Journium dashboard—complete with analysis explaining what changed, why it matters, and which segments are affected.

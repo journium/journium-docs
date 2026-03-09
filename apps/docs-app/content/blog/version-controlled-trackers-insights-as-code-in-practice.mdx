@@ -31,30 +31,43 @@ For teams that already treat infrastructure, testing, and observability as code,
 Journium tracker repositories put insight definitions in your codebase:
 
 ```yaml title=".journium/trackers/onboarding-dropoff.yml"
-apiVersion: journium.app/v0Alpha
+apiVersion: journium.app/v0Beta
 kind: InsightTracker
 metadata:
   name: onboarding-dropoff
   displayName: Onboarding Completion Analysis
-  description: Track users who start but don't complete onboarding
+  description: Track users who start but don't complete onboarding.
 spec:
   type: LLM
   trigger:
     mode: automatic
     schedule: daily
-  llmPrompt: |
-    Analyze onboarding behavior and identify:
-    - Drop-off patterns by step
-    - Common characteristics of users who abandon
-    - Time-based trends (weekday vs weekend, time of day)
-    - Correlations with account type or traffic source
-  data:
-    events:
-      - onboarding_started
-      - profile_completed
-      - team_invited
-      - onboarding_completed
-    maxEvents: 500
+  window:
+    period: last_7d
+    granularity: day
+  analysis:
+    type: funnel
+    entity: person_id
+    conversionWindow: 48h
+    steps:
+      - event: onboarding_started
+        label: Started Onboarding
+      - event: profile_completed
+        label: Completed Profile
+      - event: team_invited
+        label: Invited Team
+      - event: onboarding_completed
+        label: Completed Onboarding
+    breakdowns:
+      - property: account_type
+      - property: traffic_source
+  llm:
+    promptTemplate: |
+      Onboarding funnel (last 7 days): {{stepsSummary}}
+      Biggest drop-off: {{worstStep}} ({{worstStepLoss}} users lost, {{worstStepCvr}} conversion).
+      Breakdown by account type: {{breakdownSummary}}
+      In 2-3 sentences: identify the most critical drop-off, suggest one hypothesis, and recommend one experiment.
+    maxOutputTokens: 400
 ```
 
 Trackers are first-class artifacts in your repository—reviewed, versioned, and deployed like application code.
@@ -120,11 +133,11 @@ spec:
     schedule: weekly
     // [!code ++:1]
     schedule: daily
-  data:
+  window:
     // [!code --:1]
-    maxEvents: 100
+    period: last_7d
     // [!code ++:1]
-    maxEvents: 500
+    period: last_14d
 ```
 
 Your team reviews the change, discusses the rationale, approves or requests modifications. Insight logic is now part of your code review process.
@@ -153,13 +166,36 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download tracker schemas
+        run: |
+          mkdir -p .journium/schemas
+          curl -sf -o .journium/schemas/root.schema.json \
+            https://journium.app/schemas/journium-insight-tracker.schema.json
+          curl -sf -o .journium/schemas/v0Beta.schema.json \
+            https://journium.app/schemas/journium-insight-tracker.v0Beta.schema.json
+          curl -sf -o .journium/schemas/base.schema.json \
+            https://journium.app/schemas/journium-insight-tracker.base.schema.json
+
       - name: Validate tracker schemas
         run: |
-          npm install -g ajv-cli
+          pnpm add -g ajv-cli ajv-formats
           ajv validate \
-            -s https://journium.app/schemas/journium-insight-tracker.schema.json \
-            -d ".journium/trackers/*.yaml"
+            --spec=draft2020 \
+            -c ajv-formats \
+            -s .journium/schemas/root.schema.json \
+            -r ".journium/schemas/v0Beta.schema.json" \
+            -r ".journium/schemas/base.schema.json" \
+            -d ".journium/trackers/*.yml"
 ```
 
 Broken trackers fail CI and never merge. Analytics stay reliable through the same quality gates as application code.
@@ -174,7 +210,7 @@ This scenario plays out constantly in organizations using traditional analytics 
 
 Version-controlled trackers eliminate this. Every tracker is a YAML file in your repository—explicit, readable, and subject to the same review process as application code.
 
-When someone proposes changing a tracker's event selection from 100 to 500 samples, the change appears in a pull request. Your team discusses whether the larger sample size is worth the processing cost. Someone points out the tracker already struggles to complete within its time window. The change gets refined before merge. Insight logic improves through peer review, not trial-and-error in production.
+When someone proposes changing the schedule from weekly to daily and widening the analysis window from 7 to 14 days, the change appears in a pull request. Your team discusses whether the broader window is worth the additional processing. Someone points out the tracker already struggles to complete within its time window. The change gets refined before merge. Insight logic improves through peer review, not trial-and-error in production.
 
 ### Change History is Preserved
 
@@ -241,34 +277,42 @@ git checkout -b feature/new-onboarding-flow
 **Implement feature + tracker**
 
 ```yaml title=".journium/trackers/onboarding-v2-analysis.yml"
-apiVersion: journium.app/v0Alpha
+apiVersion: journium.app/v0Beta
 kind: InsightTracker
 metadata:
   name: onboarding-v2-analysis
   displayName: New Onboarding Flow Performance
-  description: Monitor adoption and completion of redesigned onboarding
+  description: Monitor adoption and completion of the redesigned onboarding flow.
 spec:
   type: LLM
   trigger:
     mode: automatic
     schedule: daily
-  llmPrompt: |
-    Compare new onboarding flow (v2) performance against baseline:
-    - Completion rate differences
-    - Time to complete
-    - Step-level drop-off changes
-    - Segment-specific patterns
-  data:
-    events:
-      - onboarding_v2_started
-      - onboarding_v2_step_completed
-      - onboarding_v2_completed
-    maxEvents: 1000
+  window:
+    period: last_7d
+    granularity: day
+  analysis:
+    type: funnel
+    entity: person_id
+    conversionWindow: 48h
+    steps:
+      - event: onboarding_v2_started
+        label: Started Onboarding (v2)
+      - event: onboarding_v2_step_completed
+        label: Completed Step
+      - event: onboarding_v2_completed
+        label: Completed Onboarding (v2)
+  llm:
+    promptTemplate: |
+      New onboarding flow (v2) performance (last 7 days): {{stepsSummary}}
+      Biggest drop-off: {{worstStep}} ({{worstStepLoss}} users lost, {{worstStepCvr}} conversion).
+      In 2-3 sentences: assess completion health, identify the sharpest drop-off step, and suggest one improvement.
+    maxOutputTokens: 400
 ```
 </ListItem>
 
 <ListItem>
-**Open pull request**—Team reviews feature and tracker. Someone suggests increasing `maxEvents`. You update the YAML. Everyone approves.
+**Open pull request**—Team reviews feature and tracker. Someone suggests widening the analysis window. You update the YAML. Everyone approves.
 </ListItem>
 
 <ListItem>
@@ -293,7 +337,7 @@ Application code deploys via CI/CD. Tracker deploys via Journium's automatic syn
 
 **Custom Cron Schedules**: Use cron expressions for precise timing (`cron: "0 9 * * 1"` for Monday 9 AM).
 
-**Event Filtering**: Focus trackers on specific user journeys (list specific events) or track everything (`events: "*"`).
+**Event Filtering**: Scope analysis to the exact user journey that matters. Funnel trackers define each step via `analysis.steps[].event`; adoption trackers list `analysis.featureEvents`. Analysis runs only over the signals you specify.
 
 **Multi-Environment**: Deploy from `develop` branch for staging, `main` for production. Same workflow as application deployments.
 
