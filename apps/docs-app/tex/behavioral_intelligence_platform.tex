@@ -55,7 +55,7 @@ and Grounded Language Generation}
 \begin{abstract}
 Contemporary product analytics systems require users to pose explicit queries---writing SQL, configuring dashboards, or constructing funnels---before any insight can surface. This pull-based paradigm imposes a dual bottleneck: it demands both domain knowledge and technical fluency from practitioners who must know, in advance, which questions to ask. We argue that the next generation of behavioral analytics must invert this model, shifting from passive data stores that answer queries to active intelligence systems that continuously monitor, detect, and narrate behavioral phenomena without prompting.
 
-We present the Behavioral Intelligence Platform (BIP), a system architecture and formal framework that transforms raw event streams into automatically generated, evidence-backed insights. BIP introduces three tightly integrated layers: (1) a Behavioral Graph Engine (BGE) that models user journeys as absorbing Markov chains over a multi-level state hierarchy, computing transition probabilities, removal effects, and path quality metrics; (2) a Behavioral Knowledge Graph (BKG) that reifies graph outputs into a queryable triple-store of grounded behavioral facts with rich provenance; and (3) a Grounded Language Layer (GLL) that constrains large language model (LLM) output to verified facts from the BKG, producing faithful narrative insights at scale.
+We present the Behavioral Intelligence Platform (BIP), a system architecture and formal framework that transforms raw event streams into automatically generated, evidence-backed insights. BIP introduces four tightly integrated layers: (1) a Normalization and State Derivation (NSD) stage that standardizes raw events and maps them to a multi-level semantic state hierarchy; (2) a Behavioral Graph Engine (BGE) that models user journeys as absorbing Markov chains, computing transition probabilities, removal effects, and path quality metrics; (3) a Behavioral Knowledge Graph (BKG) combined with a Detector System (DS) that reifies graph outputs into a queryable triple-store of grounded behavioral facts and autonomously identifies behavioral phenomena; and (4) a Grounded Language Layer (GLL) that constrains large language model (LLM) output to verified facts from the BKG, producing faithful narrative insights at scale.
 
 We formalize the Behavioral Intelligence Problem, define a taxonomy of detectors for autonomous insight generation (activation drivers, drop-off clusters, behavioral regressions, segment divergence, unexpected loops), and propose a composite interestingness score for prioritizing insights under bounded attention. We discuss the key design principles---grounded-first computation, semantic state abstraction, time-aware snapshots, and segment-aware analysis---and characterize the fundamental trade-offs between completeness, causal interpretability, and computational cost. The architecture is evaluated against correctness, latency, and insight quality criteria, with discussion of evaluation challenges unique to unsupervised insight generation.
 
@@ -69,7 +69,7 @@ We formalize the Behavioral Intelligence Problem, define a taxonomy of detectors
 \section{Introduction}
 % ---------------------------------------------------------------
 
-The canonical workflow of a product analyst begins with a question. The analyst opens a dashboard, constructs a query, examines a chart, and forms a hypothesis---then iterates. This interactive, pull-based model underpins virtually every analytics platform in commercial use today, from Mixpanel and Amplitude to Google Analytics and Heap. The user is assumed to be an active driver of inquiry; the system is a passive responder.
+The canonical workflow of a product analyst begins with a question. The analyst opens a dashboard, constructs a query, examines a chart, and forms a hypothesis---then iterates. This interactive, pull-based model has historically underpinned virtually every analytics platform in commercial use, from Mixpanel and Amplitude to Google Analytics and Heap. The user is assumed to be an active driver of inquiry; the system is a passive responder.
 
 This assumption is increasingly untenable. Product teams face an ever-expanding corpus of instrumented behavior---hundreds of event types, thousands of user properties, dozens of defined funnels---against which the space of meaningful questions is combinatorially vast. Under the pull model, most of this behavioral signal goes unexamined. Insights that are not explicitly sought are not found. Critical regressions in activation flows go undetected until they manifest in lagging revenue metrics. Segment-specific friction points accumulate invisibly behind aggregate conversion numbers. Fast-moving product cycles demand a pace of inference that manual exploration cannot sustain.
 
@@ -77,7 +77,7 @@ We observe a structural mismatch: the volume and velocity of behavioral data hav
 
 This paper formalizes and addresses the \textit{Behavioral Intelligence Problem}: given a continuous stream of product events across a population of users or accounts, automatically detect, rank, and narrate behavioral phenomena of potential significance---without requiring the practitioner to specify what to look for.
 
-This problem is distinct from, and more ambitious than, existing adjacent work. Automated data exploration (ADE) systems \cite{law2020,ma2021} automate the exploration of tabular datasets but lack the journey-centric, temporal, and segment-aware structure of behavioral analytics. Anomaly detection systems identify statistical deviations but do not model user journeys, cannot reason about path structure, and produce point-in-time alerts rather than behaviorally coherent narratives. Natural language interfaces to data \cite{he2024} still require the user to pose a question. We seek a system that generates questions and answers them simultaneously.
+This problem is distinct from, and more ambitious than, existing adjacent work. Automated data exploration (ADE) systems \cite{law2020,ma2021} automate the exploration of tabular datasets but lack the journey-centric, temporal, and segment-aware structure of behavioral analytics. Anomaly detection systems identify statistical deviations but do not model user journeys, cannot reason about path structure, and produce point-in-time alerts rather than behaviorally coherent narratives. Even recent benchmarks for natural language query interfaces to structured data \cite{he2024} presuppose that the user poses a question. We seek a system that generates questions and answers them simultaneously.
 
 Our contributions are as follows:
 
@@ -108,13 +108,13 @@ The remainder of this paper is organized as follows. Section~\ref{sec:related} r
 
 The problem of automatically generating insights from tabular data has received sustained attention in the database and visualization communities. Law et al.\ \cite{law2020} characterize the space of automated data insights, identifying properties such as novelty, deviation, and coverage as criteria for interestingness. DataShot \cite{xu2020} generates fact sheets from tabular data by enumerating a predefined set of statistical patterns (extrema, trends, comparisons) and ranking them by interestingness. MetaInsight \cite{ma2021} discovers structured knowledge from multidimensional data by identifying common patterns across subspaces via an optimal partition scheme.
 
-More recent work has explored LLM-mediated insight generation. The QUIS system \cite{manatkar2024} uses a two-module architecture in which a question-generation module produces statistically-informed questions about a dataset and a downstream module answers them, iterating until insight quality converges. InsightBench \cite{srinivasan2024} provides a benchmark for evaluating end-to-end data analysis agents. InsightPilot \cite{qian2023} proposes an LLM-empowered automated data exploration system. These systems target general tabular data and do not address the journey-centric, temporal, and segment-structured nature of product behavioral data.
+More recent work has explored LLM-mediated insight generation. The QUIS system \cite{manatkar2024} uses a two-module architecture in which a question-generation module produces statistically-informed questions about a dataset and a downstream module answers them, iterating until insight quality converges. InsightBench \cite{sahu2024} provides a benchmark for evaluating end-to-end data analysis agents. InsightPilot \cite{ma2023} proposes an LLM-empowered automated data exploration system. These systems target general tabular data and do not address the journey-centric, temporal, and segment-structured nature of product behavioral data.
 
 A key distinction between prior ADE work and the behavioral intelligence setting is the role of time and sequence. Tabular ADE systems treat records as independent observations; behavioral data is fundamentally sequential and causal, with the ordering and structure of events encoding user intent, friction, and outcome probability in ways that cross-sectional summary statistics cannot capture.
 
 \subsection{Markov Models for User Journey Analysis}
 
-Markov chain models have a long history in modeling sequential user behavior. Charan \cite{charan2015} applies Markov chains to customer journey attribution across marketing touchpoints. Harbich et al.\ \cite{harbich2017} propose a mixture of Markov models for customer journey map discovery. The MDPI Customer Behaviour Hidden Markov Model \cite{wang2022} extends this to e-commerce with hidden state representations.
+Markov chain models have a long history in modeling sequential user behavior, including customer journey attribution across marketing touchpoints. Harbich et al.\ \cite{harbich2017} propose a mixture of Markov models for customer journey map discovery. The MDPI Customer Behaviour Hidden Markov Model \cite{wang2022} extends this to e-commerce with hidden state representations.
 
 The absorbing Markov chain formalism provides a natural foundation for computing expected journey lengths and outcome probabilities in the presence of uncertain paths. In an absorbing Markov chain with transient states $T$ and absorbing states $A$, the fundamental matrix $N = (I - Q)^{-1}$ gives the expected number of times the chain visits each transient state before absorption, enabling closed-form derivation of conversion probabilities and expected remaining steps \cite{kemeny1960}.
 
@@ -227,7 +227,7 @@ This three-level abstraction reduces state space explosion: a product with 200 r
 
 The BGE aggregates derived state events into a directed weighted graph $G = (V, E, W)$ where $V$ is the set of states, $E \subseteq V \times V$ is the set of observed transitions, and $W: E \to \mathbb{R}^+$ assigns transition counts. The BGE materializes the following metrics for each graph snapshot: (i) per-edge transition probabilities, (ii) per-state reach rates, outcome conversion probabilities, and expected remaining steps under the absorbing Markov chain model, (iii) top-$N$ materialized paths ranked by occurrence and conversion efficiency, and (iv) segment-conditional versions of all of the above.
 
-\subsection{Layer 3: Behavioral Knowledge Graph}
+\subsection{Layer 3a: Behavioral Knowledge Graph}
 
 The BKG converts BGE outputs and detector findings into a typed triple-store of behavioral facts. Each fact takes the form:
 \begin{align*}
@@ -244,7 +244,7 @@ The closed predicate vocabulary constrains the knowledge graph to a semantically
 
 Each fact is bound to the snapshot from which it was derived, giving the system a complete lineage from raw events through derived states through graph metrics through facts.
 
-\subsection{Layer 3: Detector System}
+\subsection{Layer 3b: Detector System}
 
 Detectors are deterministic analysis modules that consume BGE snapshot outputs and emit typed findings and facts. The detector system runs after each snapshot build and is extensible: new detectors can be added without modifying the BGE or BKG schema.
 
@@ -259,7 +259,7 @@ The GLL translates structured findings and facts into natural language insights 
 
 \subsection{Absorbing Markov Chain Journey Model}
 
-We model a journey definition $\delta$ as an absorbing Markov chain $M_\delta = (S, T, Q, R)$ where $S$ is the set of transient (non-terminal) states, $T$ is the set of absorbing (terminal) states, $Q$ is the $|S| \times |S|$ sub-stochastic matrix of transition probabilities among transient states, and $R$ is the $|S| \times |T|$ matrix of transition probabilities from transient states to absorbing states.
+We model a journey definition $\delta$ as an absorbing Markov chain $M_\delta = (\mathcal{S}, \mathcal{A}, Q, R)$ where $\mathcal{S}$ is the set of transient (non-terminal) states, $\mathcal{A}$ is the set of absorbing (terminal) states, $Q$ is the $|\mathcal{S}| \times |\mathcal{S}|$ sub-stochastic matrix of transition probabilities among transient states, and $R$ is the $|\mathcal{S}| \times |\mathcal{A}|$ matrix of transition probabilities from transient states to absorbing states.
 
 Transition probabilities are estimated from observed journey instances. For a pair of states $(s_i, s_j)$, the empirical transition probability is:
 
@@ -274,6 +274,8 @@ where the denominator sums over all states, including absorbing states. This sat
   \sum_j P(s_j \mid s_i) + \sum_t P(t \mid s_i) = 1
   \label{eq:rowstochastic}
 \end{equation}
+
+Transition probabilities are estimated over a fixed analysis window, implicitly assuming behavioral stationarity within that window. This assumption is acknowledged to be an approximation; Section~\ref{sec:discussion} discusses non-stationarity as a direction for future work.
 
 \subsubsection{Fundamental Matrix}
 
@@ -357,7 +359,7 @@ For release-linked change detection, the comparison window is anchored to the re
 We define a composite interestingness score adapted to the behavioral analytics setting:
 
 \begin{equation}
-  \text{score}(f) = \alpha \cdot \text{significance} + \beta \cdot \text{magnitude} + \gamma \cdot \text{reach} + \delta \cdot \text{actionability} + \varepsilon \cdot \text{novelty}
+  \text{score}(f) = \alpha \cdot \text{significance} + \beta \cdot \text{magnitude} + \gamma \cdot \text{reach} + \omega \cdot \text{actionability} + \varepsilon \cdot \text{novelty}
   \label{eq:score}
 \end{equation}
 
@@ -370,7 +372,7 @@ where:
   \item \textbf{novelty} measures the recency of the finding relative to prior snapshots.
 \end{itemize}
 
-The weights $(\alpha, \beta, \gamma, \delta, \varepsilon)$ are configurable per deployed monitoring context. We acknowledge that the definition of interestingness is inherently subjective \cite{silberschatz1995}.
+The weights $(\alpha, \beta, \gamma, \omega, \varepsilon)$ are configurable per deployed monitoring context. We acknowledge that the definition of interestingness is inherently subjective \cite{silberschatz1995}.
 
 \subsection{Confidence Scoring}
 
@@ -410,13 +412,13 @@ The regression detector compares current snapshot metrics to a baseline and iden
 
 \subsubsection{Segment Divergence Detector}
 
-The segment divergence detector compares behavioral graph metrics across two or more user segments and identifies states or paths that exhibit significantly different conversion rates, reach rates, or transition probabilities. For segment pair $(S_1, S_2)$, it computes the KL divergence of the transition probability distributions.
+The segment divergence detector compares behavioral graph metrics across two or more user segments and identifies states or paths that exhibit significantly different conversion rates, reach rates, or transition probabilities. For segment pair $(S_1, S_2)$, it computes the Jensen-Shannon divergence of the transition probability distributions, a symmetric variant that does not require a canonical ordering of the two segments.
 
 Findings are emitted with predicates \texttt{more\_common\_in} and \texttt{less\_common\_in} for reach rate differences, and \texttt{diverges\_from} for overall distribution divergence.
 
-\subsubsection{Unexpected Loop Detector}
+\subsubsection{Repeated Visit Detector}
 
-The loop detector identifies states visited repeatedly within a single journey, indicating user confusion, friction, or a broken flow. A state $s$ is flagged as a loop when the mean visit count among journeys containing $s$ exceeds a threshold $\tau_{\text{loop}}$.
+The repeated visit detector identifies states visited multiple times within a single journey, indicating user confusion, friction, or a broken flow. A state $s$ is flagged when the mean visit count among journeys containing $s$ exceeds a threshold $\tau_{\text{loop}}$. Note that this detects unexpectedly high re-visitation frequency; detection of full cyclic paths (graph cycles) requires path-level tracking and is left to future work.
 
 \subsubsection{Path Quality Detector}
 
@@ -427,7 +429,7 @@ The path quality detector evaluates materialized paths on a composite quality sc
   \label{eq:pathquality}
 \end{equation}
 
-High-quality paths are surfaced as findings with predicate \texttt{is\_fast\_path\_to}. Low-quality paths with high occurrence rates are flagged as candidate optimization targets.
+High-quality paths are surfaced as findings with predicate \texttt{is\_fast\_path\_to}. Low-quality paths with high occurrence rates are flagged as candidate optimization targets. Note that average duration and path length are positively correlated; the multiplicative formulation jointly penalizes both dimensions. This is intentional for the present setting, where long and slow paths are doubly undesirable; however, practitioners may elect to drop one factor if the correlation is strong in a given dataset.
 
 \subsection{Detector Composition and Ordering}
 
@@ -446,7 +448,7 @@ The GLL implements a three-stage pipeline: (i) fact bundle construction, (ii) gr
 
 \subsection{Fact Bundle Construction}
 
-For a given finding $F$, the fact bundle $B(F)$ is constructed by retrieving from the BKG all facts that: (a) have \texttt{relatedEntityIds} intersecting the finding's entity set, (b) are valid within the finding's time window, and (c) exceed the minimum confidence threshold. Bundle construction uses a bounded-depth graph traversal (one-hop in v1). This produces a structured context document such as:
+For a given finding $F$, the fact bundle $B(F)$ is constructed by retrieving from the BKG all facts that: (a) have \texttt{relatedEntityIds} intersecting the finding's entity set, (b) are valid within the finding's time window, and (c) exceed the minimum confidence threshold. Bundle construction uses a bounded-depth graph traversal (one-hop in the current implementation). This produces a structured context document such as:
 
 \begin{minipage}{\linewidth}
 \begin{lstlisting}
@@ -495,7 +497,7 @@ Evaluating behavioral intelligence systems presents challenges not present in st
 
 Computational correctness is evaluated through: (i) deterministic consistency---for identical input snapshots, the system must produce identical outputs; (ii) traceability---for a random sample of facts, numerical values in the evidence payload must match recomputed values from the raw snapshot data. A target of $\geq\!99\%$ traceability is achievable with deterministic computation.
 
-For the GLL, faithfulness is evaluated by extracting verifiable claims from the narrative and checking each against the fact bundle, analogous to the claim-verification methodology of InsightBench \cite{srinivasan2024}.
+For the GLL, faithfulness is evaluated by extracting verifiable claims from the narrative and checking each against the fact bundle, analogous to the claim-verification methodology of InsightBench \cite{sahu2024}.
 
 \subsection{Insight Quality Metrics}
 
@@ -551,7 +553,7 @@ By automating the generation of behavioral insights, BIP has the potential to de
 \label{sec:conclusion}
 % ---------------------------------------------------------------
 
-We have presented the Behavioral Intelligence Platform (BIP), a formal architecture for transforming raw product event streams into automatically generated, evidence-backed narrative insights. BIP introduces three tightly integrated components: the Behavioral Graph Engine, which models user journeys as absorbing Markov chains over a multi-level semantic state hierarchy; the Behavioral Knowledge Graph, which reifies graph outputs into a typed triple-store of grounded facts with rich provenance; and the Grounded Language Layer, which constrains LLM-generated narratives to verified facts from the BKG.
+We have presented the Behavioral Intelligence Platform (BIP), a formal architecture for transforming raw product event streams into automatically generated, evidence-backed narrative insights. BIP introduces four tightly integrated layers: a Normalization and State Derivation stage that standardizes raw events and derives a multi-level semantic state hierarchy; a Behavioral Graph Engine that models user journeys as absorbing Markov chains; a Behavioral Knowledge Graph and Detector System that reify graph outputs into a typed triple-store of grounded facts and autonomously identify behavioral phenomena; and a Grounded Language Layer that constrains LLM-generated narratives to verified facts from the BKG.
 
 The architecture is grounded in a formal treatment of the Behavioral Intelligence Problem, with a well-defined taxonomy of detectors, a principled interestingness scoring framework for insight prioritization, and a confidence model that enables calibrated communication of statistical uncertainty. The core design principles---grounded-first computation, semantic abstraction, time-awareness, and AI on top of truth---reflect lessons from adjacent fields including process mining, automated data exploration, knowledge graphs, and retrieval-augmented generation.
 
@@ -577,7 +579,7 @@ Discovering Customer Journey Maps using a Mixture of Markov Models.
 
 \bibitem{he2024}
 He, X., Zhou, M., et al.\ (2024).
-Text2Analysis: A Benchmark of Table Question Answering with Advanced Data Analysis.
+Text2Analysis: A Benchmark of Table Question Answering with Advanced Data Analysis and Unclear Queries.
 \textit{AAAI 2024}.
 
 \bibitem{kemeny1960}
@@ -611,25 +613,20 @@ Pan, S. et al.\ (2024).
 Unifying Large Language Models and Knowledge Graphs: A Roadmap.
 \textit{IEEE Transactions on Knowledge and Data Engineering}.
 
-\bibitem{qian2023}
-Qian, Y., Ding, B., and Zhou, J. (2023).
-InsightPilot: An LLM-Empowered Automated Data Exploration System.
-\textit{EMNLP Demos 2023}.
+\bibitem{ma2023}
+Ma, P., Ding, R., Wang, S., Han, S., and Zhang, D. (2023).
+Demonstration of InsightPilot: An LLM-Empowered Automated Data Exploration System.
+\textit{EMNLP System Demonstrations 2023}.
 
 \bibitem{silberschatz1995}
 Silberschatz, A. and Tuzhilin, A. (1995).
 On Subjective Measures of Interestingness in Knowledge Discovery.
 \textit{KDD 1995}.
 
-\bibitem{srinivasan2024}
-Srinivasan, A., et al.\ (2024).
+\bibitem{sahu2024}
+Sahu, G., Puri, A., Rodriguez, J., Abaskohi, A., et al.\ (2024).
 InsightBench: Evaluating Business Analytics Agents through Multi-Step Insight Generation.
-\textit{ICLR 2025}.
-
-\bibitem{temouden2020}
-Temouden, K. (2020).
-Clustering Customer Journeys using a Mixture of Markov Models.
-\textit{Engineered @ Publicis Sapient Blog}.
+arXiv:2407.06423. Accepted at \textit{ICLR 2025}.
 
 \bibitem{wang2022}
 Wang, H. et al.\ (2022).
@@ -655,11 +652,6 @@ Press Release.
 Gartner, Inc. (2025).
 Gartner Predicts 75\% of Analytics Content to Use GenAI for Enhanced Contextual Intelligence by 2027.
 Press Release.
-
-\bibitem{charan2015}
-Charan, A. (2015).
-Multi-Channel Attribution Modeling: The Mathematical Overview.
-Data Science Central Blog.
 
 \end{thebibliography}
 
