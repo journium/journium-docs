@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.10)  10 MAR 2026 13:22
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.10)  10 MAR 2026 13:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -524,13 +524,13 @@ t changed.
 (rerunfilecheck)             Checksum: 3C95E0C9C35EA11C31D79934F3C8864D;10171.
  ) 
 Here is how much of TeX's memory you used:
- 14781 strings out of 467525
- 224140 string characters out of 5418982
+ 14783 strings out of 467525
+ 224200 string characters out of 5418982
  801935 words of memory out of 5000000
- 43195 multiletter control sequences out of 15000+600000
+ 43197 multiletter control sequences out of 15000+600000
  645006 words of font info for 181 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,11n,79p,1029b,1984s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,11n,79p,1029b,1182s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><
@@ -546,7 +546,7 @@ live/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texl
 ive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/local/texli
 ve/2026/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/t
 exlive/2026/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb>
-Output written on behavioral_intelligence_platform.pdf (19 pages, 261144 bytes)
+Output written on behavioral_intelligence_platform.pdf (19 pages, 260953 bytes)
 .
 PDF statistics:
  593 PDF objects out of 1000 (max. 8388607)

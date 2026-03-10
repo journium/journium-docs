@@ -448,6 +448,7 @@ The GLL implements a three-stage pipeline: (i) fact bundle construction, (ii) gr
 
 For a given finding $F$, the fact bundle $B(F)$ is constructed by retrieving from the BKG all facts that: (a) have \texttt{relatedEntityIds} intersecting the finding's entity set, (b) are valid within the finding's time window, and (c) exceed the minimum confidence threshold. Bundle construction uses a bounded-depth graph traversal (one-hop in v1). This produces a structured context document such as:
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}
 Finding: activation_driver
 State: "import_data"
@@ -465,6 +466,7 @@ Supporting facts:
   - "import_data" commonly_precedes "invite_teammate" (p=0.41)
   - "import_data" is_dropoff_point_for exit (p_dropoff=0.22)
 \end{lstlisting}
+\end{minipage}
 
 \subsection{Grounding Validation}
 
