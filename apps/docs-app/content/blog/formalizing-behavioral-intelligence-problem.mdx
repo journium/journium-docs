@@ -1,0 +1,82 @@
+---
+title: "Formalizing the Analytics Problem (And Why That Changes Everything)"
+description: "Most analytics platforms are built on implicit assumptions about what the problem is. We wrote a paper that makes those assumptions explicit — and argues for a different architectural commitment."
+date: 2026-04-07
+status: draft
+author: Arun Patra
+keywords:
+  - behavioral analytics
+  - product analytics
+  - proactive analytics
+  - behavioral intelligence
+  - product analytics platform
+  - automated product insights
+---
+
+Most software companies are built on an unstated theory of how their product works.
+
+Journium's theory is explicit, formal, and documented. We published it.
+
+This is not a standard move for a product company. We did it because the theory matters — and because we believe the shift from pull-based to push-based analytics is not a feature difference. It's an architectural commitment, and it deserves to be argued precisely.
+
+---
+
+## What "Formalizing the Problem" Means
+
+The paper defines the Behavioral Intelligence Problem as follows:
+
+> Given a continuous stream of product events across a population of users or accounts, automatically detect, rank, and narrate behavioral phenomena of potential significance — without requiring the practitioner to specify what to look for.
+
+This is a precise formulation of something that sounds obvious in plain language but is almost never stated explicitly.
+
+Current analytics platforms implicitly define a different problem: given a question, retrieve and visualize data relevant to answering it. That's a legitimate problem. It's just not the problem that matters most for early-stage product teams, high-velocity shipping cycles, or any organization where analyst bandwidth is scarce.
+
+The BIP problem is harder. It requires a system to have opinions about what matters — to continuously generate questions and answer them simultaneously, without human direction.
+
+---
+
+## Why Formalization Matters for Product Thinking
+
+When a problem is formally defined, three things become possible that weren't before.
+
+**You can distinguish solutions from partial solutions.** A dashboard is not a solution to the Behavioral Intelligence Problem. It's a partial tool for a different problem. This distinction isn't semantic — it determines what you build, what you prioritize, and what you decline to build.
+
+**You can reason about trade-offs precisely.** The paper characterizes trade-offs that are otherwise invisible: completeness vs. computational cost, causal interpretability vs. coverage, statistical validity vs. actionability. These trade-offs exist whether or not you name them. Naming them makes them tractable.
+
+**You can identify what's genuinely novel.** The formal definition shows that the Behavioral Intelligence Problem is distinct from automated data exploration, anomaly detection, and natural language query interfaces. They overlap. They are not the same thing. Each adjacent approach solves a subset of the problem. BIP solves it differently, in a way those approaches can't.
+
+---
+
+## Push-Based Is Not a Feature
+
+The core architectural commitment in the paper is push-based intelligence: the system continuously monitors behavior and surfaces insights without prompting.
+
+This gets described as a feature in most product marketing. "Get notified when something changes." That framing undersells the implication.
+
+Push-based analytics requires a fundamentally different compute model. You can't run it periodically on demand — you have to run it continuously over behavioral graphs, segment comparisons, and rolling time windows. You have to prioritize: not all detected phenomena are worth surfacing. You need an interestingness score that reflects statistical significance, behavioral magnitude, segment novelty, and trend direction simultaneously.
+
+None of this fits in a dashboard that gets refreshed when someone opens it. It requires the analytics system to take epistemic initiative — to decide, without prompting, that something matters.
+
+The paper formalizes this commitment and shows what architecture it requires.
+
+---
+
+## Journium as a Formalized Thesis
+
+Building a company on a formal thesis is a specific strategic choice.
+
+It means the architecture is derived from first principles, not assembled from components that seemed useful. It means the evaluation criteria are explicit — we know what success looks like in terms the paper defines. It means the product can be held accountable to a precise standard.
+
+It also means we made claims that are falsifiable. The paper's formal framework either correctly characterizes the problem or it doesn't. The BIP architecture either solves it or it doesn't. The evaluation framework — correctness, latency, insight quality — either captures what matters or it misses something.
+
+We think it's right. We also think having it in writing, with proofs, with simulations, and with citations — is better than having it only in our heads.
+
+---
+
+## Read the Research
+
+The full paper is available at journium.app/research. It includes the formal problem definition, the four-layer architecture, the detector taxonomy, the interestingness scoring framework, and simulation scripts for reproducing the Markov chain results.
+
+If you're building in this space, evaluating analytics infrastructure, or thinking about where the product analytics category goes next — the paper is the right starting point.
+
+[Read the research →](https://journium.app/research)

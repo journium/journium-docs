@@ -24,7 +24,9 @@ function getName(path: string) {
 }
 
 export default function Page() {
-  const posts = [...blog.getPages()].sort(
+  const posts = [...blog.getPages()]
+    .filter((post) => post.data.status !== 'draft')
+    .sort(
     (a, b) =>
       new Date(b.data.date ?? getName(b.path)).getTime() -
       new Date(a.data.date ?? getName(a.path)).getTime(),

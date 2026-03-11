@@ -18,7 +18,7 @@ export function GET() {
     copyright: 'All rights reserved 2026, Journium',
   });
 
-  for (const page of blog.getPages().sort((a, b) => {
+  for (const page of blog.getPages().filter((p) => p.data.status !== 'draft').sort((a, b) => {
     return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
   })) {
     feed.addItem({

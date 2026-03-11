@@ -15,7 +15,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
   const params = await props.params;
   const page = blog.getPage([params.slug]);
 
-  if (!page) notFound();
+  if (!page || page.data.status === 'draft') notFound();
   const { body: Mdx, toc } = await page.data.load();
 
   const blogPostingSchema = {
@@ -101,7 +101,7 @@ export async function generateMetadata(props: PageProps<'/blog/[slug]'>): Promis
 }
 
 export function generateStaticParams(): { slug: string }[] {
-  return blog.getPages().map((page) => ({
+  return blog.getPages().filter((p) => p.data.status !== 'draft').map((page) => ({
     slug: page.slugs[0],
   }));
 }
