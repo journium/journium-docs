@@ -1,18 +1,22 @@
 import { Button } from './ui/button';
-import { ExternalLink } from 'lucide-react';
+import { Download, ExternalLink } from 'lucide-react';
 
 interface CTAProps {
   title?: string;
   description?: string;
+  link?: string;
   buttonText?: string;
   buttonLink?: string;
+  download?: boolean;
 }
 
 export function CTA({
   title = '',
   description = '',
+  link,
   buttonText = 'Sign up for free',
   buttonLink = 'https://journium.app/signup',
+  download = false,
 }: CTAProps) {
   return (
     <div className="not-prose @container/main rounded-2xl border bg-fd-card p-4 shadow-sm">
@@ -27,22 +31,38 @@ export function CTA({
         {description && (
         <span className="text-sm text-fd-foreground">
           <p className="text-base text-fd-foreground">
-            {description}
+            {link ? (
+              <a href={link} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:opacity-80 transition-opacity">
+                {description}
+              </a>
+            ) : (
+              description
+            )}
           </p>
         </span>
         )}
         </div>
-        <Button
-          href={buttonLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          variant="primary"
-          size="md"
-          className="whitespace-nowrap"
-        >
-          <span>{buttonText}</span>
-          <ExternalLink className="ml-2 size-4" />
-        </Button>
+        {download ? (
+          <a
+            href={buttonLink} target="_blank" rel="noopener noreferrer" download
+            className="inline-flex items-center whitespace-nowrap rounded-lg bg-fd-primary px-4 py-2 text-sm font-medium text-fd-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
+          >
+            <span>{buttonText}</span>
+            <Download className="ml-2 size-4" />
+          </a>
+        ) : (
+          <Button
+            href={buttonLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="primary"
+            size="md"
+            className="whitespace-nowrap"
+          >
+            <span>{buttonText}</span>
+            <ExternalLink className="ml-2 size-4" />
+          </Button>
+        )}
       </div>
     </div>
   );
