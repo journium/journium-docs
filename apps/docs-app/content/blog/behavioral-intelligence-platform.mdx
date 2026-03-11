@@ -1,0 +1,75 @@
+---
+title: "We Built a Formal Framework for Behavioral Analytics. Here's Why."
+description: "Most analytics systems are pull-based: you ask a question, you get an answer. We argue that the next generation has to invert that model. Here's the paper we wrote to prove it."
+date: 2026-03-10
+author: Arun Patra
+keywords:
+  - behavioral analytics
+  - product analytics
+  - automatic insight generation
+  - proactive analytics
+  - Markov chains
+  - knowledge graphs
+---
+
+Most analytics systems are pull-based. You write a query. You build a dashboard. You check it when you remember to.
+
+The data is there. The insight is not.
+
+We think that's a design failure, not a data failure. So we formalized it.
+
+<CTA
+  description="Read more at journium.app/research"
+  link="https://journium.app/research"
+  buttonText="Download the paper (PDF)"
+  buttonLink="https://journium.app/papers/behavioral-intelligence-platform.pdf"
+  download={true}
+/>
+
+---
+
+## The Problem We're Solving
+
+Product teams today have event streams, warehouses, and dashboards. What they don't have is a system that notices important changes on their behalf.
+
+The result: critical regressions in onboarding go undetected for weeks. Segment-specific friction accumulates invisibly behind aggregate numbers. By the time someone checks the right dashboard, the behavior has already changed — and the opportunity to act has passed.
+
+This isn't solved by adding more charts or more AI on top of existing dashboards. It requires an architectural commitment: shift from a pull-based model where insight waits to be requested, to a push-based model where the system continuously monitors, detects, and narrates what matters.
+
+---
+
+## The Architecture
+
+The paper introduces the Behavioral Intelligence Platform (BIP), a four-layer architecture for turning raw event streams into automatically generated, evidence-backed insights.
+
+**Normalization and State Derivation (NSD)** maps raw events onto a three-level semantic state hierarchy — raw event, semantic state, lifecycle milestone — enabling behavior to be reasoned about at the right level of abstraction.
+
+**Behavioral Graph Engine (BGE)** models user journeys as absorbing Markov chains. This gives us closed-form expressions for conversion probability from any state, expected journey length, and — critically — removal effects: how much overall conversion drops when a given state is removed from the journey graph. Removal effects identify activation drivers with mathematical precision.
+
+**Behavioral Knowledge Graph (BKG) + Detector System (DS)** reifies the graph outputs into a triple-store of grounded behavioral facts, then runs a taxonomy of deterministic detectors over that store: activation drivers, drop-off clusters, behavioral regressions, segment divergence, and unexpected loops. Each detected phenomenon produces an evidence-backed insight object with a composite interestingness score.
+
+**Grounded Language Layer (GLL)** generates natural language narratives from verified BKG facts only — not from raw model weights. The LLM is constrained to what the knowledge graph can prove. This is the architectural answer to hallucination in analytics: don't suppress it, eliminate it by design.
+
+---
+
+## What's Formally Proven
+
+The paper formalizes the Behavioral Intelligence Problem: given a continuous stream of product events, automatically detect, rank, and narrate behavioral phenomena of potential significance without requiring the practitioner to specify what to look for.
+
+It derives closed-form solutions for absorption probabilities and removal effects using the fundamental matrix of absorbing Markov chains. It specifies the detector taxonomy with formal definitions. It proposes a composite interestingness score combining statistical significance, behavioral magnitude, segment novelty, and trend strength.
+
+The simulation scripts (Python, open source) reproduce the formal results exactly.
+
+---
+
+## Where to Go Deeper
+
+This is the architecture that Journium is built on. The full paper — with proofs, figures, simulation code, and a worked example — is available now.
+
+<CTA
+  description="Read more at journium.app/research"
+  link="https://journium.app/research"
+  buttonText="Download the paper (PDF)"
+  buttonLink="https://journium.app/papers/behavioral-intelligence-platform.pdf"
+  download={true}
+/>

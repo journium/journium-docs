@@ -27,6 +27,7 @@ export const blog = defineCollections({
     author: z.string(),
     date: z.iso.date().or(z.date()),
     keywords: z.array(z.string()).optional(),
+    status: z.enum(['draft', 'published']).optional().default('published'),
   }),
   async: true,
 });

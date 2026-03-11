@@ -1,0 +1,141 @@
+---
+title: "Why the Math Behind Your Analytics Funnel Actually Matters"
+description: "Absorbing Markov chains give us closed-form answers to questions current analytics tools can't answer at all — which states are structurally critical, how long journeys take, and what happens when a step is removed."
+date: 2026-03-24
+status: draft
+author: Arun Patra
+keywords:
+  - Markov chains
+  - conversion funnel analysis
+  - user journey analytics
+  - product analytics
+  - behavioral analytics
+  - formal methods
+---
+
+Analytics tools are good at counting. They're bad at explaining structure.
+
+Most funnel analytics works like this: count users who entered each step, divide by the step before, report a percentage. That's useful. It's also incomplete in ways that matter.
+
+The formal alternative — modeling user journeys as absorbing Markov chains — produces answers to questions current tools can't answer at all. Which states are structurally critical? What's the expected number of steps before a user converts or churns? If you removed a step from the journey, how much would overall conversion drop?
+
+This post explains the mathematics, what it produces, and why it matters for product analytics.
+
+---
+
+## User Journeys as Absorbing Markov Chains
+
+A Markov chain is a system where transitions between states depend only on the current state, not the full history. User journeys have this property approximately — at the level of semantic states (not raw events), journey transitions are reasonably estimated from the current position.
+
+An *absorbing* Markov chain has two types of states:
+
+- **Transient states** — states users can visit and re-visit: `sign_up`, `feature_used`, `import_data`, `invite_teammate`
+- **Absorbing states** — states users enter and never leave: `converted`, `dropped_off`
+
+Every user journey in a well-defined product eventually reaches an absorbing state. The model enforces this by construction.
+
+Transition probabilities are estimated from observed journey data over a fixed analysis window. The resulting matrix P is row-stochastic: each row sums to 1, representing all the ways a user in state s_i can transition.
+
+---
+
+## The Fundamental Matrix
+
+From the transition matrix, we split out Q (transient → transient transitions) and R (transient → absorbing transitions).
+
+The fundamental matrix is:
+
+```
+N = (I - Q)^{-1}
+```
+
+N[i, j] gives the expected number of times the chain visits transient state j when starting from transient state i before reaching an absorbing state.
+
+This is not a statistic you can compute from a standard funnel. It requires the full transition structure.
+
+N also gives us expected journey length: the sum of row i of N is the expected number of steps before absorption from state i. For the example funnel in the paper, a user starting at `sign_up` takes a mean of ~3.7 steps before converting or dropping off.
+
+---
+
+## Absorption Probabilities
+
+The absorption probability matrix is:
+
+```
+B = N * R
+```
+
+B[i, 'converted'] is the probability of conversion when *starting from* transient state i. This is the mathematical definition of "how likely is a user to convert if they're currently at this step."
+
+For the four-state example funnel (`sign_up → feature_used → import_data → invite_teammate`):
+
+| Starting state | P(converted) | P(dropped) |
+|---|---|---|
+| sign_up | ~0.25 | ~0.75 |
+| feature_used | ~0.42 | ~0.58 |
+| import_data | ~0.58 | ~0.42 |
+| invite_teammate | 0.71 | 0.29 |
+
+The simulation script ([`markov_journey_model.py`](https://github.com/journium/journium-research)) computes these values exactly from the transition matrix. You can run it yourself and verify.
+
+A note on terminology: most analytics tools report `P(converted | reached(s))` — the fraction of users who *ever visited* s and then converted. This is related to but different from B. For sequential funnels with low re-visitation they're closely aligned; in the presence of loops they diverge. The paper discusses both.
+
+---
+
+## Removal Effects: Which States Are Structurally Critical?
+
+The removal effect of state s with respect to `converted` is:
+
+```
+removal_effect(s) = B(sign_up, converted) - B'(sign_up, converted)
+```
+
+where B' is the absorption probability matrix *after removing state s from the journey graph* — zeroing out all transitions into and out of s, renormalizing, and recomputing.
+
+This tells you: if this state disappeared from the product tomorrow, how much would overall conversion drop?
+
+For the example funnel:
+
+| State | Removal effect |
+|---|---|
+| feature_used | −0.18 (highest) |
+| import_data | −0.14 |
+| invite_teammate | −0.09 |
+
+`feature_used` has the highest removal effect. It's the most structurally critical state. Removing it collapses the main conversion path. This is what makes it an *activation driver* — not just a step users pass through, but a load-bearing element of the journey structure.
+
+The companion script [`removal_effect.py`](https://github.com/journium/journium-research) computes these rankings. The output matches Figure 4 in the paper.
+
+---
+
+## Why Most Analytics Tools Don't Compute This
+
+Removal effects require modeling the full transition matrix and solving a matrix equation. They can't be computed from step-by-step conversion rates alone.
+
+Standard funnel analytics gives you:
+- Conversion rate at each step (aggregate)
+- Drop-off rate at each step (aggregate)
+
+Absorbing Markov chain analytics gives you:
+- Conversion probability from any state (structural)
+- Expected steps to absorption from any state
+- Removal effect of each state — which states are architecturally critical
+- Behavior under loops and re-visitation
+
+The difference isn't incremental. It's the difference between a snapshot and a model.
+
+---
+
+## Run the Simulations Yourself
+
+The full code is open source. Clone the repository and run:
+
+```bash
+python simulations/markov_journey_model.py
+python simulations/removal_effect.py
+```
+
+The output reproduces the figures and tables from the paper. The transition matrix is defined at the top of each script — modify it to match your own product's journey data.
+
+[Run the simulation yourself →](https://github.com/journium/journium-research)
+
+[Read the full architecture paper →](https://journium.app/research)

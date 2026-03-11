@@ -54,8 +54,8 @@ export async function GET() {
     priority: 0.9, // High priority - main landing page for blog section
   });
 
-  // Get all blog posts
-  const blogPages = blog.getPages();
+  // Get all blog posts (exclude drafts)
+  const blogPages = blog.getPages().filter((p) => p.data.status !== 'draft');
 
   // Calculate date threshold for recent posts (6 months ago)
   const sixMonthsAgo = new Date();

@@ -35,6 +35,7 @@ type ButtonComponentProps = ComponentPropsWithoutRef<'button'> &
     href?: string;
     target?: string;
     rel?: string;
+    download?: boolean | string;
   };
 
 export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonComponentProps>(

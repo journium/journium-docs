@@ -1,4 +1,4 @@
-import { Button } from './button';
+import { Button } from './ui/button';
 import { ExternalLink } from 'lucide-react';
 
 interface SignUpForFreeProps {

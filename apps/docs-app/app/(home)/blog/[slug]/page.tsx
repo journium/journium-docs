@@ -8,6 +8,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { ShareButton } from './page.client';
 import { BlogAuthor } from '@/components/ui/blog-author';
 import { getMDXComponents } from '@/mdx-components';
+import { BlogPostSubscribeBanner } from '@/components/ui/blog-post-subscribe-banner';
 import path from 'node:path';
 import { cn } from '@/lib/cn';
 
@@ -15,7 +16,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
   const params = await props.params;
   const page = blog.getPage([params.slug]);
 
-  if (!page) notFound();
+  if (!page || page.data.status === 'draft') notFound();
   const { body: Mdx, toc } = await page.data.load();
 
   const blogPostingSchema = {
@@ -78,6 +79,9 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
         <Mdx components={getMDXComponents()} />
       </div>
     </article>
+    <div className="mx-auto w-full max-w-[800px] px-4 pb-16">
+      <BlogPostSubscribeBanner />
+    </div>
     </>
   );
 }
@@ -101,7 +105,7 @@ export async function generateMetadata(props: PageProps<'/blog/[slug]'>): Promis
 }
 
 export function generateStaticParams(): { slug: string }[] {
-  return blog.getPages().map((page) => ({
+  return blog.getPages().filter((p) => p.data.status !== 'draft').map((page) => ({
     slug: page.slugs[0],
   }));
 }

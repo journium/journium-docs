@@ -1,0 +1,104 @@
+---
+title: "Why LLM-Generated Analytics Narratives Fail (And How to Fix Them)"
+description: "The problem with AI-generated analytics insights isn't the language model. It's the architecture. Here's what grounding means, why it matters, and how the Behavioral Knowledge Graph makes LLM narratives trustworthy."
+date: 2026-03-31
+status: draft
+author: Arun Patra
+keywords:
+  - LLM analytics
+  - AI analytics insights
+  - knowledge graphs
+  - grounded language generation
+  - AI product analytics
+  - hallucination prevention
+---
+
+Every analytics vendor is now shipping "AI-generated insights." Most of them are unreliable.
+
+Not because the models are bad. Because the architecture is wrong.
+
+The failure mode is predictable: an LLM is given raw data or a query result and asked to narrate it. The model does what it does — it generates fluent, confident prose. Sometimes that prose is accurate. Sometimes it invents trends, misattributes causation, or produces numbers that are plausible but wrong.
+
+This isn't a model quality problem. It's a grounding problem. And there's a specific architectural solution to it.
+
+---
+
+## The Grounding Problem
+
+When an LLM generates text, it draws on two sources simultaneously: the input it was given, and the patterns baked into its weights from training. For creative tasks, this mixture is a feature. For analytics, it's a liability.
+
+An analytics narrative isn't creative writing. Every claim it makes must be traceable to a verified computation on real data. "Conversion improved by 12% after the onboarding change" needs to be *true* — not plausible, not approximately right, not a confident synthesis from related patterns. True.
+
+Current approaches try to solve this with better prompting, longer contexts, or fine-tuning. These help at the margins. They don't solve the root problem: the LLM has no formal commitment to only stating what the data proves.
+
+---
+
+## The Behavioral Knowledge Graph
+
+The solution in the Behavioral Intelligence Platform is a layer between numerical computation and language generation: the Behavioral Knowledge Graph (BKG).
+
+The BKG stores behavioral facts as typed triples:
+
+```
+(subject, predicate, object, evidence_payload, confidence)
+```
+
+For example:
+- `(import_data, is_activation_driver_for, converted, {removal_effect: 0.14, p_value: 0.003}, High)`
+- `(mobile_segment, diverges_from, desktop_segment, {kl_divergence: 0.31, window: "2026-W11"}, High)`
+- `(sign_up→feature_used, conversion_rate_regression, 2026-W09..W11, {delta: -0.19, z_score: -3.2}, High)`
+
+Every fact in the BKG has two properties that make it trustworthy: it was derived from deterministic computation (not model generation), and it has a traceable evidence payload that links back to the underlying data.
+
+The BKG is the auditable intermediate representation. It separates what the numbers prove from what the text says.
+
+---
+
+## Grounded Language Generation
+
+The Grounded Language Layer (GLL) works as follows: when generating an insight narrative, the LLM is given only verified facts from the BKG — not raw data, not query results, not schema. The input to the model is a structured fact bundle containing only what has been computed and verified.
+
+The LLM's job is narration, not analysis. It transforms verified facts into readable text. It does not compute, interpret, or infer beyond what it was given.
+
+This is "AI on top of truth" rather than "AI on top of data." The distinction matters:
+
+| AI on top of data | AI on top of truth |
+|---|---|
+| Model sees raw results | Model sees verified facts only |
+| Can synthesize beyond evidence | Constrained to what BKG contains |
+| Confident but occasionally wrong | Faithful by construction |
+| Requires fact-checking output | Requires verifying BKG facts |
+
+The point is not that the LLM can't be useful for analysis — it's that *analytical claims* should not originate in a model. They should originate in deterministic computation. The model should only be trusted to express those claims in natural language.
+
+---
+
+## What This Prevents
+
+The BKG-constrained GLL prevents a specific class of errors:
+
+**Hallucinated trends.** The model can't assert "conversion has been improving for the past three weeks" unless the BKG contains a trend fact for that metric over that window.
+
+**Attribution errors.** The model can't claim causation unless the BKG explicitly encodes it. Activation drivers are labeled as correlational structural properties, not causal claims.
+
+**Number drift.** Numerical values in the narrative must match the BKG evidence payload. There's no mechanism for the model to substitute a different number.
+
+**Cross-segment confabulation.** Segment-specific facts are keyed to specific segment identifiers. The model can't blend facts across segments without the BKG explicitly containing a cross-segment comparison.
+
+---
+
+## The Design Principle
+
+The broader design principle is: compute everything that can be computed deterministically, verify it, store it in an auditable form, and only then involve a language model — strictly for expression, not for analysis.
+
+This is not a limitation on what AI can contribute to analytics. It's a division of labor. Probabilistic models are excellent at language. They are poor at arithmetic and worse at counting. Formal systems are excellent at arithmetic and counting. They are poor at language.
+
+Grounded Language Generation is the architectural answer to both: let each component do what it's good at, with a formal interface between them.
+
+---
+
+## Further Reading
+
+This architecture is described in detail in the paper "Behavioral Intelligence Platforms: From Event Streams to Autonomous Insight."
+
+[Read the full architecture paper →](https://journium.app/research)

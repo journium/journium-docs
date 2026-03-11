@@ -5,7 +5,7 @@ import * as Twoslash from 'fumadocs-twoslash/ui';
 import * as TabsComponents from 'fumadocs-ui/components/tabs';
 import { ThemedImage } from '@/components/ui/themed-image';
 import { CloneExampleRepo } from '@/components/ui/clone-example-repo';
-import { SignUpForFree } from '@/components/ui/sign-up-for-free';
+import { SignUpForFree } from '@/components/sign-up-for-free';
 import * as AccordionsComponents from 'fumadocs-ui/components/accordion';
 import * as ButtonComponents from '@/components/ui/button';
 import * as LucideIconComponents from 'lucide-react';
@@ -14,6 +14,7 @@ import { Files , Folder, File } from 'fumadocs-ui/components/files';
 import { Video } from '@/components/video';
 import { VideoPlayer } from '@/components/video-player';
 import { List, ListItem } from '@/components/ui/list';
+import { CTA } from '@/components/cta';
 
 
 // Filter out non-component exports from lucide-react (like createLucideIcon, Icon, etc.)
@@ -32,6 +33,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ThemedImage,
     CloneExampleRepo,
     SignUpForFree,
+    CTA,
     ...TabsComponents,
     ...AccordionsComponents,
     ...ButtonComponents,
