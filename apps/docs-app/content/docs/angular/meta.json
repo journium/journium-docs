@@ -13,6 +13,7 @@
     "services",
     "configuration",
     "---[Code]Example Repositories---",
-    "external:[Angular Example](https://github.com/journium/angular-example)"
+    "external:[Angular Standalone Example](https://github.com/journium/angular-standalone-example)",
+    "external:[Angular NgModule Example](https://github.com/journium/angular-ngmodule-example)"
   ]
 }
