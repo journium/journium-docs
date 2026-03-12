@@ -5,6 +5,7 @@ import { baseOptions } from '@/lib/layout.shared';
 import { TerminalIcon } from 'lucide-react';
 import { NextJsIcon } from '@/components/icons/nextjs';
 import { ReactIcon } from '@/components/icons/react';
+import { AngularIcon } from '@/components/icons/angular';
 import { JsIcon } from '@/components/icons/js';
 import { AISearchPanel } from '@/components/ai/ai-search';
 
@@ -22,8 +23,9 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
           // Check if this is a Next.js tab by checking the path
           const isNextJs = meta.path?.includes('nextjs') || false;
           const isReact = meta.path?.includes('react') || false;
+          const isAngular = meta.path?.includes('angular') || false;
           const isJs = meta.path?.includes('js') || false;
-          const Icon = isNextJs ? NextJsIcon : isReact ? ReactIcon : isJs ? JsIcon : TerminalIcon;
+          const Icon = isNextJs ? NextJsIcon : isReact ? ReactIcon  : isAngular ? AngularIcon : isJs ? JsIcon : TerminalIcon;
           
           // Extract section from path (e.g., 'nextjs' from '/docs/nextjs')
           const getSection = (path: string | undefined) => {
