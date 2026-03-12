@@ -1,0 +1,14 @@
+{
+  "title": "Concepts",
+  "description": "Concepts documentation",
+  "root": false,
+  "defaultOpen": false,
+  "icon": "BookOpen",
+  "pages": [
+    "application",
+    "events",
+    "insight_trackers",
+    "jobs",
+    "insights"
+  ]
+}

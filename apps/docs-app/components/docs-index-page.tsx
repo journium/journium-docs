@@ -2,6 +2,7 @@ import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/notebook/page';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { NextJsIcon } from '@/components/icons/nextjs';
 import { ReactIcon } from '@/components/icons/react';
+import { AngularIcon } from '@/components/icons/angular';
 import { JsIcon } from '@/components/icons/js';
 import { JourniumIcon } from '@/components/ui/journium-icon';
 
@@ -84,6 +85,14 @@ export function DocsIndexPage({ title, description }: DocsIndexPageProps) {
               href="/docs/react"
             >
               Integrate Journium into your React application
+            </Card>
+
+            <Card 
+              title="Angular" 
+              icon={<AngularIcon className="w-5 h-5" />} 
+              href="/docs/angular"
+            >
+              Add Journium tracking to your Angular application
             </Card>
             <Card 
               title="JavaScript" 

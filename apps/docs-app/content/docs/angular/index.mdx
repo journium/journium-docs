@@ -1,0 +1,223 @@
+---
+title: Angular Quick Start
+description: This tutorial demonstrates how to integrate Journium with your Angular application.
+icon: Rocket
+keywords: analytics SDK for Angular, developer analytics SDK, in-app analytics for Angular, AI product analytics
+---
+
+## Setup
+
+Set up Journium for your Angular application.
+
+<section id="setup-section">
+<div className="fd-steps [&_h3]:fd-step">
+
+
+### Install `@journium/angular`
+
+The [Journium Angular SDK](/docs/angular/services) gives you access to a `JourniumService`, Angular module, and provider functions to send events from your Angular application and get insights from your data.
+
+Run the following command to install the SDK:
+
+```npm title="Terminal"
+npm i @journium/angular
+```
+
+### Set your Journium Publishable Key
+
+1. **Sign up for a Journium account** for free at [journium.app/signup](https://journium.app/signup)
+
+2. **[Create an application](https://dashboard.journium.app/apps/new)** in your Journium dashboard
+
+3. **Copy your Publishable Key** from the [Developers | API Keys](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/api-keys) section
+
+   <Callout type="info">
+   Dashboard URLs automatically navigate to your app - just click!
+   </Callout>
+
+4. **Add your key** to `src/environments/environment.ts`:
+
+   ```typescript title="src/environments/environment.ts"
+   export const environment = {
+     production: false,
+     journiumPublishableKey: 'your_publishable_key_here',
+   };
+   ```
+
+   <Callout type="info">
+   Development instances use `pk_test_` keys. Production keys start with `pk_live_`.
+   </Callout>
+
+### Initialize Journium in your app
+
+The Journium Angular SDK supports both **standalone** (Angular 15+) and **NgModule** patterns.
+
+<Tabs groupId="angular-pattern" items={['Standalone (recommended)', 'NgModule']} persist>
+  <Tab value="Standalone (recommended)">
+    Add `provideJournium()` to your `bootstrapApplication` call in `src/main.ts`:
+
+    ```typescript title="src/main.ts"
+    import { bootstrapApplication } from '@angular/platform-browser';
+    import { provideRouter } from '@angular/router';
+    // [!code ++:2]
+    import { provideJournium, withJourniumRouter } from '@journium/angular';
+    import { environment } from './environments/environment';
+    import { AppComponent } from './app/app.component';
+    import { routes } from './app/app.routes';
+
+    bootstrapApplication(AppComponent, {
+      providers: [
+        // [!code ++:7]
+        provideJournium({
+          publishableKey: environment.journiumPublishableKey,
+        }),
+        provideRouter(routes),
+        // Optional: automatically track pageviews on each route change
+        withJourniumRouter(),
+      ],
+    });
+    ```
+  </Tab>
+  <Tab value="NgModule">
+    Import `JourniumModule.forRoot()` in your root `AppModule`:
+
+    ```typescript title="src/app/app.module.ts"
+    import { NgModule } from '@angular/core';
+    import { BrowserModule } from '@angular/platform-browser';
+    // [!code ++:2]
+    import { JourniumModule } from '@journium/angular/ngmodule';
+    import { environment } from '../environments/environment';
+    import { AppComponent } from './app.component';
+
+    @NgModule({
+      declarations: [AppComponent],
+      imports: [
+        BrowserModule,
+        // [!code ++:3]
+        JourniumModule.forRoot({
+          publishableKey: environment.journiumPublishableKey,
+        }),
+      ],
+      bootstrap: [AppComponent],
+    })
+    export class AppModule {}
+    ```
+  </Tab>
+</Tabs>
+
+### Use `JourniumService` in your components
+
+Inject `JourniumService` to track events anywhere in your app:
+
+```typescript title="src/app/pages/home.component.ts"
+import { Component } from '@angular/core';
+// [!code ++:1]
+import { JourniumService } from '@journium/angular';
+
+@Component({
+  selector: 'app-home',
+  standalone: true,
+  template: `
+    <button (click)="handleClick()">Track Event</button>
+  `,
+})
+export class HomeComponent {
+  // [!code ++:1]
+  constructor(private journium: JourniumService) {}
+
+  handleClick(): void {
+    // [!code ++:4]
+    this.journium.track('button_clicked', {
+      page: 'home',
+      button_text: 'Track Event',
+    });
+  }
+}
+```
+
+### Run the Development Server
+
+Start your application:
+
+```bash title="Terminal"
+ng serve
+```
+
+<Callout>
+**Using a custom port?** Pass `--port 4200` to the serve command. The default Angular port is `4200`.
+</Callout>
+
+### Verify Your Setup
+
+Open [http://localhost:4200](http://localhost:4200) in your browser. Interact with your app to generate events.
+
+### Send Events to Journium
+
+Navigate around your app to automatically send events to Journium.
+
+Then view your collected events at [Developers | Events](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/events).
+
+**Success indicator:** You should see events appearing in your dashboard within a few seconds.
+
+### Generate Your First Insight
+
+<Callout type="info">
+When you create an app in Journium, a default [Insight Tracker](/docs/angular/concepts/insight_trackers) is automatically created. This tracker helps you test data ingestion and insight generation.
+</Callout>
+
+1. Go to your [Developers | Insight Trackers](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/insight-trackers) page
+2. Click the **`Analyze now`** button for the tracker titled **"User Engagement"**
+3. Monitor the job status in [Developers | Jobs](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/developers/jobs)
+4. Wait for the job to complete (usually takes 1-2 minutes)
+5. View your generated insights at [Dashboard | Insights](https://dashboard.journium.app/apps/j_app~/instances/j_app_inst~/insights)
+
+### Done
+
+**Congratulations!** You've successfully created your first insight with Journium!
+
+</div>
+</section>
+
+## Troubleshooting
+
+<Accordions type="single">
+  <Accordion title="Events not appearing in dashboard?">
+  - Verify your publishable key starts with `pk_` and is correctly set in `environment.ts`
+  - Check browser console for errors (F12 → Console)
+  - Ensure you're interacting with your **local app** (not the dashboard)
+  - Restart the dev server after changing `environment.ts`
+  </Accordion>
+
+  <Accordion title="Build errors after installing @journium/angular?">
+  - Delete `node_modules` and reinstall:
+    ```bash
+    rm -rf node_modules && npm install
+    ```
+  - Ensure Angular 15+ is installed:
+    ```bash
+    ng version
+    ```
+  - Verify `experimentalDecorators: true` is set in your `tsconfig.json`
+  </Accordion>
+
+  <Accordion title="JourniumService not found in component?">
+  - Ensure `provideJournium()` is called in `bootstrapApplication` (standalone) or `JourniumModule.forRoot()` is imported in `AppModule` (NgModule)
+  - `JourniumService` must be provided at the root level — not in a lazy-loaded module
+  </Accordion>
+
+  <Accordion title="Pageviews not tracking on route changes?">
+  - Ensure `withJourniumRouter()` is included in the providers array alongside `provideRouter(routes)`
+  - Both `provideRouter` and `withJourniumRouter` must be in the same `bootstrapApplication` call
+  </Accordion>
+</Accordions>
+
+## What's next?
+
+<Cards>
+  <Card title="Custom Events" href="/docs/angular/concepts/events">
+    Learn how to send your own custom events to track user behavior.
+  </Card>
+  <Card title="Insight Trackers" href="/docs/angular/concepts/insight_trackers">
+    Create custom analytics and understand how insights are generated.
+  </Card>
+</Cards>

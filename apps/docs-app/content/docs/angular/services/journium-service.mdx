@@ -1,0 +1,203 @@
+---
+title: JourniumService
+description: Angular service for tracking events, identifying users, and managing pageviews with the Journium SDK.
+icon: Zap
+keywords: Angular analytics service, Angular tracking service, Angular event tracking
+---
+
+# JourniumService
+
+`JourniumService` is the main Angular service provided by `@journium/angular`. It wraps the core JavaScript SDK and exposes all analytics methods for use throughout your Angular application.
+
+## Setup
+
+Ensure `JourniumService` is available by calling `provideJournium()` (standalone) or importing `JourniumModule.forRoot()` (NgModule) at application root:
+
+<Callout type="warn">
+`JourniumService` does **not** have an `@Injectable()` decorator and cannot be added to any `providers` array directly. It is only available when registered via `provideJournium()` or `JourniumModule.forRoot()`. Attempting to provide it manually will cause a runtime DI error.
+</Callout>
+
+```typescript title="src/main.ts (standalone)"
+import { provideJournium } from '@journium/angular';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideJournium({ publishableKey: 'pk_...' }),
+  ],
+});
+```
+
+Then inject the service in any component or service:
+
+```typescript
+import { JourniumService } from '@journium/angular';
+
+@Component({ ... })
+export class MyComponent {
+  constructor(private journium: JourniumService) {}
+}
+```
+
+## Methods
+
+### `track(event, properties?)`
+
+Track a custom event with optional properties.
+
+```typescript
+this.journium.track('button_clicked', {
+  button_text: 'Sign Up',
+  page: '/home',
+  plan: 'pro',
+});
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `event` | `string` | Yes | Event name (e.g., `'purchase_completed'`) |
+| `properties` | `Record<string, unknown>` | No | Key-value event properties |
+
+---
+
+### `identify(distinctId, attributes?)`
+
+Associate subsequent events with a specific user. Call this after a user logs in.
+
+```typescript
+this.journium.identify('user-123', {
+  name: 'Alice Smith',
+  email: 'alice@example.com',
+  plan: 'enterprise',
+});
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `distinctId` | `string` | Yes | Unique identifier for the user |
+| `attributes` | `Record<string, unknown>` | No | User attributes (name, email, plan, etc.) |
+
+---
+
+### `reset()`
+
+Clear the current user identity. Call this when a user logs out.
+
+```typescript
+this.journium.reset();
+```
+
+---
+
+### `capturePageview(properties?)`
+
+Manually capture a pageview event. When using `withJourniumRouter()`, pageviews are captured automatically on each `NavigationEnd` event. Use this for manual tracking.
+
+```typescript
+this.journium.capturePageview({
+  page: '/checkout',
+  step: 'payment',
+});
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `properties` | `Record<string, unknown>` | No | Additional pageview properties |
+
+---
+
+### `startAutocapture()`
+
+Start automatic event capture (clicks, form submits, etc.). Usually controlled via configuration rather than calling directly.
+
+```typescript
+this.journium.startAutocapture();
+```
+
+---
+
+### `stopAutocapture()`
+
+Stop automatic event capture.
+
+```typescript
+this.journium.stopAutocapture();
+```
+
+---
+
+### `getEffectiveOptions()`
+
+Returns the currently active configuration options (merged from local and remote config).
+
+```typescript
+const options = this.journium.getEffectiveOptions();
+console.log(options.debug); // true/false
+```
+
+**Returns:** `JourniumLocalOptions`
+
+---
+
+## Lifecycle: `ngOnDestroy()`
+
+`JourniumService` implements `OnDestroy`. On application teardown, it automatically flushes pending events and destroys the analytics instance. No manual cleanup is required.
+
+## Example: Component with full lifecycle
+
+```typescript
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { JourniumService } from '@journium/angular';
+
+@Component({
+  selector: 'app-checkout',
+  standalone: true,
+  template: `
+    <div>
+      <button (click)="addItem()">Add to Cart</button>
+      <button (click)="checkout()">Checkout</button>
+    </div>
+  `,
+})
+export class CheckoutComponent implements OnInit, OnDestroy {
+  constructor(private journium: JourniumService) {}
+
+  ngOnInit(): void {
+    this.journium.track('checkout_page_viewed');
+  }
+
+  addItem(): void {
+    this.journium.track('item_added_to_cart', {
+      product_id: 'prod-001',
+      price: 29.99,
+    });
+  }
+
+  checkout(): void {
+    this.journium.track('checkout_started', {
+      cart_total: 29.99,
+      item_count: 1,
+    });
+  }
+
+  ngOnDestroy(): void {
+    // No cleanup needed — JourniumService handles this automatically
+  }
+}
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Configuration" href="/docs/angular/configuration">
+    Learn about all configuration options
+  </Card>
+  <Card title="Custom Events" href="/docs/angular/concepts/events">
+    Best practices for custom event tracking
+  </Card>
+</Cards>
