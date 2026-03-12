@@ -1,17 +1,21 @@
 ---
 title: JourniumService
-description: Injectable Angular service for tracking events, identifying users, and managing pageviews with the Journium SDK.
+description: Angular service for tracking events, identifying users, and managing pageviews with the Journium SDK.
 icon: Zap
 keywords: Angular analytics service, Angular tracking service, Angular event tracking
 ---
 
 # JourniumService
 
-`JourniumService` is the main injectable Angular service provided by `@journium/angular`. It wraps the core JavaScript SDK and exposes all analytics methods for use throughout your Angular application.
+`JourniumService` is the main Angular service provided by `@journium/angular`. It wraps the core JavaScript SDK and exposes all analytics methods for use throughout your Angular application.
 
 ## Setup
 
 Ensure `JourniumService` is available by calling `provideJournium()` (standalone) or importing `JourniumModule.forRoot()` (NgModule) at application root:
+
+<Callout type="warn">
+`JourniumService` does **not** have an `@Injectable()` decorator and cannot be added to any `providers` array directly. It is only available when registered via `provideJournium()` or `JourniumModule.forRoot()`. Attempting to provide it manually will cause a runtime DI error.
+</Callout>
 
 ```typescript title="src/main.ts (standalone)"
 import { provideJournium } from '@journium/angular';

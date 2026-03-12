@@ -8,6 +8,21 @@ keywords: analytics SDK for Angular, developer analytics SDK, in-app analytics f
 
 The Journium Angular SDK wraps the core [JavaScript SDK](/docs/js) and provides Angular-specific service and providers.
 
+## Angular Version Compatibility
+
+`@journium/angular` requires **Angular 15 or later**. All APIs used (`makeEnvironmentProviders`, `inject()`, `APP_INITIALIZER`) have been stable since Angular 15.
+
+| Angular | Standalone API | NgModule API | Signals | Zoneless |
+|---------|---------------|--------------|---------|----------|
+| 15      | ✅             | ✅            | —       | —        |
+| 16      | ✅             | ✅            | —       | —        |
+| 17      | ✅             | ✅            | ✅       | —        |
+| 18      | ✅             | ✅            | ✅       | ✅ (experimental) |
+| 19      | ✅             | ✅            | ✅       | ✅ (experimental) |
+| 20 / 21 | ✅             | ✅            | ✅       | ✅ (experimental) |
+
+The SDK is **zone-agnostic**: no `NgZone`, no `ChangeDetectorRef` coupling. It works identically in zone.js, zoneless, and signal-based component trees.
+
 ## Angular-Specific Setup
 
 ### Standalone App Configuration
@@ -46,7 +61,7 @@ Use `JourniumModule.forRoot()` in your root module:
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
-import { JourniumModule } from '@journium/angular';
+import { JourniumModule } from '@journium/angular/ngmodule';
 import { environment } from '../environments/environment';
 
 @NgModule({
