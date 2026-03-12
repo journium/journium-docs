@@ -1,0 +1,11 @@
+{
+  "title": "Services",
+  "description": "Angular services documentation",
+  "root": false,
+  "icon": "Layers",
+  "defaultOpen": false,
+  "pages": [
+    "index",
+    "journium-service"
+  ]
+}

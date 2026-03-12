@@ -1,0 +1,47 @@
+---
+title: Angular Services
+description: Overview of Angular services provided by the Journium Angular SDK.
+icon: Layers
+---
+
+# Angular Services
+
+The Journium Angular SDK provides a single injectable service, `JourniumService`, which wraps the core JavaScript SDK and exposes all analytics methods via Angular's dependency injection system.
+
+## Available Services
+
+| Service | Description |
+|---------|-------------|
+| [`JourniumService`](/docs/angular/services/journium-service) | Main analytics service — track events, identify users, manage pageviews |
+
+## How to Use
+
+Inject `JourniumService` in any standalone component, NgModule-based component, or service after calling `provideJournium()` or importing `JourniumModule.forRoot()`:
+
+```typescript
+import { Component } from '@angular/core';
+import { JourniumService } from '@journium/angular';
+
+@Component({
+  selector: 'app-example',
+  standalone: true,
+  template: `<button (click)="track()">Track</button>`,
+})
+export class ExampleComponent {
+  constructor(private journium: JourniumService) {}
+
+  track(): void {
+    this.journium.track('example_event', { source: 'example' });
+  }
+}
+```
+
+## Cleanup
+
+`JourniumService` implements Angular's `OnDestroy` interface. When the service is destroyed (on application teardown), it automatically calls `analytics.destroy()` to flush pending events and clean up resources. You do not need to call `destroy()` manually.
+
+<Cards>
+  <Card title="JourniumService Reference" href="/docs/angular/services/journium-service">
+    Complete API reference for JourniumService
+  </Card>
+</Cards>

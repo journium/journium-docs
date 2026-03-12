@@ -1,0 +1,18 @@
+{
+  "title": "Angular",
+  "description": "Angular documentation",
+  "root": true,
+  "pages": [
+    "---[Footprints]Introduction---",
+    "index",
+    "what-is-journium",
+    "how-journium-works",
+    "concepts",
+    "tools",
+    "---[LibraryBig]SDK Reference---",
+    "services",
+    "configuration",
+    "---[Code]Example Repositories---",
+    "external:[Angular Example](https://github.com/journium/angular-example)"
+  ]
+}

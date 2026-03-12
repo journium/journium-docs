@@ -1,0 +1,38 @@
+---
+title: Events
+description: Events are single pieces of telemetry data that drive analytics
+             and insights. Understand how to send custom events and configure auto-captured events.
+icon: Event
+---
+
+<include>../../.includes/.shared.events.part1.mdx</include>
+
+
+### Custom Events
+
+Custom Events are events that you manually send to Journium.
+You can send any event you want to Journium, and you can add any properties you want to the event.
+
+```typescript title="src/app/pages/home.component.ts"
+import { Component } from '@angular/core';
+import { JourniumService } from '@journium/angular';
+
+@Component({
+  selector: 'app-home',
+  standalone: true,
+  template: `<button (click)="handleClick()">Buy Now</button>`,
+})
+export class HomeComponent {
+  constructor(private journium: JourniumService) {}
+
+  handleClick(): void {
+    this.journium.track('purchase_completed', {
+      product_id: 'prod-001',
+      price: 29.99,
+      currency: 'USD',
+    });
+  }
+}
+```
+
+<include>../../.includes/.shared.events.part2.mdx</include>

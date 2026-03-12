@@ -1,0 +1,162 @@
+---
+title: Angular Configuration
+description: Configure Journium Angular SDK with provideJournium(), JourniumModule, and underlying JavaScript SDK options.
+keywords: analytics SDK for Angular, developer analytics SDK, in-app analytics for Angular, privacy-friendly analytics
+---
+
+# Angular Configuration
+
+The Journium Angular SDK wraps the core [JavaScript SDK](/docs/js) and provides Angular-specific service and providers.
+
+## Angular-Specific Setup
+
+### Standalone App Configuration
+
+Use `provideJournium()` in `bootstrapApplication`:
+
+```typescript title="src/main.ts"
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
+import { provideJournium, withJourniumRouter } from '@journium/angular';
+import { environment } from './environments/environment';
+import { AppComponent } from './app/app.component';
+import { routes } from './app/app.routes';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideJournium({
+      publishableKey: environment.journiumPublishableKey,
+      options: {
+        debug: !environment.production,
+        autoTrackPageviews: true,
+        autocapture: true,
+      },
+    }),
+    provideRouter(routes),
+    withJourniumRouter(), // Auto-track pageviews on NavigationEnd
+  ],
+});
+```
+
+### NgModule Configuration
+
+Use `JourniumModule.forRoot()` in your root module:
+
+```typescript title="src/app/app.module.ts"
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule } from '@angular/router';
+import { JourniumModule } from '@journium/angular';
+import { environment } from '../environments/environment';
+
+@NgModule({
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot(routes),
+    JourniumModule.forRoot({
+      publishableKey: environment.journiumPublishableKey,
+      options: {
+        debug: !environment.production,
+        autoTrackPageviews: true,
+        autocapture: true,
+      },
+    }),
+  ],
+  bootstrap: [AppComponent],
+})
+export class AppModule {}
+```
+
+## Configuration Options
+
+The `config` object passed to `provideJournium()` or `JourniumModule.forRoot()` accepts a `JourniumConfig` object:
+
+- `publishableKey` (required): Your Journium publishable key
+- `apiHost` (optional): Custom API endpoint
+- `options` (optional): Configuration options object
+
+For detailed information about all available configuration options, see the [JavaScript SDK Configuration Guide](/docs/js/configuration).
+
+**Common options:**
+- `debug` - Enable debug logging
+- `flushAt` - Number of events before auto-flush
+- `flushInterval` - Flush interval in milliseconds
+- `sessionTimeout` - Session timeout duration
+- `autoTrackPageviews` - Automatically track page views
+- `autocapture` - Configure automatic event capture
+
+## Angular Providers
+
+### `provideJournium(config)`
+
+Returns `EnvironmentProviders` for use in `bootstrapApplication`. This is the recommended approach for standalone Angular 15+ apps.
+
+```typescript
+import { provideJournium } from '@journium/angular';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideJournium({ publishableKey: 'pk_...' }),
+  ],
+});
+```
+
+### `withJourniumRouter()`
+
+Optional router integration. Subscribes to Angular Router `NavigationEnd` events and automatically calls `capturePageview()` on each navigation.
+
+```typescript
+import { provideJournium, withJourniumRouter } from '@journium/angular';
+import { provideRouter } from '@angular/router';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideJournium({ publishableKey: 'pk_...' }),
+    provideRouter(routes),
+    withJourniumRouter(), // Must come after provideRouter()
+  ],
+});
+```
+
+### `JourniumModule.forRoot(config)` (NgModule pattern)
+
+For Angular apps using NgModule, import `JourniumModule.forRoot()` once in your root module. This provides `JourniumService` application-wide via Angular's DI.
+
+## `JourniumService`
+
+Inject `JourniumService` in any component or service. See the [JourniumService reference](/docs/angular/services/journium-service) for available methods.
+
+```typescript
+import { JourniumService } from '@journium/angular';
+
+@Component({ ... })
+export class MyComponent {
+  constructor(private journium: JourniumService) {}
+}
+```
+
+## TypeScript Support
+
+The Angular SDK is fully typed. All types are re-exported from `@journium/angular`:
+
+```typescript
+import {
+  type JourniumConfig,
+  type JourniumLocalOptions,
+  type AutocaptureOptions,
+} from '@journium/angular';
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="JourniumService" href="/docs/angular/services/journium-service">
+    Learn about all JourniumService methods
+  </Card>
+  <Card title="Configuration Options" href="/docs/js/configuration">
+    See all configuration options in detail
+  </Card>
+  <Card title="API Methods" href="/docs/js/api-methods">
+    Complete API method reference
+  </Card>
+</Cards>
