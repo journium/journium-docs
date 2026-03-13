@@ -1,4 +1,4 @@
-# Journium Documentation Monorepo
+# Journium Documentation
 
 > Multi-project monorepo for Journium documentation website and MCP server
 
