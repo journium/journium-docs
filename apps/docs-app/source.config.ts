@@ -11,6 +11,7 @@ import { z } from 'zod';
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
+    files: ['**/*.mdx'],
     postprocess: {
       includeProcessedMarkdown: true,
     },
@@ -20,6 +21,7 @@ export const docs = defineDocs({
 export const blog = defineCollections({
   type: 'doc',
   dir: 'content/blog',
+  files: ['**/*.mdx'],
   postprocess: {
     includeProcessedMarkdown: true,
   },
