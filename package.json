@@ -1,7 +1,7 @@
 {
   "name": "@journium/journium-docs",
   "private": true,
-  "packageManager": "pnpm@10.28.2",
+  "packageManager": "pnpm@10.32.1",
   "scripts": {
     "dev": "NX_WORKSPACE_ROOT_PATH=$PWD nx dev",
     "build": "NX_WORKSPACE_ROOT_PATH=$PWD nx build",
