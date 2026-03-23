@@ -71,10 +71,13 @@ export default function Page() {
               Latest announcements, insights, and stories from Journium.
               Discover how we&apos;re delivering automated product insights — without dashboards or data analysts.
             </p>
-          </div>
 
-          <div className="mt-16 max-w-xl">
-            <BlogSubscribe showPrivacyNote={false} buttonLabel='Subscribe for new posts'/>
+            <div className="mt-8 max-w-md">
+              <p className="mb-3 text-sm text-gray-500 dark:text-gray-400">
+                Get new posts delivered to your inbox.
+              </p>
+              <BlogSubscribe compact showPrivacyNote={false} buttonLabel="Subscribe" />
+            </div>
           </div>
         </div>
 
