@@ -15,7 +15,9 @@ import { Video } from '@/components/video';
 import { VideoPlayer } from '@/components/video-player';
 import { List, ListItem } from '@/components/ui/list';
 import { CTA } from '@/components/cta';
-
+import { BlogSubscribe } from '@/components/ui/blog-subscribe';
+import { BlogPostSubscribeBanner } from '@/components/ui/blog-post-subscribe-banner';
+import { BlogPostSubscribeBannerSlim } from '@/components/ui/blog-post-subscribe-banner-slim';
 
 // Filter out non-component exports from lucide-react (like createLucideIcon, Icon, etc.)
 const LucideIcons = Object.fromEntries(
@@ -46,5 +48,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     VideoPlayer,
     List,
     ListItem,
+    BlogSubscribe,
+    BlogPostSubscribeBanner,
+    BlogPostSubscribeBannerSlim,
   };
 }

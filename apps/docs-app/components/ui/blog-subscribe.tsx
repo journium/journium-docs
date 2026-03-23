@@ -8,6 +8,7 @@ interface BlogSubscribeProps {
   subtitle?: string;
   buttonLabel?: string;
   showPrivacyNote?: boolean;
+  compact?: boolean;
 }
 
 export function BlogSubscribe({
@@ -15,6 +16,7 @@ export function BlogSubscribe({
   subtitle,
   buttonLabel = 'Subscribe',
   showPrivacyNote = true,
+  compact = false,
 }: BlogSubscribeProps) {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,6 +48,16 @@ export function BlogSubscribe({
   };
 
   if (isSubscribed) {
+    if (compact) {
+      return (
+        <div className="flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400">
+          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          You&apos;re subscribed!
+        </div>
+      );
+    }
     return (
       <div className="flex flex-col items-center gap-2 py-2 text-center">
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30">
@@ -61,15 +73,15 @@ export function BlogSubscribe({
 
   return (
     <div className="w-full">
-      {title && (
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">{title}</h2>
+      {!compact && title && (
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 mt-2">{title}</h2>
       )}
-      {subtitle && (
+      {!compact && subtitle && (
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-sm mx-auto">{subtitle}</p>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-3">
-        <div className="flex items-stretch max-w-xl mx-auto">
+        <div className={`flex items-stretch ${compact ? 'w-full' : 'max-w-xl mx-auto'}`}>
           <input
             type="email"
             value={email}
@@ -108,7 +120,7 @@ export function BlogSubscribe({
         )}
       </form>
 
-      {showPrivacyNote && (
+      {!compact && showPrivacyNote && (
         <p className="mt-3 text-xs text-gray-500 dark:text-gray-500 text-center">
           We respect your privacy. You can unsubscribe at any time.
         </p>
