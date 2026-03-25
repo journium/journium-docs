@@ -52,7 +52,7 @@ export default function Page() {
         </div>
 
         {/* Content - Constrained */}
-        <div className="relative z-10 mx-auto w-full max-w-page px-8 py-16 md:px-12 md:py-20">
+        <div className="relative z-10 mx-auto w-full max-w-page px-8 py-16 md:px-12 md:py-16">
           <div className="max-w-3xl">
             {/* Badge or tag */}
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-500/10 dark:bg-blue-400/10 px-4 py-1.5 text-sm font-medium text-blue-700 dark:text-blue-300 border border-blue-500/20">
@@ -66,18 +66,17 @@ export default function Page() {
             <h1 className="mb-4 text-4xl md:text-5xl lg:text-6xl font-bold bg-linear-to-br from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 bg-clip-text text-transparent">
               Journium Blog
             </h1>
-            
+
             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-              Latest announcements, insights, and stories from Journium.  
+              Latest announcements, insights, and stories from Journium.
               Discover how we&apos;re delivering automated product insights — without dashboards or data analysts.
             </p>
 
-            {/* Optional: Add search or CTA */}
-            <div className="mt-8 flex flex-wrap gap-4">
-              <BlogSubscribe />
-              {/* <button className="px-6 py-2.5 bg-white/50 dark:bg-gray-800/50 hover:bg-white/80 dark:hover:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 rounded-lg font-medium transition-colors border border-gray-200 dark:border-gray-700">
-                View All Posts
-              </button> */}
+            <div className="mt-8 max-w-md">
+              <p className="mb-3 text-sm text-gray-500 dark:text-gray-400">
+                Get new posts delivered to your inbox.
+              </p>
+              <BlogSubscribe compact showPrivacyNote={false} buttonLabel="Subscribe" />
             </div>
           </div>
         </div>

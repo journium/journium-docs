@@ -8,7 +8,6 @@ import { buttonVariants } from '@/components/ui/button';
 import { ShareButton } from './page.client';
 import { BlogAuthor } from '@/components/ui/blog-author';
 import { getMDXComponents } from '@/mdx-components';
-import { BlogPostSubscribeBanner } from '@/components/ui/blog-post-subscribe-banner';
 import path from 'node:path';
 import { cn } from '@/lib/cn';
 
@@ -79,9 +78,6 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
         <Mdx components={getMDXComponents()} />
       </div>
     </article>
-    <div className="mx-auto w-full max-w-[800px] px-4 pb-16">
-      <BlogPostSubscribeBanner />
-    </div>
     </>
   );
 }

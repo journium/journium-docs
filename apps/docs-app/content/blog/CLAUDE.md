@@ -34,6 +34,9 @@ These components are available in blog posts without importing:
 
 | Component | Purpose |
 |-----------|---------|
+| `<BlogSubscribe showPrivacyNote={false} buttonLabel="..." />` | Inline email subscribe form |
+| `<BlogPostSubscribeBanner />` | Full subscribe banner with title/subtitle (used at post bottom) |
+| `<BlogPostSubscribeBannerSlim />` | Slim subscribe banner (used at post top) |
 | `<SignUpForFree message="..." />` | CTA button linking to sign-up |
 | `<CTA />` | Generic call-to-action block |
 | `<Video type="youtube" src="VIDEO_ID" width={560} height={315} />` | Embed YouTube video |
