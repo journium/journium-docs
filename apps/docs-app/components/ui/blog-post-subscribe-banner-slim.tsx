@@ -6,7 +6,7 @@ export function BlogPostSubscribeBannerSlim() {
       <p className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:whitespace-nowrap sm:flex-shrink-0">
         Get posts like this in your inbox.
       </p>
-      <div className="w-full sm:max-w-sm">
+      <div className="w-full sm:flex-1 sm:min-w-0">
         <BlogSubscribe compact showPrivacyNote={false} buttonLabel="Subscribe" />
       </div>
     </div>
