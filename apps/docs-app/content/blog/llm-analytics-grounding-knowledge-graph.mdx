@@ -37,7 +37,7 @@ Current approaches try to solve this with better prompting, longer contexts, or 
 
 ## The Behavioral Knowledge Graph
 
-The solution in the Behavioral Intelligence Platform is a layer between numerical computation and language generation: the Behavioral Knowledge Graph (BKG).
+The solution in the [Behavioral Intelligence Platform](/blog/behavioral-intelligence-platform) is a layer between numerical computation and language generation: the Behavioral Knowledge Graph (BKG).
 
 The BKG stores behavioral facts as typed triples:
 
@@ -93,7 +93,7 @@ The BKG-constrained GLL prevents a specific class of errors:
 
 The broader design principle is: compute everything that can be computed deterministically, verify it, store it in an auditable form, and only then involve a language model — strictly for expression, not for analysis.
 
-This is not a limitation on what AI can contribute to analytics. It's a division of labor. Probabilistic models are excellent at language. They are poor at arithmetic and worse at counting. Formal systems are excellent at arithmetic and counting. They are poor at language.
+This is not a limitation on what AI can contribute to analytics. It's a division of labor. Probabilistic models are excellent at language. They are poor at arithmetic and worse at counting. Formal systems are excellent at arithmetic and counting. They are poor at language. The [Markov chain computations underlying the BKG](/blog/markov-chain-analytics-formal-foundations) are a direct example of this principle: closed-form, deterministic, and exact before any language model sees them.
 
 Grounded Language Generation is the architectural answer to both: let each component do what it's good at, with a formal interface between them.
 

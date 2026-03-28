@@ -47,7 +47,7 @@ Data flows automatically. Insight does not.
 
 ## Dashboards Encode Answers, Not Questions
 
-Dashboards are usually built to answer questions someone *already thought to ask*.
+[Dashboards](https://journium.app/manifesto) are usually built to answer questions someone *already thought to ask*.
 
 * "How many users converted?"
 * "What is DAU this week?"
@@ -111,10 +111,10 @@ A system that reliably produces insight optimizes for different primitives:
 * encoding what matters, not exposing everything
 * reducing human scanning, not increasing it
 
-This requires shifting analytics from a pull-based model ("check dashboards") 
-to a push-based one ("notify when something meaningful changes").
+This requires shifting analytics from a pull-based model ("check dashboards")
+to a push-based one ("notify when something meaningful changes"). This shift is what formalizing the behavioral intelligence problem makes precise.
 
-It also requires making insight definitions explicit, rather than implicit in charts and queries.
+It also requires making insight definitions explicit, rather than implicit in charts and queries. [Insights as Code](/blog/insights-as-code-shifting-product-intelligence-left) is the practical expression of this — defining what matters in version-controlled YAML instead of ad-hoc queries.
 
 ---
 
@@ -122,8 +122,8 @@ It also requires making insight definitions explicit, rather than implicit in ch
 
 Behavior matters here not as a philosophical concept, but as a practical one.
 
-Patterns of behavior change more slowly than raw events and more meaningfully than individual metrics. 
-They provide a stable layer for monitoring without constant re-interpretation.
+Patterns of behavior change more slowly than raw events and more meaningfully than individual metrics.
+They provide a stable layer for monitoring without constant re-interpretation. This is the core argument behind [why user behavior is a higher-value abstraction than raw data](/blog/user-behavior-is-a-higher-value-abstraction-than-raw-data).
 
 Used correctly, they allow systems to detect when something *material* has shifted - without humans having to watch everything.
 
@@ -136,6 +136,6 @@ Most analytics stacks today are successful engineering projects that fail as dec
 They collect data efficiently but externalize the hardest part: knowing when something important has changed.
 
 Until analytics systems are designed with insight as a first-class outcome - not a hoped-for side effect,
-teams will keep building impressive infrastructure and wondering why clarity remains elusive.
+teams will keep building impressive infrastructure and wondering why clarity remains elusive. The [Behavioral Intelligence Platform](/blog/behavioral-intelligence-platform) is a formal answer to what that architecture looks like.
 
 <BlogPostSubscribeBanner />

@@ -103,7 +103,7 @@ For the example funnel:
 | import_data | −0.14 |
 | invite_teammate | −0.09 |
 
-`feature_used` has the highest removal effect. It's the most structurally critical state. Removing it collapses the main conversion path. This is what makes it an *activation driver* — not just a step users pass through, but a load-bearing element of the journey structure.
+`feature_used` has the highest removal effect. It's the most structurally critical state. Removing it collapses the main conversion path. This is what makes it an [*activation driver*](/blog/five-behavioral-phenomena-analytics-misses) — not just a step users pass through, but a load-bearing element of the journey structure.
 
 The companion script [`removal_effect.py`](https://github.com/journium/journium-research) computes these rankings. The output matches Figure 4 in the paper.
 
@@ -139,6 +139,8 @@ python simulations/removal_effect.py
 The output reproduces the figures and tables from the paper. The transition matrix is defined at the top of each script — modify it to match your own product's journey data.
 
 [Run the simulation yourself →](https://github.com/journium/journium-research)
+
+*These techniques are the mathematical foundation of the [Behavioral Intelligence Platform](/blog/behavioral-intelligence-platform) — the formal architecture Journium is built on.*
 
 [Read the full architecture paper →](https://journium.app/research)
 
