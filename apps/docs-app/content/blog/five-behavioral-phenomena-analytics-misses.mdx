@@ -19,7 +19,7 @@ Events are flowing. Dashboards are rendering. Queries are fast. Funnels are conf
 
 But there are five categories of behavioral phenomena it almost certainly isn't detecting — not because your data is bad, but because current tools aren't designed to look for them automatically.
 
-These aren't edge cases. They're the signals that predict activation, churn, and retention long before they show up in your headline metrics.
+These aren't edge cases. They're the signals that predict activation, churn, and retention long before they show up in your headline metrics. And [they're invisible to most analytics systems by design](/blog/why-analytics-systems-dont-produce-insights).
 
 ---
 
@@ -33,7 +33,7 @@ The canonical example: users who import data convert at 4× the rate of users wh
 
 Most tools show you conversion rates by step. They don't tell you which steps are structurally load-bearing — which ones, if you removed them, would collapse your funnel entirely.
 
-Activation drivers are identified using the *removal effect*: the decrease in overall conversion rate when a given state is removed from the Markov chain model of the journey. States with large removal effects are activation drivers. The computation is exact, not heuristic.
+Activation drivers are identified using the *removal effect*: the decrease in overall conversion rate when a given state is removed from the [Markov chain model of the journey](/blog/markov-chain-analytics-formal-foundations). States with large removal effects are activation drivers. The computation is exact, not heuristic.
 
 **Why it matters:** Activation drivers tell you where to focus onboarding. Not based on gut feel. Based on the structure of the journey graph.
 
@@ -91,9 +91,9 @@ Example: a deployment that introduced a validation error on the profile completi
 
 All five of these phenomena share a property: they require monitoring the *structure* of user journeys, not just the aggregate values of individual metrics.
 
-Dashboards encode answers to questions you already thought to ask. These phenomena don't announce themselves. A system that detects them has to be watching continuously, computing over journey graphs, and comparing across segments and time windows — without waiting to be asked.
+[Dashboards](https://journium.app/manifesto) encode answers to questions you already thought to ask. These phenomena don't announce themselves. A system that detects them has to be watching continuously, computing over journey graphs, and comparing across segments and time windows — without waiting to be asked.
 
-That's what Journium is built to do.
+That's what [Journium is built to do](/blog/behavioral-intelligence-platform).
 
 [See how Journium detects these automatically →](https://journium.app/docs)
 
