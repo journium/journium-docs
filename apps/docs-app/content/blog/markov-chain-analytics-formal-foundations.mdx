@@ -2,7 +2,7 @@
 title: "Why the Math Behind Your Analytics Funnel Actually Matters"
 description: "Absorbing Markov chains give us closed-form answers to questions current analytics tools can't answer at all — which states are structurally critical, how long journeys take, and what happens when a step is removed."
 date: 2026-03-24
-status: draft
+status: published
 author: Arun Patra
 keywords:
   - Markov chains
@@ -36,25 +36,25 @@ An *absorbing* Markov chain has two types of states:
 
 Every user journey in a well-defined product eventually reaches an absorbing state. The model enforces this by construction.
 
-Transition probabilities are estimated from observed journey data over a fixed analysis window. The resulting matrix P is row-stochastic: each row sums to 1, representing all the ways a user in state s_i can transition.
+Transition probabilities are estimated from observed journey data over a fixed analysis window. The resulting matrix $P$ is row-stochastic: each row sums to 1, representing all the ways a user in state $s_i$ can transition.
 
 ---
 
 ## The Fundamental Matrix
 
-From the transition matrix, we split out Q (transient → transient transitions) and R (transient → absorbing transitions).
+From the transition matrix, we split out $Q$ (transient → transient transitions) and $R$ (transient → absorbing transitions).
 
 The fundamental matrix is:
 
-```
+$$
 N = (I - Q)^{-1}
-```
+$$
 
-N[i, j] gives the expected number of times the chain visits transient state j when starting from transient state i before reaching an absorbing state.
+$N[i, j]$ gives the expected number of times the chain visits transient state $j$ when starting from transient state $i$ before reaching an absorbing state.
 
 This is not a statistic you can compute from a standard funnel. It requires the full transition structure.
 
-N also gives us expected journey length: the sum of row i of N is the expected number of steps before absorption from state i. For the example funnel in the paper, a user starting at `sign_up` takes a mean of ~3.7 steps before converting or dropping off.
+$N$ also gives us expected journey length: the sum of row $i$ of $N$ is the expected number of steps before absorption from state $i$. For the example funnel in the paper, a user starting at `sign_up` takes a mean of ~2.07 steps before converting or dropping off.
 
 ---
 
@@ -62,48 +62,50 @@ N also gives us expected journey length: the sum of row i of N is the expected n
 
 The absorption probability matrix is:
 
-```
-B = N * R
-```
+$$
+B = N \cdot R
+$$
 
-B[i, 'converted'] is the probability of conversion when *starting from* transient state i. This is the mathematical definition of "how likely is a user to convert if they're currently at this step."
+$B[i, \text{converted}]$ is the probability of conversion when *starting from* transient state $i$. This is the mathematical definition of "how likely is a user to convert if they're currently at this step."
 
 For the four-state example funnel (`sign_up → feature_used → import_data → invite_teammate`):
 
 | Starting state | P(converted) | P(dropped) |
 |---|---|---|
-| sign_up | ~0.25 | ~0.75 |
-| feature_used | ~0.42 | ~0.58 |
+| sign_up | ~0.16 | ~0.84 |
+| feature_used | ~0.28 | ~0.72 |
 | import_data | ~0.58 | ~0.42 |
 | invite_teammate | 0.71 | 0.29 |
 
 The simulation script ([`markov_journey_model.py`](https://github.com/journium/journium-research)) computes these values exactly from the transition matrix. You can run it yourself and verify.
 
-A note on terminology: most analytics tools report `P(converted | reached(s))` — the fraction of users who *ever visited* s and then converted. This is related to but different from B. For sequential funnels with low re-visitation they're closely aligned; in the presence of loops they diverge. The paper discusses both.
+A note on terminology: most analytics tools report $P(\text{converted} \mid \text{reached}(s))$ — the fraction of users who *ever visited* $s$ and then converted. This is related to but different from $B$. For sequential funnels with low re-visitation they're closely aligned; in the presence of loops they diverge. The paper discusses both.
 
 ---
 
 ## Removal Effects: Which States Are Structurally Critical?
 
-The removal effect of state s with respect to `converted` is:
+The removal effect of state $s$ with respect to terminal outcome $t$ is the decrease in overall conversion rate when $s$ is removed from the journey graph. Removal is modeled by: (i) deleting all edges into and out of $s$ from the transition graph, (ii) re-normalizing transition probabilities from predecessor states of $s$, and (iii) recomputing the absorption probability matrix $B'$ under the modified graph:
 
-```
-removal_effect(s) = B(sign_up, converted) - B'(sign_up, converted)
-```
+$$
+\Delta(s, t) = B(\text{start}, t) - B'(\text{start}, t)
+$$
 
-where B' is the absorption probability matrix *after removing state s from the journey graph* — zeroing out all transitions into and out of s, renormalizing, and recomputing.
+where $\Delta(s, t)$ denotes the removal effect, $\text{start}$ is the starting state of the journey, and $B'$ is the absorption probability matrix after the removal procedure above.
 
-This tells you: if this state disappeared from the product tomorrow, how much would overall conversion drop?
+A high removal effect indicates that the state lies on the dominant conversion paths in the graph. Note that this is *not* a causal effect — it's a structural property of the observed graph. Identifying causal drivers requires controlled experimentation.
 
-For the example funnel:
+In product terms: if this state disappeared from the product tomorrow, how much would overall conversion drop?
+
+For the example funnel (values are decreases in $P(\text{converted})$ when the state is removed):
 
 | State | Removal effect |
 |---|---|
-| feature_used | −0.18 (highest) |
-| import_data | −0.14 |
-| invite_teammate | −0.09 |
+| import_data | 0.14 (highest) |
+| feature_used | 0.12 |
+| invite_teammate | 0.08 |
 
-`feature_used` has the highest removal effect. It's the most structurally critical state. Removing it collapses the main conversion path. This is what makes it an [*activation driver*](/blog/five-behavioral-phenomena-analytics-misses) — not just a step users pass through, but a load-bearing element of the journey structure.
+`import_data` has the highest removal effect. It's the most structurally critical state — as the sole gateway to `invite_teammate` (the highest-converting transient state), removing it eliminates the dominant conversion path. This is what makes it an [*activation driver*](/blog/five-behavioral-phenomena-analytics-misses) — not just a step users pass through, but a load-bearing element of the journey structure.
 
 The companion script [`removal_effect.py`](https://github.com/journium/journium-research) computes these rankings. The output matches Figure 4 in the paper.
 
@@ -129,7 +131,7 @@ The difference isn't incremental. It's the difference between a snapshot and a m
 
 ## Run the Simulations Yourself
 
-The full code is open source. Clone the repository and run:
+The full code is open source. [Clone the repository](https://github.com/journium/journium-research) and run:
 
 ```bash
 python simulations/markov_journey_model.py
